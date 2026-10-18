@@ -99,8 +99,12 @@ shader_type spatial;
 render_mode cull_disabled, diffuse_lambert_wrap;
 uniform sampler2D leaf_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform float wind_strength = 0.07;
+uniform vec3 cam_pos = vec3(0.0, 1000.0, 0.0);
+uniform vec3 focus_pos = vec3(0.0, -1000.0, 0.0);
+varying vec3 wpos;
 void vertex() {
 	vec3 wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	wpos = wp;
 	float s = sin(TIME * 1.3 + wp.x * 0.3 + wp.z * 0.2 + wp.y * 0.6);
 	float f = sin(TIME * 4.1 + wp.x * 2.1 + wp.y * 3.0) * 0.3;
 	VERTEX += vec3(s + f, f * 0.5, s * 0.6) * wind_strength * COLOR.a;
@@ -108,6 +112,15 @@ void vertex() {
 void fragment() {
 	if (!FRONT_FACING) { NORMAL = -NORMAL; }
 	vec4 t = texture(leaf_tex, UV);
+	// Copa entre a câmera e o personagem fica rala (pontilhado), como no PZ.
+	vec3 seg = focus_pos - cam_pos;
+	float k = clamp(dot(wpos - cam_pos, seg) / dot(seg, seg), 0.0, 1.0);
+	float d = length(wpos - (cam_pos + seg * k));
+	float fade = (1.0 - smoothstep(1.6, 3.2, d)) * step(0.05, k) * (1.0 - step(0.97, k));
+	float dither = fract(sin(dot(floor(FRAGCOORD.xy), vec2(12.9898, 78.233))) * 43758.5453);
+	if (fade * 0.85 > dither) {
+		discard;
+	}
 	ALBEDO = t.rgb * COLOR.rgb;
 	ALPHA = t.a;
 	ALPHA_SCISSOR_THRESHOLD = 0.45;
@@ -119,6 +132,12 @@ void fragment() {
 	_leaf_mat.shader = sh
 	_leaf_mat.set_shader_parameter("leaf_tex", leaf_texture())
 	return _leaf_mat
+
+## Atualiza o ponto de foco (personagem) para afinar a copa que o esconde da câmera.
+static func set_focus(cam: Vector3, focus: Vector3) -> void:
+	if _leaf_mat:
+		_leaf_mat.set_shader_parameter("cam_pos", cam)
+		_leaf_mat.set_shader_parameter("focus_pos", focus)
 
 ## Terra batida com pedrinhas, sulcos e borda orgânica (recorte por ruído).
 static func dirt_material() -> ShaderMaterial:

@@ -129,6 +129,13 @@ func can_enter(car: Node, node_key: String, axis: String, dist: float) -> bool:
 	n.occ_t = 0.0
 	return true
 
+func near_node(p: Vector3, r: float) -> bool:
+	for k in nodes:
+		var q: Vector3 = nodes[k].pos
+		if absf(q.x - p.x) < r and absf(q.z - p.z) < r:
+			return true
+	return false
+
 func release(car: Node, node_key: String) -> void:
 	if nodes.has(node_key) and nodes[node_key].occupant == car:
 		nodes[node_key].occupant = null

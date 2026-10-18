@@ -45,6 +45,7 @@ func _process(delta: float) -> void:
 	var offset := Basis(Vector3.UP, yaw) * (Basis(Vector3.RIGHT, pitch) * Vector3(0, 0, distance))
 	camera.global_position = global_position + offset
 	camera.look_at(global_position, Vector3.UP)
+	Nature.set_focus(camera.global_position, global_position + Vector3(0, 0.2, 0))
 
 func snap() -> void:
 	if target:

@@ -38,6 +38,26 @@ func _ready() -> void:
 	await _scene("frota_tarde", Vector3(18, 0.05, 6.2), 1, 17, 30, "limpo")
 	await _scene("frota_chuva", Vector3(18, 0.05, 6.2), 2, 14, 0, "chuva")
 	await _scene("frota_noite", Vector3(18, 0.05, 6.2), 2, 21, 0, "limpo")
+	# Elenco: variedade de corpos, cabelos, roupas e acessórios.
+	var cast := [
+		{"sex": "m", "skin": "#c68e6a", "hair": "#2b1d12", "hair_style": "short", "shirt": "#3f7f9f", "pants": "#2f3a4a"},
+		{"sex": "f", "skin": "#e8c4a6", "hair": "#6b3a1e", "hair_style": "long", "shirt": "#c0504d", "pants": "#3a3550", "bottom": "skirt"},
+		{"sex": "m", "skin": "#7a5038", "hair": "#111111", "hair_style": "curly", "shirt": "#e0b040", "pants": "#4a4a4a", "bottom": "shorts", "build": 1.15},
+		{"sex": "f", "skin": "#a8704e", "hair": "#1a1410", "hair_style": "ponytail", "shirt": "#5a8a5a", "pants": "#2b3445", "jacket": true, "backpack": "#7a4a2a"},
+		{"sex": "m", "skin": "#d9a98a", "hair": "#9a9a9a", "hair_style": "slick", "shirt": "#8a7a6a", "pants": "#3a3a40", "elderly": true, "mustache": true, "top": "long"},
+		{"sex": "m", "skin": "#c08060", "hair": "#2a1d14", "hair_style": "messy", "shirt": "#e8e8e0", "pants": "#3a5a8a", "overalls": true, "cap": "#b03a2e", "beard": true},
+		{"sex": "f", "skin": "#f0d0b8", "hair": "#c8a050", "hair_style": "bob", "shirt": "#7a5ea8", "pants": "#2a2a30", "apron": "#e8e2d6"},
+		{"sex": "f", "skin": "#5a3a28", "hair": "#141010", "hair_style": "bun", "shirt": "#2f7a5f", "pants": "#4a3a30", "beanie": "#c0392b", "build": 0.9},
+	]
+	for i in cast.size():
+		var hm := Humanoid.new()
+		world.add_child(hm)
+		hm.build(cast[i])
+		hm.position = Vector3(30.5 + i * 0.95, 0.12, 6.2)
+		hm.rotation_degrees.y = 200.0
+		hm.set_pose(["idle", "talk", "idle", "walk", "idle", "work", "talk", "eat"][i])
+	world.camera_rig._dist_goal = 7.5
+	await _scene("elenco", Vector3(33.8, 0.05, 6.9), 3, 10, 30, "limpo")
 	world.camera_rig._dist_goal = 4.5
 	await _scene("personagem_perto", Vector3(18, 0.05, 6.2), 3, 10, 0, "limpo")
 	world.camera_rig._dist_goal = 6.0

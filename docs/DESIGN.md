@@ -61,17 +61,22 @@ para C++ via GDExtension sem trocar de engine.
 - **Corte de paredes estilo Project Zomboid:** ao entrar em um prédio (ou ficar atrás dele), o telhado
   some e as paredes voltadas para a câmera baixam. Interiores fazem parte do mesmo mundo, sem tela de
   carregamento.
-- **Arte estilizada "maquete viva":** formas simples, cores quentes, materiais com shader procedural
-  (asfalto com granulação, calçada de ladrilho, piso de tábua, grama com variação). Personagens
-  low-poly com animação procedural (andar, correr, sentar, deitar, trabalhar, gesticular).
+- **Arte estilizada, levemente realista:**
+  - texturas PBR (tijolo, reboco, telha, asfalto, pedra portuguesa, madeira, tecido) projetadas
+    no espaço do mundo;
+  - personagens com esqueleto, roupas e cabelos, a partir de dados CC0 do MakeHuman;
+  - carros modelados no Blender;
+  - paleta contida, com o dourado só no amanhecer e no entardecer.
+
+  Ver `DIRECAO_ARTE.md`.
 - **Luz e clima:** ciclo de dia e noite, céu procedural, sombras direcionais suaves, SSAO e glow
   (Forward+), janelas e postes que acendem à noite, chuva com piso molhado e reflexos (efeitos altos).
 - **Desempenho primeiro:** geometria estática agrupada em blocos de 40 m (poucas chamadas de desenho,
   descarte por visibilidade), luzes sem sombra, efeitos escalonáveis nas opções.
 
-Todos os modelos, sons, nomes e textos são originais. Os modelos atuais são gerados por código a partir
-de primitivas — são *placeholders de qualidade*, organizados para serem substituídos por arte final
-(ver "Placeholders" em `PROTOTIPO.md`).
+Todos os modelos, sons, nomes e textos são originais. A única exceção é a base anatômica dos
+personagens, que vem de dados CC0 do MakeHuman (ver `assets/CREDITS.md`). Os ativos são gerados
+pelos scripts reprodutíveis de `tools/art/`.
 
 ## 4. Arquitetura técnica
 

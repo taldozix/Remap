@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://y62sa3tq24we"
-path="res://.godot/imported/horarios_e_climas.png-7c7f7439eb33daf8223c733c9a13a79e.ctex"
+uid="uid://bq6r7vuuc8ftf"
+path="res://.godot/imported/arte_frota.png-7a9ee2be8e15d6602ef5e7d3a311c5a9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/img/horarios_e_climas.png"
-dest_files=["res://.godot/imported/horarios_e_climas.png-7c7f7439eb33daf8223c733c9a13a79e.ctex"]
+source_file="res://docs/img/arte_frota.png"
+dest_files=["res://.godot/imported/arte_frota.png-7a9ee2be8e15d6602ef5e7d3a311c5a9.ctex"]
 
 [params]
 

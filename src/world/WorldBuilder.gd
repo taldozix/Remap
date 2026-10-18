@@ -33,6 +33,7 @@ var doors: Dictionary = {}
 var furniture: Dictionary = {}
 var streetlights: Array[OmniLight3D] = []
 var rng := RandomNumberGenerator.new()
+var current_building_origin := Vector3.ZERO
 
 func build(p_world: Node3D, p_map: Dictionary, nav_region: NavigationRegion3D) -> void:
 	world = p_world
@@ -405,6 +406,7 @@ func _build_building(b: Dictionary) -> void:
 		node.add_child(node.lamp)
 	# Colisões das paredes internas e mobília
 	var interior := MeshBatcher.new()
+	current_building_origin = c
 	for f in b.get("furniture", []):
 		_build_furniture(node, b, f, interior, accent)
 	var imi := interior.build(0.7)
@@ -715,17 +717,32 @@ func _furniture_visual(bt: MeshBatcher, f: Dictionary, xf: Transform3D, accent: 
 		bt.add_box(xf * Transform3D(Basis(), p), s, c, m)
 	match f.type:
 		"bed":
-			B.call(Vector3(0, 0.18, 0), Vector3(1.4, 0.36, 2.0), WOOD, "wood")
-			B.call(Vector3(0, 0.43, 0.05), Vector3(1.3, 0.16, 1.85), WHITE, "fabric")
-			B.call(Vector3(0, 0.56, -0.68), Vector3(1.0, 0.12, 0.38), Color("f4f1ea"), "")
-			B.call(Vector3(0, 0.53, 0.32), Vector3(1.34, 0.08, 1.25), accent, "fabric")
-			B.call(Vector3(0, 0.55, -0.98), Vector3(1.44, 1.1, 0.08), WOOD_DARK, "wood")
+			for lx in [-0.65, 0.65]:
+				for lz in [-0.9, 0.9]:
+					B.call(Vector3(lx, 0.1, lz), Vector3(0.07, 0.2, 0.07), WOOD_DARK, "wood")
+			B.call(Vector3(0, 0.25, 0.02), Vector3(1.4, 0.1, 1.96), WOOD, "wood")
+			B.call(Vector3(0, 0.4, 0.05), Vector3(1.32, 0.2, 1.85), Color(0.93, 0.92, 0.9), "fabric")
+			B.call(Vector3(0, 0.51, 0.04), Vector3(1.28, 0.03, 1.8), Color(0.96, 0.96, 0.95), "fabric")
+			for px in [-0.32, 0.32]:
+				B.call(Vector3(px, 0.57, -0.7), Vector3(0.5, 0.1, 0.32), Color(0.97, 0.96, 0.94), "fabric")
+			B.call(Vector3(0, 0.53, 0.33), Vector3(1.36, 0.06, 1.2), accent.lerp(Color.WHITE, 0.25), "fabric")
+			B.call(Vector3(-0.69, 0.42, 0.33), Vector3(0.03, 0.26, 1.2), accent.lerp(Color.WHITE, 0.2), "fabric")
+			B.call(Vector3(0.69, 0.42, 0.33), Vector3(0.03, 0.26, 1.2), accent.lerp(Color.WHITE, 0.2), "fabric")
+			B.call(Vector3(0, 0.62, -0.98), Vector3(1.48, 1.0, 0.06), WOOD_DARK, "wood")
+			for hx in [-0.36, 0.36]:
+				B.call(Vector3(hx, 0.75, -0.95), Vector3(0.6, 0.5, 0.02), WOOD, "wood")
+			B.call(Vector3(0, 1.14, -0.98), Vector3(1.52, 0.05, 0.1), WOOD_DARK, "wood")
 			return Vector3(1.4, 0.6, 2.0)
 		"wardrobe":
-			B.call(Vector3(0, 1.0, 0), Vector3(1.2, 2.0, 0.6), WOOD, "wood")
-			B.call(Vector3(0, 1.0, -0.31), Vector3(0.02, 1.9, 0.02), WOOD_DARK, "wood")
-			B.call(Vector3(0.08, 1.05, -0.32), Vector3(0.04, 0.2, 0.03), STEEL, "steel")
-			B.call(Vector3(-0.08, 1.05, -0.32), Vector3(0.04, 0.2, 0.03), STEEL, "steel")
+			B.call(Vector3(0, 0.05, 0), Vector3(1.16, 0.1, 0.56), WOOD_DARK, "wood")
+			B.call(Vector3(0, 1.02, 0), Vector3(1.2, 1.86, 0.6), WOOD, "wood")
+			B.call(Vector3(0, 1.98, 0), Vector3(1.26, 0.06, 0.64), WOOD_DARK, "wood")
+			for dx in [-0.3, 0.3]:
+				B.call(Vector3(dx, 1.35, -0.305), Vector3(0.48, 0.9, 0.015), WOOD.darkened(0.08), "wood")
+				B.call(Vector3(dx, 0.55, -0.305), Vector3(0.48, 0.55, 0.015), WOOD.darkened(0.08), "wood")
+			B.call(Vector3(0, 1.02, -0.31), Vector3(0.015, 1.84, 0.015), WOOD_DARK, "wood")
+			for hx in [-0.06, 0.06]:
+				bt.add_tube(xf * Vector3(hx, 0.95, -0.34), xf * Vector3(hx, 1.2, -0.34), 0.012, STEEL, 6, "steel")
 			return Vector3(1.2, 2.0, 0.6)
 		"nightstand":
 			B.call(Vector3(0, 0.25, 0), Vector3(0.45, 0.5, 0.45), WOOD, "wood")
@@ -742,16 +759,24 @@ func _furniture_visual(bt: MeshBatcher, f: Dictionary, xf: Transform3D, accent: 
 			B.call(Vector3(0, 0.55, -0.22), Vector3(0.42, 0.5, 0.18), WHITE, "")
 			return Vector3(0.45, 0.8, 0.65)
 		"fridge":
-			B.call(Vector3(0, 0.9, 0), Vector3(0.7, 1.8, 0.7), WHITE, "metal")
-			B.call(Vector3(0, 1.2, -0.36), Vector3(0.68, 0.02, 0.02), Color("cccccc"), "")
-			B.call(Vector3(0.28, 1.45, -0.37), Vector3(0.04, 0.3, 0.04), STEEL, "steel")
+			B.call(Vector3(0, 0.92, 0), Vector3(0.7, 1.8, 0.68), WHITE, "metal")
+			B.call(Vector3(0, 0.03, 0), Vector3(0.66, 0.06, 0.6), Color(0.3, 0.3, 0.32), "metal")
+			B.call(Vector3(0, 1.32, -0.345), Vector3(0.68, 0.94, 0.02), WHITE.darkened(0.03), "metal")
+			B.call(Vector3(0, 0.45, -0.345), Vector3(0.68, 0.76, 0.02), WHITE.darkened(0.03), "metal")
+			bt.add_tube(xf * Vector3(0.27, 1.0, -0.38), xf * Vector3(0.27, 1.4, -0.38), 0.014, STEEL, 6, "steel")
+			bt.add_tube(xf * Vector3(0.27, 0.7, -0.38), xf * Vector3(0.27, 0.95, -0.38), 0.014, STEEL, 6, "steel")
 			return Vector3(0.7, 1.8, 0.7)
 		"stove":
-			B.call(Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.62), WHITE, "metal")
-			B.call(Vector3(0, 0.91, 0), Vector3(0.66, 0.03, 0.58), DARK, "metal")
-			for p in [Vector3(-0.16, 0.93, -0.13), Vector3(0.16, 0.93, -0.13), Vector3(-0.16, 0.93, 0.13), Vector3(0.16, 0.93, 0.13)]:
-				B.call(p, Vector3(0.16, 0.02, 0.16), Color("555555"), "")
-			B.call(Vector3(0, 0.45, -0.32), Vector3(0.5, 0.35, 0.02), Color("333333"), "")
+			B.call(Vector3(0, 0.46, 0), Vector3(0.7, 0.88, 0.62), WHITE, "metal")
+			B.call(Vector3(0, 0.91, 0), Vector3(0.68, 0.025, 0.6), Color(0.12, 0.12, 0.13), "steel")
+			for q in [Vector3(-0.16, 0.93, -0.13), Vector3(0.16, 0.93, -0.13), Vector3(-0.16, 0.93, 0.13), Vector3(0.16, 0.93, 0.13)]:
+				bt.add_cylinder(xf * q, 0.085, 0.02, Color(0.25, 0.25, 0.26), 12, "steel")
+				bt.add_cylinder(xf * (q + Vector3(0, 0.015, 0)), 0.04, 0.02, Color(0.15, 0.15, 0.16), 10, "steel")
+			B.call(Vector3(0, 1.02, 0.3), Vector3(0.7, 0.2, 0.03), WHITE, "metal")
+			B.call(Vector3(0, 0.42, -0.315), Vector3(0.5, 0.36, 0.01), Color(0.1, 0.1, 0.11), "glass")
+			B.call(Vector3(0, 0.67, -0.33), Vector3(0.5, 0.025, 0.03), STEEL, "steel")
+			for k in 4:
+				bt.add_cylinder(xf * Vector3(-0.21 + k * 0.14, 0.8, -0.32), 0.022, 0.03, Color(0.15, 0.15, 0.16), 8, "")
 			return Vector3(0.7, 0.95, 0.62)
 		"sink":
 			B.call(Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.62), WOOD, "wood")
@@ -760,34 +785,52 @@ func _furniture_visual(bt: MeshBatcher, f: Dictionary, xf: Transform3D, accent: 
 			B.call(Vector3(0, 1.1, 0.27), Vector3(0.04, 0.3, 0.04), STEEL, "steel")
 			return Vector3(0.7, 0.95, 0.62)
 		"table":
-			B.call(Vector3(0, 0.74, 0), Vector3(1.2, 0.05, 0.8), WOOD, "wood")
-			for p in [Vector3(-0.52, 0.36, -0.32), Vector3(0.52, 0.36, -0.32), Vector3(-0.52, 0.36, 0.32), Vector3(0.52, 0.36, 0.32)]:
-				B.call(p, Vector3(0.06, 0.72, 0.06), WOOD_DARK, "wood")
+			B.call(Vector3(0, 0.75, 0), Vector3(1.2, 0.04, 0.8), WOOD, "wood")
+			B.call(Vector3(0, 0.69, 0), Vector3(1.08, 0.08, 0.68), WOOD_DARK, "wood")
+			for q in [Vector3(-0.52, 0.36, -0.32), Vector3(0.52, 0.36, -0.32), Vector3(-0.52, 0.36, 0.32), Vector3(0.52, 0.36, 0.32)]:
+				B.call(q, Vector3(0.06, 0.72, 0.06), WOOD_DARK, "wood")
 			return Vector3(1.2, 0.78, 0.8)
 		"chair":
-			B.call(Vector3(0, 0.45, 0), Vector3(0.45, 0.05, 0.45), WOOD, "wood")
-			B.call(Vector3(0, 0.75, 0.2), Vector3(0.45, 0.6, 0.05), WOOD, "wood")
-			for p in [Vector3(-0.19, 0.22, -0.19), Vector3(0.19, 0.22, -0.19), Vector3(-0.19, 0.22, 0.19), Vector3(0.19, 0.22, 0.19)]:
-				B.call(p, Vector3(0.04, 0.45, 0.04), WOOD_DARK, "wood")
+			B.call(Vector3(0, 0.45, 0), Vector3(0.44, 0.04, 0.44), WOOD, "wood")
+			for q in [Vector3(-0.19, 0.22, -0.19), Vector3(0.19, 0.22, -0.19), Vector3(-0.19, 0.22, 0.19), Vector3(0.19, 0.22, 0.19)]:
+				B.call(q, Vector3(0.035, 0.45, 0.035), WOOD_DARK, "wood")
+			for sx in [-0.19, 0.19]:
+				B.call(Vector3(sx, 0.72, 0.2), Vector3(0.035, 0.52, 0.035), WOOD_DARK, "wood")
+			for k in 3:
+				B.call(Vector3(0, 0.62 + k * 0.12, 0.2), Vector3(0.38, 0.05, 0.02), WOOD, "wood")
 			return Vector3.ZERO
 		"sofa":
-			B.call(Vector3(0, 0.22, 0.05), Vector3(2.0, 0.44, 0.85), accent.darkened(0.2), "fabric")
-			B.call(Vector3(0, 0.62, 0.38), Vector3(2.0, 0.6, 0.22), accent.darkened(0.3), "fabric")
-			B.call(Vector3(-0.95, 0.35, 0.05), Vector3(0.18, 0.4, 0.85), accent.darkened(0.35), "fabric")
-			B.call(Vector3(0.95, 0.35, 0.05), Vector3(0.18, 0.4, 0.85), accent.darkened(0.35), "fabric")
-			B.call(Vector3(-0.45, 0.46, -0.02), Vector3(0.85, 0.08, 0.65), accent, "fabric")
-			B.call(Vector3(0.45, 0.46, -0.02), Vector3(0.85, 0.08, 0.65), accent, "fabric")
+			var fab := accent.lerp(Color(0.55, 0.55, 0.55), 0.3)
+			for q in [Vector3(-0.9, 0.04, -0.35), Vector3(0.9, 0.04, -0.35), Vector3(-0.9, 0.04, 0.4), Vector3(0.9, 0.04, 0.4)]:
+				B.call(q, Vector3(0.06, 0.08, 0.06), WOOD_DARK, "wood")
+			B.call(Vector3(0, 0.2, 0.05), Vector3(1.9, 0.26, 0.85), fab.darkened(0.15), "fabric")
+			B.call(Vector3(0, 0.6, 0.38), Vector3(1.9, 0.55, 0.2), fab.darkened(0.1), "fabric")
+			for sx in [-1.0, 1.0]:
+				B.call(Vector3(sx * 0.95, 0.42, 0.05), Vector3(0.2, 0.36, 0.86), fab.darkened(0.18), "fabric")
+				bt.add_tube(xf * Vector3(sx * 0.95, 0.6, -0.37), xf * Vector3(sx * 0.95, 0.6, 0.47), 0.1, fab.darkened(0.18), 10, "fabric")
+			for cx in [-0.43, 0.43]:
+				B.call(Vector3(cx, 0.4, -0.02), Vector3(0.83, 0.14, 0.68), fab, "fabric")
+				B.call(Vector3(cx, 0.68, 0.24), Vector3(0.8, 0.42, 0.14), fab.lightened(0.03), "fabric")
+			B.call(Vector3(-0.62, 0.62, 0.12), Vector3(0.36, 0.3, 0.1), Color(0.86, 0.8, 0.66), "fabric")
 			return Vector3(2.0, 0.9, 0.9)
 		"tv":
-			B.call(Vector3(0, 0.25, 0), Vector3(1.2, 0.5, 0.4), WOOD_DARK, "wood")
-			B.call(Vector3(0, 0.85, 0.05), Vector3(1.0, 0.6, 0.06), Color("111114"), "metal")
+			B.call(Vector3(0, 0.24, 0), Vector3(1.2, 0.48, 0.42), WOOD, "wood")
+			B.call(Vector3(-0.3, 0.24, -0.215), Vector3(0.55, 0.36, 0.01), WOOD_DARK, "wood")
+			B.call(Vector3(0.3, 0.24, -0.215), Vector3(0.55, 0.36, 0.01), WOOD_DARK, "wood")
+			B.call(Vector3(0, 0.52, 0.05), Vector3(0.3, 0.04, 0.18), Color(0.12, 0.12, 0.13), "metal")
+			B.call(Vector3(0, 0.88, 0.05), Vector3(1.0, 0.6, 0.04), Color(0.1, 0.1, 0.11), "metal")
+			B.call(Vector3(0, 0.88, 0.028), Vector3(0.94, 0.54, 0.005), Color(0.03, 0.04, 0.05), "glass")
 			return Vector3(1.2, 0.6, 0.4)
 		"rug":
 			B.call(Vector3(0, 0.035, 0), Vector3(2.0, 0.01, 1.4), accent.lightened(0.3), "fabric")
 			return Vector3.ZERO
 		"plant":
-			B.call(Vector3(0, 0.2, 0), Vector3(0.35, 0.4, 0.35), Color("a0522d"), "")
-			bt.add_sphere(xf * Vector3(0, 0.7, 0), Vector3(0.35, 0.45, 0.35), Color("3f6a35"))
+			bt.add_cylinder(xf * Vector3(0, 0.18, 0), 0.18, 0.36, Color(0.72, 0.42, 0.3), 14, "concrete")
+			bt.add_cylinder(xf * Vector3(0, 0.35, 0), 0.16, 0.02, Color(0.3, 0.22, 0.15), 14, "dirt")
+			var pr := RandomNumberGenerator.new()
+			pr.seed = int(xf.origin.x * 13.0 + xf.origin.z * 7.0)
+			var wpos := current_building_origin + xf * Vector3(0, 0.75, 0)
+			foliage.add_canopy(wpos - Vector3(0, 0.4, 0), [[wpos, Vector3(0.32, 0.4, 0.32)]], Color(0.28, 0.42, 0.18), pr, 26, 0.45)
 			return Vector3.ZERO
 		"shelf":
 			B.call(Vector3(0, 0.9, 0), Vector3(L, 1.8, 0.5), col.lightened(0.0) if f.has("color") else Color("d0d4d8"), "metal")

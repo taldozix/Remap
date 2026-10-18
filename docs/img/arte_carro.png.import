@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1vuf6euhjj5g"
-path="res://.godot/imported/diorama_trilha.png-d473b9a1accdb5e80819aeb3d4b95def.ctex"
+uid="uid://dq6dpva04oaf6"
+path="res://.godot/imported/arte_carro.png-60a3418a9f320b1fd9bf2d98ff5fa769.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/img/diorama_trilha.png"
-dest_files=["res://.godot/imported/diorama_trilha.png-d473b9a1accdb5e80819aeb3d4b95def.ctex"]
+source_file="res://docs/img/arte_carro.png"
+dest_files=["res://.godot/imported/arte_carro.png-60a3418a9f320b1fd9bf2d98ff5fa769.ctex"]
 
 [params]
 

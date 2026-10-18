@@ -120,5 +120,9 @@
 	"Jogo carregado.": "Game loaded.",
 	"Corpo": "Body",
 	"Masculino": "Male",
-	"Feminino": "Female"
+	"Feminino": "Female",
+	"Detalhe dos modelos": "Model detail",
+	"Baixo": "Low",
+	"Médio": "Medium",
+	"Alto": "High"
 }

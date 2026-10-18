@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d11ifi7s650hw"
-path="res://.godot/imported/diorama_praca.png-6a9f8455cceff327dec339e469ac7c4f.ctex"
+uid="uid://c3w811lvmjx4r"
+path="res://.godot/imported/arte_interior.png-9b9132de67ff98368222a8fa4cdb8024.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/img/diorama_praca.png"
-dest_files=["res://.godot/imported/diorama_praca.png-6a9f8455cceff327dec339e469ac7c4f.ctex"]
+source_file="res://docs/img/arte_interior.png"
+dest_files=["res://.godot/imported/arte_interior.png-9b9132de67ff98368222a8fa4cdb8024.ctex"]
 
 [params]
 

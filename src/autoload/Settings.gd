@@ -25,6 +25,7 @@ const DEFAULTS := {
 		"msaa": 1,               # 0 off, 1 2x, 2 4x
 		"grass_density": 2,      # 0 sem grama … 3 alta
 		"tilt_shift": 1,         # desfoque de miniatura: 0 off, 1 sutil, 2 forte
+		"model_detail": 2,       # detalhe dos modelos (LOD): 0 baixo … 2 alto
 		"color_grading": true,   # gradação de cor e vinheta
 	},
 	"audio": {"master": 0.8, "music": 0.6, "sfx": 0.8, "voice": 0.8, "ambient": 0.7},
@@ -160,6 +161,8 @@ func apply_graphics() -> void:
 		vp.scaling_3d_scale = clampf(float(get_value("graphics", "render_scale")), 0.5, 1.0)
 		vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_4X][int(get_value("graphics", "msaa"))]
 		vp.anisotropic_filtering_level = [Viewport.ANISOTROPY_DISABLED, Viewport.ANISOTROPY_4X, Viewport.ANISOTROPY_16X][int(get_value("graphics", "texture_filter"))]
+		# Limiar de LOD das malhas (carros e personagens têm LODs gerados na importação).
+		vp.mesh_lod_threshold = [6.0, 2.5, 1.0][clampi(int(get_value("graphics", "model_detail")), 0, 2)]
 	var shadow_q: int = get_value("graphics", "shadows")
 	RenderingServer.directional_shadow_atlas_set_size([1024, 2048, 4096, 8192][shadow_q], true)
 	RenderingServer.directional_soft_shadow_filter_set_quality([0, 1, 2, 4][shadow_q])

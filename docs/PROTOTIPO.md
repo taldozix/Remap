@@ -163,11 +163,28 @@ Grama densa com vento, árvores de folhas, trilhas de terra, desfoque de miniatu
 por hora e clima. Detalhes, limites e próximos passos em [`DIRECAO_ARTE.md`](DIRECAO_ARTE.md).
 Opções novas: densidade da grama, desfoque de miniatura, gradação de cor e vinheta.
 
+## Passada visual 2 (reformulação da direção de arte)
+
+Os placeholders de primitivas foram substituídos:
+
+- **Personagens:** esqueleto e animações a partir de dados CC0 do MakeHuman, com roupas,
+  cabelos e acessórios.
+- **Carros:** quatro modelos do Blender.
+- **Cenário:** prédios, ruas e interiores com texturas PBR próprias, além de mobiliário urbano
+  (postes com fiação, hidrantes, canteiros, vagas).
+
+As interfaces foram mantidas, e os testes seguem passando. Para as opções, o que mudou é a
+opção "Detalhe dos modelos" (LOD); na criação de personagem, a escolha de corpo. Detalhes,
+licenças e limitações estão em [`DIRECAO_ARTE.md`](DIRECAO_ARTE.md).
+
 ## Limitações conhecidas (versões simplificadas, documentadas)
 
-- **Arte placeholder**: personagens, carros e móveis são primitivas geradas por código, com
-  animação procedural. A arquitetura permite trocá-los por modelos (`Humanoid`, `CarVisual`,
-  `WorldBuilder._furniture_visual`).
+- **Arte**: ver as limitações em [`DIRECAO_ARTE.md`](DIRECAO_ARTE.md). Em resumo:
+  - roupas justas, sem simulação de tecido;
+  - cabelos em casca sólida;
+  - animações procedurais, sem animação facial;
+  - texturas procedurais, não fotoescaneadas;
+  - prédios ainda retangulares.
 - **Retratos de diálogo** são iniciais coloridas, não rostos.
 - **Combate, polícia em campo e perseguições** não existem ainda (Fase 5). Crimes geram
   multas/reputação/memórias, não prisões.
@@ -191,9 +208,9 @@ Opções novas: densidade da grama, desfoque de miniatura, gradação de cor e v
 
 | O quê | Onde | Substituição prevista |
 |---|---|---|
-| Modelos de personagens | `src/actors/Humanoid.gd` | Cena `.glb` com esqueleto e animações; manter a API `set_pose()` |
-| Veículos | `src/vehicles/CarVisual.gd` | Modelos por tipo em `assets/vehicles/`, mantendo rodas/porta/luzes |
-| Mobília e props | `WorldBuilder._furniture_visual`, `_build_prop` | Cenas por tipo em `assets/props/` |
+| ~~Modelos de personagens~~ | `src/actors/Humanoid.gd` | **Feito**: `assets/characters/human_{m,f}.glb` |
+| ~~Veículos~~ | `src/vehicles/CarVisual.gd` | **Feito**: `assets/vehicles/car_*.glb` |
+| Mobília e props | `WorldBuilder._furniture_visual`, `_build_prop` | Texturizados e mais detalhados; o próximo passo são modelos `.glb` por tipo em `assets/props/` |
 | Sons | `src/audio/Audio.gd` | Arquivos em `assets/audio/<id>.ogg` (automático) |
 | Retratos | `src/ui/DialoguePanel.gd` | Texturas em `assets/portraits/<npc>.png` |
 

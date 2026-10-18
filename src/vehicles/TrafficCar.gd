@@ -118,8 +118,14 @@ func _physics_process(delta: float) -> void:
 	var look := 5.0 + speed * 1.8
 	var blocker: Dictionary = {}
 	var gap := 1e9
+	var jammed := _stopped_t > (3.0 if mode == "turn" else 6.0) and (mode == "turn" or _granted) and sys.near_node(pos, 12.0)
 	for o in sys.obstacles():
 		if o.node == self:
+			continue
+		# Desfaz nó no cruzamento: parado há tempo dentro ou na boca de um cruzamento, ignora
+		# os outros carros do trânsito (pedestres e o jogador continuam sendo respeitados);
+		# senão carros fazendo a curva travam uns aos outros para sempre.
+		if jammed and o.node is TrafficCar:
 			continue
 		var rel: Vector3 = o.pos - pos
 		rel.y = 0

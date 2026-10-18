@@ -13,14 +13,24 @@ conversar, resolver uma missão de várias formas, reagir a eventos na rua e sal
 - **Testes:** `GODOT=/caminho/do/godot tools/run_tests.sh`
   (283 verificações de unidade + testes de aceitação do protótipo e da Fase 1).
 
-## Direção de arte: "diorama vivo"
+## Direção de arte
 
-![Praça no fim da tarde](docs/img/diorama_praca.png)
+![Elenco](docs/img/arte_elenco.png)
 
-Grama densa, árvores de folhas, trilhas de terra, desfoque de miniatura e luz que muda com a hora
-e o clima — dourada só no amanhecer e no entardecer ([`docs/DIRECAO_ARTE.md`](docs/DIRECAO_ARTE.md)).
+Personagens com esqueleto e animações a partir de dados CC0 do MakeHuman, com roupas, cabelos
+e acessórios gerados por script. Quatro carros modelados no Blender (hatch, sedã, picape, van).
+Prédios, ruas e interiores com texturas PBR próprias (tijolo, reboco, telha, asfalto, pedra
+portuguesa, madeira, tecido…). A luz muda com a hora e o clima, e o dourado aparece só no
+amanhecer e no entardecer. Detalhes, licenças e limitações estão em
+[`docs/DIRECAO_ARTE.md`](docs/DIRECAO_ARTE.md); créditos em
+[`assets/CREDITS.md`](assets/CREDITS.md); como regerar os ativos em
+[`tools/art/README.md`](tools/art/README.md).
 
-![Horários e climas](docs/img/horarios_e_climas.png)
+| | |
+|---|---|
+| ![Frota](docs/img/arte_frota.png) | ![Carro](docs/img/arte_carro.png) |
+
+![Horários e climas](docs/img/arte_horarios.png)
 
 ## Capturas (renderizador de compatibilidade/OpenGL)
 
@@ -37,16 +47,18 @@ e o clima — dourada só no amanhecer e no entardecer ([`docs/DIRECAO_ARTE.md`]
 - [`docs/PROTOTIPO.md`](docs/PROTOTIPO.md) — como rodar, controles, o que está implementado,
   como cada critério foi verificado e limitações conhecidas.
 - [`docs/HISTORIA.md`](docs/HISTORIA.md) — estrutura da história principal (planejada).
-- [`docs/DIRECAO_ARTE.md`](docs/DIRECAO_ARTE.md) — análise da referência visual e passada visual 1.
+- [`docs/DIRECAO_ARTE.md`](docs/DIRECAO_ARTE.md) — auditoria, pesquisa de ativos, modelos,
+  materiais, desempenho e limitações da direção de arte.
 
 ## Estrutura
 
 ```
+assets/      modelos (carros, personagens), texturas PBR e créditos
 data/        conteúdo em JSON (itens, NPCs, diálogos, missões, lojas, emprego, veículos, mapa, traduções)
 src/         código (autoload, systems, world, actors, vehicles, ui, audio, util)
 tests/       testes de unidade, aceitação e capturas de tela
-tools/       gerador do mapa e script de testes
+tools/       gerador do mapa, script de testes e pipeline de arte (tools/art)
 docs/        documentação
 ```
 
-Licença: MIT (ver `LICENSE`).
+Licença: MIT (ver `LICENSE`) para o código e os ativos próprios; dados do MakeHuman em CC0 (ver `assets/CREDITS.md`).
