@@ -17,6 +17,9 @@ var traffic: TrafficSystem
 var daynight: DayNight
 var ui: Node
 var nav_region: NavigationRegion3D
+var grass: GrassField
+var postfx: PostFX
+var _grass_level := -1
 var ready_done := false
 var player_building := ""
 var _incidents: Array = []
@@ -47,6 +50,16 @@ func _ready() -> void:
 	buildings = builder.buildings
 	doors = builder.doors
 	furniture = builder.furniture
+	grass = GrassField.new()
+	grass.name = "Grass"
+	add_child(grass)
+	var t0 := Time.get_ticks_msec()
+	_grass_level = int(Settings.get_value("graphics", "grass_density"))
+	grass.build(builder, _grass_level)
+	print_verbose("Grama: %d tufos em %d ms" % [grass.instances, Time.get_ticks_msec() - t0])
+	Settings.changed.connect(_on_settings_changed)
+	postfx = PostFX.new()
+	add_child(postfx)
 	daynight.streetlights = builder.streetlights
 	daynight.buildings = buildings.values()
 	for g in Game.world_state.ground_items:
@@ -84,6 +97,14 @@ func _ready() -> void:
 		Events.notify.emit(tr("Jogo carregado."), "good")
 		Events.game_loaded.emit()
 	Game.pending_load = {}
+
+func _on_settings_changed(section: String) -> void:
+	if section != "graphics":
+		return
+	var lvl := int(Settings.get_value("graphics", "grass_density"))
+	if lvl != _grass_level and grass:
+		_grass_level = lvl
+		grass.build(builder, lvl)
 
 func _exit_tree() -> void:
 	if Game.world == self:

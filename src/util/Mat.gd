@@ -101,8 +101,8 @@ static func grass() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = _shader("grass", """
 shader_type spatial;
-uniform vec3 base_a : source_color = vec3(0.23, 0.38, 0.15);
-uniform vec3 base_b : source_color = vec3(0.33, 0.46, 0.18);
+uniform vec3 base_a : source_color = vec3(0.13, 0.22, 0.07);
+uniform vec3 base_b : source_color = vec3(0.22, 0.30, 0.10);
 uniform float wetness = 0.0;
 varying vec3 wpos;
 """ + NOISE_FN + """

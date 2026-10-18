@@ -157,6 +157,12 @@ Verificado por `tests/AcceptanceFase1.tscn`, no mundo real:
   buzina, batida, caixa registradora, chapa, chuva, cidade, música do menu). Qualquer arquivo em
   `assets/audio/<id>.ogg|wav` substitui o som sintetizado automaticamente.
 
+## Passada visual 1 ("diorama vivo")
+
+Grama densa com vento, árvores de folhas, trilhas de terra, desfoque de miniatura e gradação de cor
+por hora e clima. Detalhes, limites e próximos passos em [`DIRECAO_ARTE.md`](DIRECAO_ARTE.md).
+Opções novas: densidade da grama, desfoque de miniatura, gradação de cor e vinheta.
+
 ## Limitações conhecidas (versões simplificadas, documentadas)
 
 - **Arte placeholder**: personagens, carros e móveis são primitivas geradas por código, com

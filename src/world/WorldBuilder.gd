@@ -24,6 +24,7 @@ var markings := ChunkBatcher.new()
 var lamp_heads := ChunkBatcher.new()
 var sidewalks := ChunkBatcher.new()
 var asphalt_b := ChunkBatcher.new()
+var foliage := FoliageBatcher.new()
 var sidewalk_rects: Array[Rect2] = []
 var spots: Dictionary = {}
 var buildings: Dictionary = {}
@@ -55,6 +56,7 @@ func build(p_world: Node3D, p_map: Dictionary, nav_region: NavigationRegion3D) -
 		var s: Dictionary = map.spots[sid]
 		_add_spot(sid, Vector3(float(s.pos[0]), 0, float(s.pos[1])), float(s.get("rot", 0)), s.get("pose", "stand"), bool(s.get("hidden", false)), "")
 	deco.build(visual_root, "Deco", 0.85)
+	foliage.build(visual_root)
 	sidewalks.build(visual_root, "Sidewalks", 0.8, true, Mat.sidewalk())
 	asphalt_b.build(visual_root, "Asphalt", 0.9, false, Mat.asphalt())
 	markings.build(visual_root, "Markings", 0.6, false)
@@ -207,6 +209,18 @@ func _build_areas() -> void:
 				var bm2 := BoxMesh.new()
 				bm2.size = Vector3(float(r2[2]) - float(r2[0]), 0.03, float(r2[3]) - float(r2[1]))
 				_mesh(bm2, Mat.sidewalk(), Vector3((float(r2[0]) + float(r2[2])) * 0.5, 0.0, (float(r2[1]) + float(r2[3])) * 0.5)).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			"trail":
+				var tp: Array = a.points
+				var tw := float(a.get("width", 2.2))
+				for i in tp.size() - 1:
+					var q0 := Vector3(float(tp[i][0]), 0, float(tp[i][1]))
+					var q1 := Vector3(float(tp[i + 1][0]), 0, float(tp[i + 1][1]))
+					var pm := PlaneMesh.new()
+					pm.size = Vector2(tw, q0.distance_to(q1) + tw * 0.6)
+					var tm := _mesh(pm, Nature.dirt_material(), (q0 + q1) * 0.5)
+					tm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+					tm.look_at((q0 + q1) * 0.5 + (q1 - q0).normalized(), Vector3.UP)
+					tm.position.y = 0.012 + i * 0.0005
 			"drive_lane":
 				var pts: Array = a.points
 				for i in pts.size() - 1:
@@ -643,14 +657,7 @@ func _build_prop(p: Dictionary) -> void:
 		deco.add_box(xf * Transform3D(Basis(), lp), s, c)
 	match p.type:
 		"tree":
-			var v := int(p.get("variant", 0))
-			var tones := [Color("3d6e2f"), Color("4f7f2a"), Color("2f5f3a")]
-			deco.add_cylinder(pos + Vector3(0, 1.2, 0), 0.16, 2.4, Color("5b3b22"), 7)
-			var sc := 1.0 + (v - 1) * 0.15
-			deco.add_sphere(pos + Vector3(0, 3.2 * sc, 0), Vector3(1.6, 1.4, 1.6) * sc, tones[v])
-			deco.add_sphere(pos + Vector3(0.6, 3.9 * sc, 0.3), Vector3(1.1, 1.0, 1.1) * sc, tones[v].lightened(0.08))
-			deco.add_sphere(pos + Vector3(-0.5, 3.7 * sc, -0.4), Vector3(1.0, 0.9, 1.0) * sc, tones[v].darkened(0.08))
-			add_cyl_collider(pos + Vector3(0, 1.0, 0), 0.25, 2.0)
+			_build_tree(pos, int(p.get("variant", 0)))
 		"bench":
 			B.call(Vector3(0, 0.45, 0), Vector3(1.8, 0.06, 0.5), WOOD)
 			B.call(Vector3(0, 0.75, 0.24), Vector3(1.8, 0.4, 0.05), WOOD)
@@ -771,6 +778,32 @@ func _build_prop(p: Dictionary) -> void:
 			var len := a.distance_to(e)
 			deco.box((a + e) * 0.5 + Vector3(0, 0.55, 0), Vector3(len, 1.1, 0.7), Color("3f6f33"), r2)
 			add_collider((a + e) * 0.5 + Vector3(0, 0.55, 0), Vector3(len, 1.1, 0.7), r2)
+
+## Árvore: tronco afunilado, galhos e copa de cartões de folhas (paleta de outono).
+const LEAF_TINTS := [Color(0.42, 0.56, 0.20), Color(0.70, 0.66, 0.24), Color(0.92, 0.70, 0.26)]
+
+func _build_tree(pos: Vector3, variant: int) -> void:
+	var trng := RandomNumberGenerator.new()
+	trng.seed = int(pos.x * 73.0 + pos.z * 191.0)
+	var sc := trng.randf_range(1.15, 1.7)
+	var h := 2.8 * sc
+	var bark := Color("6b5844").lerp(Color("cfc6b4"), 0.55 if variant == 2 else 0.1)
+	deco.add_cylinder(pos + Vector3(0, h * 0.5, 0), 0.17 * sc, h, bark, 7)
+	deco.add_cylinder(pos + Vector3(0, h + 0.5 * sc, 0), 0.1 * sc, 1.0 * sc, bark, 6)
+	var top := pos + Vector3(0, h, 0)
+	var clusters: Array = [[top + Vector3(0, 1.3, 0) * sc, Vector3(1.6, 1.25, 1.6) * sc]]
+	for i in 3:
+		var a := trng.randf() * TAU + i * 2.1
+		var off := Vector3(cos(a), 0, sin(a)) * trng.randf_range(0.8, 1.3) * sc
+		var cpos := top + off + Vector3(0, trng.randf_range(0.5, 1.9) * sc, 0)
+		clusters.append([cpos, Vector3(1.05, 0.9, 1.05) * sc * trng.randf_range(0.8, 1.15)])
+		var mid := top.lerp(cpos, 0.5)
+		deco.add_box(Transform3D(Basis.looking_at((cpos - top).normalized(), Vector3.FORWARD if absf((cpos - top).normalized().y) > 0.95 else Vector3.UP), mid), Vector3(0.09, 0.09, top.distance_to(cpos)) * sc, bark.darkened(0.1))
+	# Maioria verde; amarelos e dourados como destaque (ipês e árvores de outono).
+	var pick: int = [0, 0, 0, 1, 2][trng.randi() % 5]
+	var tint: Color = LEAF_TINTS[pick].lerp(LEAF_TINTS[min(pick + 1, 2)], trng.randf() * 0.2)
+	foliage.add_canopy(top, clusters, tint, trng)
+	add_cyl_collider(pos + Vector3(0, 1.0, 0), 0.25, 2.0)
 
 func _prop_furniture(p: Dictionary, pos: Vector3, rot: float) -> void:
 	var fn := Furniture.new()

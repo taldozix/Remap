@@ -23,6 +23,9 @@ const DEFAULTS := {
 		"fps_limit": 60,
 		"texture_filter": 1,     # 0 bilinear, 1 aniso 4x, 2 aniso 16x
 		"msaa": 1,               # 0 off, 1 2x, 2 4x
+		"grass_density": 2,      # 0 sem grama … 3 alta
+		"tilt_shift": 1,         # desfoque de miniatura: 0 off, 1 sutil, 2 forte
+		"color_grading": true,   # gradação de cor e vinheta
 	},
 	"audio": {"master": 0.8, "music": 0.6, "sfx": 0.8, "voice": 0.8, "ambient": 0.7},
 	"game": {
