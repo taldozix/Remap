@@ -45,6 +45,8 @@ func _ready() -> void:
 	left.add_child(spacer)
 	center = CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.offset_left = 420
+	center.offset_right = -40
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	_main_buttons(left)

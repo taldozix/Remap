@@ -166,7 +166,7 @@ func _run() -> void:
 	await wait(0.4)
 	check(door.is_open, "porta está aberta")
 	check(await walk_to(Vector3(-44, 0, -6.0), 15.0, true), "saiu correndo até a calçada")
-	await frames(10)
+	await wait(0.3)
 	check(world.player_building == "", "o jogador está na rua")
 	check(p.needs.get_need("fadiga") > 0.0 or p.skills.xp.get("condicionamento", 0) >= 0, "correr gera fadiga")
 
@@ -209,8 +209,9 @@ func _run() -> void:
 	check(use_focus(car, "enter"), "entrou no próprio carro")
 	await frames(5)
 	check(player().state == "driving", "jogador está dirigindo")
+	# Acelera pouco para não deixar o carro parado na avenida (bloquearia o trânsito).
 	Input.action_press("move_up")
-	await wait(2.5)
+	await wait(1.4)
 	Input.action_release("move_up")
 	Input.action_press("move_down")
 	for i in 600:
@@ -219,7 +220,7 @@ func _run() -> void:
 			break
 	Input.action_release("move_down")
 	await wait(0.3)
-	check(car.global_position.distance_to(pos0) > 6.0, "o carro andou %.1f m com aceleração e frenagem" % car.global_position.distance_to(pos0))
+	check(car.global_position.distance_to(pos0) > 3.0 and car.global_position.z < -5.0, "o carro andou %.1f m com aceleração e frenagem" % car.global_position.distance_to(pos0))
 	check(car.fuel < fuel0, "consumiu combustível (%.3f → %.3f L)" % [fuel0, car.fuel])
 	player().exit_vehicle()
 	await frames(3)
@@ -237,7 +238,7 @@ func _run() -> void:
 	check(not mdoor.locked(), "mercadinho destrancado no horário comercial")
 	check(use_focus(mdoor, "open"), "abriu a porta do mercadinho")
 	check(await walk_to(mdoor.global_position + Vector3(0, 0, -2.0)), "entrou andando")
-	await frames(10)
+	await wait(0.3)
 	check(world.player_building == "mercadinho", "jogador está dentro do Mercadinho Bom Preço")
 
 	# ------------------------------------------------------------ 6
@@ -348,6 +349,7 @@ func _run() -> void:
 	step("7. Voltar para casa, guardar objetos e descansar")
 	var fridge: Furniture = world.furniture["geladeira_jogador"]
 	await teleport(fridge.interact_point())
+	await wait(0.3)
 	check(world.player_building == "casa_jogador", "de volta em casa")
 	check(use_focus(fridge, "open"), "abriu a geladeira")
 	await frames(3)

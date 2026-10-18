@@ -90,8 +90,8 @@ func _build_hud() -> void:
 	# Relógio e dinheiro (canto superior direito)
 	var tr_panel := PanelContainer.new()
 	tr_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	tr_panel.position = Vector2(-250, 14)
-	tr_panel.custom_minimum_size = Vector2(236, 0)
+	tr_panel.position = Vector2(-300, 14)
+	tr_panel.custom_minimum_size = Vector2(286, 0)
 	tr_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(tr_panel)
 	var v := VBoxContainer.new()

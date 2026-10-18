@@ -74,7 +74,10 @@ func _ready() -> void:
 	Audio.set_ambient("city", true, -16.0)
 	Events.world_ready.emit()
 	if Game.pending_load.has("new"):
-		Events.request_message.emit(tr("Vila Aurora, Porto Serra"), tr("Segunda-feira, 7h30. Primeira manhã na casa nova.\n\nTem um bilhete do senhorio na mesa da cozinha. A geladeira tem pouca coisa, a carteira tem R$ 60 e o aluguel vence no domingo.\n\nDica: [%s] interage, [%s] abre o inventário, [%s] o diário e [%s] o mapa.") % [Settings.primary_key_text("interact"), Settings.primary_key_text("inventory"), Settings.primary_key_text("journal"), Settings.primary_key_text("map")])
+		var intro := tr("Segunda-feira, 7h30. Primeira manhã na casa nova.\n\nTem um bilhete do senhorio na mesa da cozinha. A geladeira tem pouca coisa, a carteira tem R$ 60 e o aluguel vence no domingo.")
+		if Settings.get_value("game", "show_hints"):
+			intro += "\n\n" + tr("Dica: [%s] interage, [%s] entra/sai do carro, [%s] abre o inventário, [%s] o diário, [%s] o mapa, [%s]/[%s] giram a câmera e [%s] pausa (salvar/carregar).") % [Settings.primary_key_text("interact"), Settings.primary_key_text("vehicle"), Settings.primary_key_text("inventory"), Settings.primary_key_text("journal"), Settings.primary_key_text("map"), Settings.primary_key_text("cam_left"), Settings.primary_key_text("cam_right"), Settings.primary_key_text("pause")]
+		Events.request_message.emit(tr("Vila Aurora, Porto Serra"), intro)
 	elif Game.pending_load.has("loaded"):
 		Events.notify.emit(tr("Jogo carregado."), "good")
 		Events.game_loaded.emit()

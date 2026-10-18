@@ -55,6 +55,17 @@ func _ready() -> void:
 	await _wait(2.5)
 	await _shot("12_dialogo")
 	world.ui.close_current()
+	world.queue_free()
+	await _wait(0.3)
+	var menu: Control = load("res://src/ui/MainMenu.tscn").instantiate()
+	add_child(menu)
+	await _wait(1.0)
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png("%s/13_menu.png" % out_dir)
+	menu._new_game_panel()
+	await _wait(0.8)
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png("%s/14_criacao.png" % out_dir)
 	get_tree().quit()
 
 func _wait(t: float) -> void:

@@ -958,10 +958,10 @@
    ],
    "height": 3.4,
    "style": {
-    "wall": "#f3efe6",
+    "wall": "#e6e0d2",
     "roof": "#5a6470",
     "trim": "#2d7d46",
-    "floor": "#d9d4c7",
+    "floor": "#a9a397",
     "accent": "#2d7d46",
     "sign": "MERCADINHO BOM PREÇO"
    },
@@ -1246,10 +1246,10 @@
    ],
    "height": 3.6,
    "style": {
-    "wall": "#f2e3c9",
+    "wall": "#e8d2b0",
     "roof": "#b8432f",
     "trim": "#e8a33a",
-    "floor": "#e2d6c2",
+    "floor": "#b0805f",
     "accent": "#b8432f",
     "sign": "BRASA BURGER"
    },

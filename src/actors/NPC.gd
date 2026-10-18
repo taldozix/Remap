@@ -517,12 +517,14 @@ func _get_up() -> void:
 func bark(text: String) -> void:
 	if text == "" or not visible:
 		return
+	Events.bark.emit(npc_id, text)
+	if not Settings.get_value("game", "subtitles"):
+		return
 	bark_label.text = text
 	bark_label.visible = true
 	bark_label.modulate.a = 1.0
 	_bark_t = 4.0
 	_bark_cd = 3.0
-	Events.bark.emit(npc_id, text)
 
 func _pick(key: String) -> String:
 	var list: Array = Data.chatter().get(key, [])

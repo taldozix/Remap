@@ -87,7 +87,7 @@ buildings.append(house("casa_silva", "Casa dos Silva (nº 14)", [-20, -42], 9, "
 # ---------------------------------------------------------------- NE: comércio
 buildings.append({
     "id": "mercadinho", "name": "Mercadinho Bom Preço", "type": "shop", "center": [22, -18], "size": [14, 10], "height": 3.4,
-    "style": {"wall": "#f3efe6", "roof": "#5a6470", "trim": "#2d7d46", "floor": "#d9d4c7", "accent": "#2d7d46", "sign": "MERCADINHO BOM PREÇO"},
+    "style": {"wall": "#e6e0d2", "roof": "#5a6470", "trim": "#2d7d46", "floor": "#a9a397", "accent": "#2d7d46", "sign": "MERCADINHO BOM PREÇO"},
     "owner": "antonio", "private": False, "shop": "mercadinho",
     "doors": [{"id": "porta_mercadinho", "side": "s", "offset": -3.0, "width": 1.6, "locked": False,
                "hours": [7, 21], "keys": ["antonio"], "label": "Porta do mercadinho", "glass": True}],
@@ -131,7 +131,7 @@ buildings.append({
 # ---------------------------------------------------------------- SE: drive-thru
 buildings.append({
     "id": "brasa", "name": "Brasa Burger Drive-Thru", "type": "restaurant", "center": [26, 26], "size": [14, 10], "height": 3.6,
-    "style": {"wall": "#f2e3c9", "roof": "#b8432f", "trim": "#e8a33a", "floor": "#e2d6c2", "accent": "#b8432f", "sign": "BRASA BURGER"},
+    "style": {"wall": "#e8d2b0", "roof": "#b8432f", "trim": "#e8a33a", "floor": "#b0805f", "accent": "#b8432f", "sign": "BRASA BURGER"},
     "owner": "sandra", "private": False, "job": "brasa",
     "doors": [{"id": "porta_brasa", "side": "n", "offset": -4.0, "width": 1.6, "locked": False, "hours": [10, 22],
                "keys": ["sandra", "kleber", "player_job"], "label": "Porta do Brasa Burger", "glass": True}],
