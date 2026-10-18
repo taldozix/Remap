@@ -1,0 +1,464 @@
+{
+	"lucia": {
+		"name": "Dona Lúcia",
+		"role": "Aposentada, vizinha da casa 10",
+		"dialogue": "lucia",
+		"important": true,
+		"appearance": {
+			"skin": "#d9a98a",
+			"hair": "#d8d8d8",
+			"hair_style": "bun",
+			"shirt": "#8e6bb8",
+			"pants": "#4a4060",
+			"height": 0.93,
+			"build": 1.05,
+			"elderly": true
+		},
+		"walk_speed": 1.1,
+		"start_relation": 10,
+		"personality": {
+			"tolerance": 0.8,
+			"friendly": 0.9
+		},
+		"schedule": [
+			{
+				"from": 22,
+				"to": 6.5,
+				"place": "lucia_cama",
+				"activity": "sleep"
+			},
+			{
+				"from": 6.5,
+				"to": 7.8,
+				"place": "lucia_cozinha",
+				"activity": "stand"
+			},
+			{
+				"from": 7.8,
+				"to": 9.5,
+				"place": "praca_banco_1",
+				"activity": "sit"
+			},
+			{
+				"from": 9.5,
+				"to": 11.5,
+				"place": "mercadinho_cliente",
+				"activity": "shop",
+				"shop": "mercadinho"
+			},
+			{
+				"from": 11.5,
+				"to": 15,
+				"place": "lucia_sofa",
+				"activity": "sit"
+			},
+			{
+				"from": 15,
+				"to": 18.5,
+				"place": "calcada_lucia",
+				"activity": "stand"
+			},
+			{
+				"from": 18.5,
+				"to": 22,
+				"place": "lucia_sofa",
+				"activity": "sit"
+			}
+		]
+	},
+	"marcos": {
+		"name": "Marcos",
+		"role": "Mecânico, vizinho da casa 12",
+		"dialogue": "marcos",
+		"important": true,
+		"appearance": {
+			"skin": "#a8765a",
+			"hair": "#2a1d14",
+			"hair_style": "short",
+			"shirt": "#3b5d7a",
+			"pants": "#2b2b30",
+			"height": 1.04,
+			"build": 1.15,
+			"beard": true
+		},
+		"walk_speed": 1.4,
+		"start_relation": -5,
+		"personality": {
+			"tolerance": 0.3,
+			"friendly": 0.2
+		},
+		"schedule": [
+			{
+				"from": 23,
+				"to": 6.8,
+				"place": "marcos_cama",
+				"activity": "sleep"
+			},
+			{
+				"from": 6.8,
+				"to": 7.5,
+				"place": "marcos_cozinha",
+				"activity": "stand"
+			},
+			{
+				"from": 7.5,
+				"to": 17,
+				"place": "oficina_marcos",
+				"activity": "work"
+			},
+			{
+				"from": 17,
+				"to": 19,
+				"place": "praca_banco_3",
+				"activity": "sit"
+			},
+			{
+				"from": 19,
+				"to": 23,
+				"place": "marcos_sofa",
+				"activity": "sit"
+			}
+		]
+	},
+	"antonio": {
+		"name": "Seu Antônio",
+		"role": "Dono do Mercadinho Bom Preço",
+		"dialogue": "antonio",
+		"important": true,
+		"appearance": {
+			"skin": "#e0b494",
+			"hair": "#9a9a9a",
+			"hair_style": "bald",
+			"shirt": "#2d7d46",
+			"pants": "#3a3a3a",
+			"height": 0.98,
+			"build": 1.2,
+			"mustache": true,
+			"apron": "#ffffff"
+		},
+		"walk_speed": 1.2,
+		"start_relation": 5,
+		"schedule": [
+			{
+				"from": 21,
+				"to": 6.5,
+				"place": "mercadinho_quartinho",
+				"activity": "sleep"
+			},
+			{
+				"from": 6.5,
+				"to": 12,
+				"place": "mercadinho_balcao",
+				"activity": "work"
+			},
+			{
+				"from": 12,
+				"to": 13.5,
+				"place": "praca_banco_6",
+				"activity": "sit"
+			},
+			{
+				"from": 13.5,
+				"to": 21,
+				"place": "mercadinho_balcao",
+				"activity": "work"
+			}
+		]
+	},
+	"beto": {
+		"name": "Beto",
+		"role": "Dono da loja de penhores",
+		"dialogue": "beto",
+		"important": true,
+		"appearance": {
+			"skin": "#c48b63",
+			"hair": "#111111",
+			"hair_style": "slick",
+			"shirt": "#b5832a",
+			"pants": "#3b2f25",
+			"height": 1.0,
+			"build": 0.95
+		},
+		"walk_speed": 1.3,
+		"start_relation": 0,
+		"schedule": [
+			{
+				"from": 21.5,
+				"to": 8.4,
+				"place": "predio_interior",
+				"activity": "sleep"
+			},
+			{
+				"from": 8.4,
+				"to": 19,
+				"place": "penhores_balcao",
+				"activity": "work"
+			},
+			{
+				"from": 19,
+				"to": 21.5,
+				"place": "praca_conversa_2",
+				"activity": "chat"
+			}
+		]
+	},
+	"sandra": {
+		"name": "Sandra",
+		"role": "Gerente do Brasa Burger",
+		"dialogue": "sandra",
+		"important": true,
+		"appearance": {
+			"skin": "#8a5a3c",
+			"hair": "#2b1a10",
+			"hair_style": "ponytail",
+			"shirt": "#b8432f",
+			"pants": "#22222a",
+			"height": 1.0,
+			"build": 0.95,
+			"cap": "#b8432f"
+		},
+		"walk_speed": 1.45,
+		"start_relation": 0,
+		"schedule": [
+			{
+				"from": 22.3,
+				"to": 8.3,
+				"place": "predio_interior",
+				"activity": "sleep"
+			},
+			{
+				"from": 8.3,
+				"to": 22.3,
+				"place": "brasa_escritorio",
+				"activity": "work"
+			}
+		]
+	},
+	"kleber": {
+		"name": "Kleber",
+		"role": "Atendente do Brasa Burger",
+		"dialogue": "kleber",
+		"important": false,
+		"appearance": {
+			"skin": "#6e4630",
+			"hair": "#0e0a08",
+			"hair_style": "curly",
+			"shirt": "#b8432f",
+			"pants": "#22222a",
+			"height": 1.03,
+			"build": 0.9,
+			"cap": "#e8a33a"
+		},
+		"walk_speed": 1.5,
+		"start_relation": 5,
+		"schedule": [
+			{
+				"from": 22.2,
+				"to": 9.6,
+				"place": "predio_interior",
+				"activity": "sleep"
+			},
+			{
+				"from": 9.6,
+				"to": 22.2,
+				"place": "brasa_balcao_func",
+				"activity": "work"
+			}
+		]
+	},
+	"rafael": {
+		"name": "Rafael",
+		"role": "Dono da oficina",
+		"dialogue": "rafael",
+		"important": true,
+		"appearance": {
+			"skin": "#d6a07c",
+			"hair": "#6b3d1e",
+			"hair_style": "short",
+			"shirt": "#e0b521",
+			"pants": "#2c3e5a",
+			"height": 1.02,
+			"build": 1.05,
+			"overalls": true
+		},
+		"walk_speed": 1.35,
+		"start_relation": 0,
+		"schedule": [
+			{
+				"from": 18.2,
+				"to": 7.3,
+				"place": "oficina_fundos",
+				"activity": "sleep"
+			},
+			{
+				"from": 7.3,
+				"to": 18.2,
+				"place": "oficina_rafael",
+				"activity": "work"
+			}
+		]
+	},
+	"julia": {
+		"name": "Júlia",
+		"role": "Estudante de enfermagem",
+		"dialogue": "julia",
+		"important": false,
+		"appearance": {
+			"skin": "#f0c8a8",
+			"hair": "#a0522d",
+			"hair_style": "long",
+			"shirt": "#3fa0a8",
+			"pants": "#3a4a6a",
+			"height": 0.97,
+			"build": 0.85
+		},
+		"walk_speed": 1.5,
+		"start_relation": 0,
+		"schedule": [
+			{
+				"from": 22,
+				"to": 7,
+				"place": "predio_interior",
+				"activity": "sleep"
+			},
+			{
+				"from": 7,
+				"to": 16.5,
+				"place": "ponto_onibus",
+				"activity": "leave"
+			},
+			{
+				"from": 16.5,
+				"to": 18,
+				"place": "praca_banco_5",
+				"activity": "sit"
+			},
+			{
+				"from": 18,
+				"to": 19.2,
+				"place": "praca",
+				"activity": "jog"
+			},
+			{
+				"from": 19.2,
+				"to": 20.5,
+				"place": "mercadinho_cliente_2",
+				"activity": "shop",
+				"shop": "mercadinho"
+			},
+			{
+				"from": 20.5,
+				"to": 22,
+				"place": "praca_conversa_1",
+				"activity": "chat"
+			}
+		]
+	},
+	"tiao": {
+		"name": "Tião",
+		"role": "Morador da praça",
+		"dialogue": "tiao",
+		"important": true,
+		"appearance": {
+			"skin": "#7a5038",
+			"hair": "#5a5a5a",
+			"hair_style": "messy",
+			"shirt": "#6b6b4a",
+			"pants": "#4a3f33",
+			"height": 0.99,
+			"build": 0.85,
+			"beard": true,
+			"beanie": "#7a3030"
+		},
+		"walk_speed": 1.0,
+		"start_relation": 0,
+		"schedule": [
+			{
+				"from": 21,
+				"to": 7,
+				"place": "praca_banco_4",
+				"activity": "sleep_bench"
+			},
+			{
+				"from": 7,
+				"to": 12,
+				"place": "praca_banco_2",
+				"activity": "sit"
+			},
+			{
+				"from": 12,
+				"to": 13,
+				"place": "lixeira_mercadinho_spot",
+				"activity": "search"
+			},
+			{
+				"from": 13,
+				"to": 18,
+				"place": "praca_banco_2",
+				"activity": "sit"
+			},
+			{
+				"from": 18,
+				"to": 21,
+				"place": "brasa_entrada",
+				"activity": "stand"
+			}
+		]
+	},
+	"paula": {
+		"name": "Paula Silva",
+		"role": "Enfermeira, vizinha da casa 14",
+		"dialogue": "paula",
+		"important": false,
+		"appearance": {
+			"skin": "#b07a58",
+			"hair": "#1a1a1a",
+			"hair_style": "bob",
+			"shirt": "#e8eef5",
+			"pants": "#5a7a9a",
+			"height": 0.98,
+			"build": 0.9
+		},
+		"walk_speed": 1.45,
+		"start_relation": 0,
+		"schedule": [
+			{
+				"from": 22.5,
+				"to": 6,
+				"place": "silva_cama",
+				"activity": "sleep"
+			},
+			{
+				"from": 6,
+				"to": 7,
+				"place": "silva_cozinha",
+				"activity": "stand"
+			},
+			{
+				"from": 7,
+				"to": 17,
+				"place": "ponto_onibus",
+				"activity": "leave"
+			},
+			{
+				"from": 17,
+				"to": 18.4,
+				"place": "mercadinho_cliente",
+				"activity": "shop",
+				"shop": "mercadinho"
+			},
+			{
+				"from": 18.4,
+				"to": 19.4,
+				"place": "brasa_mesa_1",
+				"activity": "eat"
+			},
+			{
+				"from": 19.4,
+				"to": 22.5,
+				"place": "silva_sofa",
+				"activity": "sit"
+			}
+		]
+	}
+}

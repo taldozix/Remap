@@ -1,0 +1,24 @@
+{
+	"brasa": {
+		"name": "Brasa Burger Drive-Thru",
+		"employer": "sandra",
+		"hours": [10, 22],
+		"ranks": [
+			{"title": "Atendente", "wage": 12},
+			{"title": "Atendente Sênior", "wage": 15, "min_perf": 70, "min_orders": 12},
+			{"title": "Supervisor(a) de Turno", "wage": 19, "min_perf": 82, "min_orders": 35}
+		],
+		"menu": ["job_x_brasa", "job_batata", "job_refri"],
+		"stations": {
+			"chapa": {"label": "Hambúrguer", "product": "job_x_brasa", "cook": 9.0, "cook_per_level": -0.6, "window": 7.0, "window_per_level": 0.8},
+			"fritadeira": {"label": "Batata", "product": "job_batata", "cook": 6.0, "cook_per_level": -0.4, "window": 8.0, "window_per_level": 0.8}
+		},
+		"actions": {"chapa_start": 1.5, "chapa_collect": 2.0, "fritadeira_start": 1.2, "fritadeira_collect": 1.5, "refri": 2.5, "deliver": 1.0},
+		"order_bonus": 2,
+		"patience": 95,
+		"customer_interval": [25, 50],
+		"max_queue": 3,
+		"abandon_minutes": 15,
+		"max_warnings": 3
+	}
+}

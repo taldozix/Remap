@@ -1,0 +1,6 @@
+{
+	"brisa": {"name": "Lumen Brisa", "kind": "hatch", "size": [1.75, 1.35, 3.9], "max_speed": 25.0, "reverse_speed": 6.0, "accel": 6.5, "brake": 14.0, "steer": 0.62, "wheelbase": 2.45, "grip": 7.0, "fuel_capacity": 40.0, "fuel_per_km": 0.09, "trunk_capacity": 30},
+	"vanza": {"name": "Teco Vanza", "kind": "van", "size": [1.95, 2.0, 4.8], "max_speed": 21.0, "reverse_speed": 5.0, "accel": 4.2, "brake": 11.0, "steer": 0.5, "wheelbase": 3.0, "grip": 5.5, "fuel_capacity": 60.0, "fuel_per_km": 0.13, "trunk_capacity": 90},
+	"sedan": {"name": "Aurea Sedã", "kind": "sedan", "size": [1.8, 1.4, 4.4], "max_speed": 26.0, "reverse_speed": 6.0, "accel": 6.0, "brake": 13.0, "steer": 0.58, "wheelbase": 2.7, "grip": 7.0, "fuel_capacity": 50.0, "fuel_per_km": 0.1, "trunk_capacity": 45},
+	"picape": {"name": "Rota Picape", "kind": "pickup", "size": [1.9, 1.6, 4.9], "max_speed": 23.0, "reverse_speed": 5.5, "accel": 5.0, "brake": 12.0, "steer": 0.52, "wheelbase": 3.0, "grip": 6.0, "fuel_capacity": 65.0, "fuel_per_km": 0.14, "trunk_capacity": 120}
+}

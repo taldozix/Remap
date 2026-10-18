@@ -1,0 +1,56 @@
+; Engine configuration file.
+; Projeto: Vila Aurora — protótipo do Open World Life RPG (Godot 4.4)
+
+config_version=5
+
+[application]
+
+config/name="Vila Aurora — Open World Life RPG (Protótipo)"
+config/description="Protótipo vertical: um bairro pequeno, porém vivo."
+run/main_scene="res://src/ui/MainMenu.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
+boot_splash/bg_color=Color(0.07, 0.08, 0.1, 1)
+
+[autoload]
+
+Events="*res://src/autoload/Events.gd"
+Data="*res://src/autoload/Data.gd"
+Settings="*res://src/autoload/Settings.gd"
+Clock="*res://src/autoload/Clock.gd"
+Game="*res://src/autoload/Game.gd"
+Saves="*res://src/autoload/Saves.gd"
+Audio="*res://src/audio/Audio.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[gui]
+
+common/drop_mouse_on_gui_input_disabled=true
+
+[layer_names]
+
+3d_physics/layer_1="mundo"
+3d_physics/layer_2="portas"
+3d_physics/layer_3="jogador"
+3d_physics/layer_4="npcs"
+3d_physics/layer_5="veiculos"
+3d_physics/layer_6="sensores"
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+rendering_device/fallback_to_opengl3=true
+anti_aliasing/quality/msaa_3d=1
+lights_and_shadows/directional_shadow/size=4096
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=2
+limits/opengl/max_lights_per_object=24
+environment/defaults/default_clear_color=Color(0.07, 0.08, 0.1, 1)
