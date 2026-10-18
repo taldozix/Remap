@@ -1,0 +1,106 @@
+{
+ "asphalt": {
+  "tile_m": 4.0,
+  "size": 1024
+ },
+ "brick": {
+  "tile_m": 1.2,
+  "size": 512
+ },
+ "cloth_canvas": {
+  "tile_m": 0.25,
+  "size": 512
+ },
+ "cloth_denim": {
+  "tile_m": 0.25,
+  "size": 512
+ },
+ "cloth_knit": {
+  "tile_m": 0.25,
+  "size": 512
+ },
+ "concrete": {
+  "tile_m": 2.0,
+  "size": 512
+ },
+ "corrugated": {
+  "tile_m": 1.0,
+  "size": 512
+ },
+ "dirt": {
+  "tile_m": 3.0,
+  "size": 512
+ },
+ "fabric": {
+  "tile_m": 0.5,
+  "size": 512
+ },
+ "ground": {
+  "tile_m": 4.0,
+  "size": 512
+ },
+ "hair": {
+  "tile_m": 0.3,
+  "size": 512
+ },
+ "leather": {
+  "tile_m": 0.3,
+  "size": 512
+ },
+ "metal_brushed": {
+  "tile_m": 1.0,
+  "size": 512
+ },
+ "metal_painted": {
+  "tile_m": 1.0,
+  "size": 512
+ },
+ "pedra_portuguesa": {
+  "tile_m": 2.0,
+  "size": 1024
+ },
+ "plaster": {
+  "tile_m": 2.0,
+  "size": 512
+ },
+ "porcelain": {
+  "tile_m": 1.2,
+  "size": 512
+ },
+ "roof_fiber": {
+  "tile_m": 1.77,
+  "size": 512
+ },
+ "roof_flat": {
+  "tile_m": 3.0,
+  "size": 512
+ },
+ "roof_tiles": {
+  "tile_m": 2.0,
+  "size": 1024
+ },
+ "rubber": {
+  "tile_m": 0.3,
+  "size": 256
+ },
+ "sidewalk": {
+  "tile_m": 2.4,
+  "size": 512
+ },
+ "wall_tiles": {
+  "tile_m": 0.6,
+  "size": 512
+ },
+ "wood": {
+  "tile_m": 1.0,
+  "size": 512
+ },
+ "wood_floor": {
+  "tile_m": 2.0,
+  "size": 512
+ },
+ "wood_siding": {
+  "tile_m": 2.0,
+  "size": 512
+ }
+}

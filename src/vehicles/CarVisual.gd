@@ -1,106 +1,167 @@
 class_name CarVisual
 extends Node3D
-## Carroceria estilizada montada com primitivas (hatch, sedã, van, picape).
-## Frente = -Z. Expõe rodas (giram/esterçam), porta do motorista e luzes.
+## Visual dos carros: modelos 3D próprios (assets/vehicles/car_<tipo>.glb, gerados por
+## tools/art/blender/make_cars.py) com carroceria, vidros, faróis, interior e rodas
+## detalhadas. Frente = -Z. Expõe rodas (giram/esterçam), porta do motorista e luzes.
+## A pintura é recolorida por instância; faróis e lanternas acendem por material.
 
-var wheels: Array[Node3D] = []
+const MODELS := {
+	"hatch": "res://assets/vehicles/car_hatch.glb",
+	"sedan": "res://assets/vehicles/car_sedan.glb",
+	"pickup": "res://assets/vehicles/car_pickup.glb",
+	"van": "res://assets/vehicles/car_van.glb",
+}
+## Comprimento dos modelos exportados (m), para ajustar ao tamanho dos dados.
+const MODEL_LENGTH := {"hatch": 3.9, "sedan": 4.4, "pickup": 4.9, "van": 4.8}
+const WHEEL_RADIUS := {"hatch": 0.3, "sedan": 0.31, "pickup": 0.37, "van": 0.33}
+
+static var _scenes: Dictionary = {}
+static var _shared: Dictionary = {}   # materiais compartilhados ajustados (vidro, pneu…)
+static var _paints: Dictionary = {}
+static var _shadow_mat: ShaderMaterial
+
+var wheels: Array[Node3D] = []        # pivôs (o filho 0 gira)
 var front_wheels: Array[Node3D] = []
 var driver_door: Node3D
 var brake_mat: StandardMaterial3D
 var head_mat: StandardMaterial3D
 var body_mesh: MeshInstance3D
 var smoke: CPUParticles3D
+var wheel_radius := 0.32
+
+static func _scene(kind: String) -> PackedScene:
+	if not MODELS.has(kind):
+		kind = "sedan"
+	if not _scenes.has(kind):
+		_scenes[kind] = load(MODELS[kind])
+	return _scenes[kind]
 
 func build(kind: String, size: Array, color: Color) -> void:
-	var w := float(size[0])
-	var h := float(size[1])
-	var l := float(size[2])
-	var paint := Mat.color(color, 0.35, 0.25)
-	var glass := Mat.color(Color(0.16, 0.22, 0.28), 0.1, 0.5)
-	var trim := Mat.color(Color(0.12, 0.12, 0.13), 0.6)
-	var lower_h := h * 0.45
-	body_mesh = _box(Vector3(w, lower_h, l), Vector3(0, 0.32 + lower_h * 0.5, 0), paint)
-	match kind:
-		"van":
-			_box(Vector3(w * 0.98, h - lower_h - 0.1, l * 0.82), Vector3(0, 0.32 + lower_h + (h - lower_h - 0.1) * 0.5, l * 0.08), paint)
-			_box(Vector3(w * 0.9, (h - lower_h) * 0.5, 0.05), Vector3(0, 0.32 + lower_h + (h - lower_h) * 0.4, -l * 0.33), glass)
-			for s in [-1.0, 1.0]:
-				_box(Vector3(0.04, (h - lower_h) * 0.4, l * 0.18), Vector3(s * w * 0.495, 0.32 + lower_h + (h - lower_h) * 0.45, -l * 0.22), glass)
-		"pickup":
-			_box(Vector3(w * 0.96, h - lower_h, l * 0.38), Vector3(0, 0.32 + lower_h + (h - lower_h) * 0.5, -l * 0.08), paint)
-			_box(Vector3(w * 0.9, (h - lower_h) * 0.6, 0.05), Vector3(0, 0.32 + lower_h + (h - lower_h) * 0.45, -l * 0.27), glass)
-			_box(Vector3(w * 0.92, 0.35, l * 0.4), Vector3(0, 0.32 + lower_h + 0.1, l * 0.28), trim)
-		_:
-			var cab_l := l * (0.5 if kind == "hatch" else 0.48)
-			var cab_z := l * (0.06 if kind == "hatch" else 0.02)
-			_box(Vector3(w * 0.9, h - lower_h, cab_l), Vector3(0, 0.32 + lower_h + (h - lower_h) * 0.5, cab_z), paint)
-			_box(Vector3(w * 0.84, (h - lower_h) * 0.7, 0.05), Vector3(0, 0.32 + lower_h + (h - lower_h) * 0.45, cab_z - cab_l * 0.5 - 0.01), glass)
-			_box(Vector3(w * 0.84, (h - lower_h) * 0.65, 0.05), Vector3(0, 0.32 + lower_h + (h - lower_h) * 0.45, cab_z + cab_l * 0.5 + 0.01), glass)
-			for s in [-1.0, 1.0]:
-				_box(Vector3(0.04, (h - lower_h) * 0.6, cab_l * 0.85), Vector3(s * w * 0.451, 0.32 + lower_h + (h - lower_h) * 0.45, cab_z), glass)
-	# Para-choques, faróis e lanternas
-	_box(Vector3(w * 1.01, 0.16, 0.12), Vector3(0, 0.35, -l * 0.5), trim)
-	_box(Vector3(w * 1.01, 0.16, 0.12), Vector3(0, 0.35, l * 0.5), trim)
-	head_mat = StandardMaterial3D.new()
-	head_mat.albedo_color = Color(1, 0.98, 0.9)
-	head_mat.emission_enabled = true
-	head_mat.emission = Color(1, 0.95, 0.8)
-	head_mat.emission_energy_multiplier = 0.3
-	brake_mat = StandardMaterial3D.new()
-	brake_mat.albedo_color = Color(0.6, 0.05, 0.05)
-	brake_mat.emission_enabled = true
-	brake_mat.emission = Color(1, 0.1, 0.05)
-	brake_mat.emission_energy_multiplier = 0.2
-	for s in [-1.0, 1.0]:
-		_box(Vector3(0.32, 0.14, 0.04), Vector3(s * w * 0.34, 0.32 + lower_h * 0.7, -l * 0.5 - 0.01), head_mat)
-		_box(Vector3(0.3, 0.12, 0.04), Vector3(s * w * 0.36, 0.32 + lower_h * 0.7, l * 0.5 + 0.01), brake_mat)
-	# Rodas
-	var wb := l * 0.32
-	for zs in [-wb, wb]:
-		for s in [-1.0, 1.0]:
-			var pivot := Node3D.new()
-			pivot.position = Vector3(s * (w * 0.5 - 0.12), 0.32, zs)
-			add_child(pivot)
-			var tire := MeshInstance3D.new()
-			var cm := CylinderMesh.new()
-			cm.top_radius = 0.32
-			cm.bottom_radius = 0.32
-			cm.height = 0.24
-			cm.radial_segments = 12
-			tire.mesh = cm
-			tire.rotation_degrees.z = 90
-			tire.material_override = Mat.color(Color(0.08, 0.08, 0.09), 0.9)
-			pivot.add_child(tire)
-			var hub := MeshInstance3D.new()
-			var hm := CylinderMesh.new()
-			hm.top_radius = 0.17
-			hm.bottom_radius = 0.17
-			hm.height = 0.26
-			hm.radial_segments = 8
-			hub.mesh = hm
-			hub.rotation_degrees.z = 90
-			hub.material_override = Mat.color(Color(0.7, 0.72, 0.75), 0.3, 0.8)
-			pivot.add_child(hub)
-			wheels.append(pivot)
-			if zs < 0:
-				front_wheels.append(pivot)
-	# Porta do motorista (lado esquerdo) — abre na entrada/saída.
-	driver_door = Node3D.new()
-	driver_door.position = Vector3(-w * 0.5, 0, -l * 0.12)
-	add_child(driver_door)
-	var dm := MeshInstance3D.new()
-	var db := BoxMesh.new()
-	db.size = Vector3(0.05, lower_h * 0.9, l * 0.26)
-	dm.mesh = db
-	dm.material_override = paint
-	dm.position = Vector3(-0.01, 0.32 + lower_h * 0.5, l * 0.13)
-	driver_door.add_child(dm)
-	# Fumaça de motor avariado
+	if not MODELS.has(kind):
+		kind = "sedan"
+	var model: Node3D = _scene(kind).instantiate()
+	model.name = "Model"
+	var s := float(size[2]) / float(MODEL_LENGTH[kind])
+	model.scale = Vector3.ONE * s
+	add_child(model)
+	wheel_radius = float(WHEEL_RADIUS[kind]) * s
+	head_mat = _light_material(Color(1.0, 0.95, 0.82), 0.3)
+	brake_mat = _light_material(Color(1.0, 0.08, 0.04), 0.2)
+	_setup_meshes(model, color)
+	for tag in ["FL", "FR", "RL", "RR"]:
+		var pivot: Node3D = model.find_child("Wheel_" + tag, true, false)
+		if pivot == null or pivot.get_child_count() == 0:
+			continue
+		wheels.append(pivot)
+		if tag.begins_with("F"):
+			front_wheels.append(pivot)
+	driver_door = model.find_child("Door_FL", true, false)
+	body_mesh = model.find_child("Body", true, false) as MeshInstance3D
+	_add_contact_shadow(float(size[0]), float(size[2]))
+	_add_smoke(float(size[1]), float(size[2]))
+
+func _setup_meshes(node: Node, color: Color) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		for i in mi.mesh.get_surface_count():
+			var src := mi.mesh.surface_get_material(i) as StandardMaterial3D
+			if src == null:
+				continue
+			mi.set_surface_override_material(i, _material_for(src, color))
+	for c in node.get_children():
+		_setup_meshes(c, color)
+
+## Converte o material importado no material do jogo (cacheado sempre que possível).
+func _material_for(src: StandardMaterial3D, color: Color) -> Material:
+	var name := src.resource_name
+	match name:
+		"paint":
+			var key := color.to_html()
+			if not _paints.has(key):
+				var m := src.duplicate() as StandardMaterial3D
+				m.albedo_color = color
+				m.metallic = 0.35
+				m.roughness = 0.3
+				m.metallic_specular = 0.6
+				m.clearcoat_enabled = true
+				m.clearcoat = 0.8
+				m.clearcoat_roughness = 0.12
+				m.vertex_color_use_as_albedo = true
+				_paints[key] = m
+			return _paints[key]
+		"headlight", "indicator":
+			return head_mat if name == "headlight" else _shared_mat(src)
+		"taillight":
+			return brake_mat
+	return _shared_mat(src)
+
+static func _shared_mat(src: StandardMaterial3D) -> Material:
+	var name := src.resource_name
+	if _shared.has(name):
+		return _shared[name]
+	var m := src.duplicate() as StandardMaterial3D
+	m.vertex_color_use_as_albedo = true
+	match name:
+		"glass":
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			m.cull_mode = BaseMaterial3D.CULL_DISABLED
+			m.albedo_color = Color(0.07, 0.09, 0.11, 0.62)
+			m.metallic = 0.4
+			m.roughness = 0.04
+			m.vertex_color_use_as_albedo = false
+		"tire", "plastic", "bedliner", "seat", "interior":
+			m.roughness = 0.9
+		"indicator":
+			m.emission_enabled = true
+			m.emission = Color(1.0, 0.5, 0.05)
+			m.emission_energy_multiplier = 0.15
+	_shared[name] = m
+	return m
+
+func _light_material(c: Color, energy: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c.lerp(Color.WHITE, 0.15) if c.r > 0.9 and c.g > 0.9 else c * 0.6
+	m.roughness = 0.1
+	m.emission_enabled = true
+	m.emission = c
+	m.emission_energy_multiplier = energy
+	return m
+
+## Sombra de contato suave sob o carro (assenta o modelo no chão em qualquer renderizador).
+func _add_contact_shadow(w: float, l: float) -> void:
+	if _shadow_mat == null:
+		_shadow_mat = ShaderMaterial.new()
+		var sh := Shader.new()
+		sh.code = """
+shader_type spatial;
+render_mode unshaded, blend_mix, depth_draw_never, cull_back, shadows_disabled;
+uniform float strength = 0.55;
+void fragment() {
+	vec2 d = abs(UV - 0.5) * 2.0;
+	float r = length(max(d - vec2(0.55, 0.75), 0.0) / vec2(0.45, 0.25));
+	float a = (1.0 - smoothstep(0.0, 1.0, r)) * strength;
+	ALBEDO = vec3(0.0);
+	ALPHA = a;
+}
+"""
+		_shadow_mat.shader = sh
+	var q := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(w + 0.5, l + 0.6)
+	q.mesh = pm
+	q.material_override = _shadow_mat
+	q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	q.position.y = 0.025
+	q.name = "ContactShadow"
+	add_child(q)
+
+func _add_smoke(h: float, l: float) -> void:
 	smoke = CPUParticles3D.new()
 	smoke.emitting = false
 	smoke.amount = 24
 	smoke.lifetime = 1.8
-	smoke.position = Vector3(0, 0.32 + lower_h, -l * 0.42)
+	smoke.position = Vector3(0, h * 0.65, -l * 0.38)
 	smoke.direction = Vector3(0, 1, 0)
 	smoke.spread = 25
 	smoke.initial_velocity_min = 0.6
@@ -119,26 +180,18 @@ func build(kind: String, size: Array, color: Color) -> void:
 	smoke.material_override = smat
 	add_child(smoke)
 
-func _box(size: Vector3, pos: Vector3, mat: Material) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = size
-	mi.mesh = bm
-	mi.material_override = mat
-	mi.position = pos
-	add_child(mi)
-	return mi
-
 func animate(speed: float, steer: float, delta: float) -> void:
 	for w in wheels:
-		w.get_child(0).rotation.x -= speed * delta / 0.32
+		w.get_child(0).rotation.x -= speed * delta / wheel_radius
 	for w in front_wheels:
 		w.rotation.y = steer
 
 func set_lights(head: bool, braking: bool) -> void:
-	head_mat.emission_energy_multiplier = 2.5 if head else 0.3
-	brake_mat.emission_energy_multiplier = 3.0 if braking else (1.0 if head else 0.2)
+	head_mat.emission_energy_multiplier = 3.0 if head else 0.3
+	brake_mat.emission_energy_multiplier = 3.5 if braking else (1.2 if head else 0.2)
 
 func set_door(open: bool) -> void:
+	if driver_door == null:
+		return
 	var tw := create_tween()
 	tw.tween_property(driver_door, "rotation:y", deg_to_rad(-65.0) if open else 0.0, 0.25)

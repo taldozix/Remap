@@ -1,269 +1,252 @@
 class_name Humanoid
 extends Node3D
-## Personagem estilizado montado com primitivas e animado proceduralmente
-## (andar, correr, sentar, deitar, trabalhar, conversar, caído).
-## Frente = -Z. A raiz fica nos pés.
+## Personagem 3D: corpo e esqueleto do MakeHuman (CC0), roupas, cabelos e acessórios
+## gerados por tools/art/blender/make_characters.py (assets/characters/human_<m|f>.glb).
+## A aparência liga/desliga peças, aplica cores, morphs (peso, idade, rosto) e esconde
+## a pele sob a roupa. Animações por esqueleto: idle, walk, run, sit, lie, knocked,
+## work, talk, eat e search. Frente = -Z. A raiz fica nos pés.
+
+const SCENES := {"m": "res://assets/characters/human_m.glb", "f": "res://assets/characters/human_f.glb"}
+const TEX := "res://assets/textures/%s_%s.png"
+const CHAR_TEX := "res://assets/characters/%s.png"
+## Velocidade (m/s) para a qual cada ciclo foi animado.
+const CYCLE_SPEED := {"walk": 1.7, "run": 4.4}
+const FEMININE_HAIR := ["long", "bob", "bun", "ponytail"]
+## Bits de região do corpo escondidos por cada peça (ver Anatomy.region no gerador).
+const HIDE_BITS := {
+	"Top_tee": (1 << 1) | (1 << 3),
+	"Top_long": (1 << 1) | (1 << 3) | (1 << 4) | (1 << 5),
+	"Top_jacket": (1 << 1) | (1 << 3) | (1 << 4) | (1 << 5),
+	"Bottom_pants": (1 << 2) | (1 << 7) | (1 << 8) | (1 << 9),
+	"Bottom_shorts": (1 << 2) | (1 << 7),
+	"Bottom_skirt": (1 << 2),
+	"Shoes": (1 << 11),
+}
+## Textura de tecido e escala de UV (as peças usam 1 unidade de UV = 0,5 m).
+const FABRIC := {
+	"Top_tee": ["cloth_knit", 2.0], "Top_long": ["cloth_knit", 2.0], "Top_jacket": ["cloth_canvas", 2.0],
+	"Bottom_pants": ["cloth_denim", 2.0], "Bottom_shorts": ["cloth_denim", 2.0], "Bottom_skirt": ["cloth_canvas", 2.0],
+	"Overalls": ["cloth_denim", 2.0], "Apron": ["cloth_canvas", 1.6], "Backpack": ["cloth_canvas", 1.6],
+	"Cap": ["cloth_canvas", 1.6], "Beanie": ["cloth_knit", 3.0], "Shoes": ["leather", 1.7],
+}
+
+static var _scenes: Dictionary = {}
+static var _mats: Dictionary = {}
+static var _skin_shader: Shader
+static var _textures: Dictionary = {}
 
 var appearance: Dictionary = {}
-var pose := "idle"        # idle, walk, run, sit, lie, knocked, work, talk, eat, search
-var speed := 0.0          # m/s (para cadência da caminhada)
+var pose := "idle"
+var speed := 0.0
 var height_scale := 1.0
-var _phase := 0.0
-var _t := 0.0
-var lod_far := false
+var lod_far := false:
+	set(v):
+		lod_far = v
+		if anim:
+			anim.speed_scale = 0.0 if v else _anim_rate()
+var sex := "m"
+var model: Node3D
+var skeleton: Skeleton3D
+var anim: AnimationPlayer
+var meshes: Dictionary = {}
+var _elderly := false
 
-var body: Node3D
-var hips: Node3D
-var torso: Node3D
-var head: Node3D
-var arm_l: Node3D
-var arm_r: Node3D
-var leg_l: Node3D
-var leg_r: Node3D
-var knee_l: Node3D
-var knee_r: Node3D
-var forearm_l: Node3D
-var forearm_r: Node3D
+static func _scene(s: String) -> PackedScene:
+	if not _scenes.has(s):
+		_scenes[s] = load(SCENES[s])
+	return _scenes[s]
 
-const LIE_BASIS := Basis(Vector3(-1, 0, 0), Vector3(0, 0, -1), Vector3(0, -1, 0))
+static func _tex(path: String) -> Texture2D:
+	if not _textures.has(path):
+		_textures[path] = load(path) if ResourceLoader.exists(path) else null
+	return _textures[path]
+
+static func infer_sex(app: Dictionary) -> String:
+	if app.has("sex"):
+		return "f" if str(app.sex) == "f" else "m"
+	return "f" if str(app.get("hair_style", "short")) in FEMININE_HAIR and not app.get("beard", false) else "m"
 
 func build(app: Dictionary) -> void:
 	appearance = app
+	sex = infer_sex(app)
 	height_scale = float(app.get("height", 1.0))
-	var build_w := float(app.get("build", 1.0))
+	_elderly = app.get("elderly", false)
+	model = _scene(sex).instantiate()
+	model.name = "Model"
+	model.scale = Vector3.ONE * height_scale
+	add_child(model)
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		meshes[str(mi.name)] = mi
+		mi.visible = false
+	skeleton = model.find_children("*", "Skeleton3D", true, false)[0] if model.find_children("*", "Skeleton3D", true, false).size() > 0 else null
+	var players := model.find_children("*", "AnimationPlayer", true, false)
+	anim = players[0] if players.size() > 0 else null
+	_dress(app)
+	if anim:
+		for n in anim.get_animation_list():
+			if n in ["idle", "walk", "run", "talk", "work", "eat", "search", "sit", "lie", "knocked"]:
+				anim.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+		anim.play("idle")
+		anim.seek(randf() * 2.0, true)
+
+## Escolhe e pinta as peças conforme a aparência.
+func _dress(app: Dictionary) -> void:
 	var skin := Color(app.get("skin", "#d9a98a"))
+	var hair := Color(app.get("hair", "#2a1d14"))
 	var shirt := Color(app.get("shirt", "#4477aa"))
 	var pants := Color(app.get("pants", "#333344"))
-	var hair := Color(app.get("hair", "#2a1d14"))
 	var shoes := Color(app.get("shoes", "#2a2420"))
-	body = Node3D.new()
-	body.scale = Vector3(build_w, height_scale, build_w)
-	add_child(body)
-	hips = Node3D.new()
-	hips.position = Vector3(0, 0.92, 0)
-	body.add_child(hips)
-	torso = Node3D.new()
-	hips.add_child(torso)
-	var t := _part(CylinderMesh.new(), shirt, torso, Vector3(0, 0.3, 0))
-	(t.mesh as CylinderMesh).top_radius = 0.2
-	(t.mesh as CylinderMesh).bottom_radius = 0.17
-	(t.mesh as CylinderMesh).height = 0.6
-	t.scale = Vector3(1.0, 1.0, 0.62)
-	var pelvis := _part(CylinderMesh.new(), pants, hips, Vector3(0, -0.02, 0))
-	(pelvis.mesh as CylinderMesh).top_radius = 0.175
-	(pelvis.mesh as CylinderMesh).bottom_radius = 0.17
-	(pelvis.mesh as CylinderMesh).height = 0.16
-	pelvis.scale = Vector3(1.0, 1.0, 0.65)
-	if app.has("apron"):
-		var ap := _part(BoxMesh.new(), Color(app.apron), torso, Vector3(0, 0.12, -0.115))
-		(ap.mesh as BoxMesh).size = Vector3(0.3, 0.5, 0.02)
-	if app.has("backpack"):
-		var bp := _part(BoxMesh.new(), Color(app.backpack), torso, Vector3(0, 0.3, 0.17))
-		(bp.mesh as BoxMesh).size = Vector3(0.3, 0.38, 0.14)
-	if app.get("jacket", false):
-		var col := _part(BoxMesh.new(), shirt.darkened(0.25), torso, Vector3(0, 0.6, 0.0))
-		(col.mesh as BoxMesh).size = Vector3(0.34, 0.07, 0.24)
-	if app.get("overalls", false):
-		for x in [-0.09, 0.09]:
-			var st := _part(BoxMesh.new(), pants, torso, Vector3(x, 0.35, -0.115))
-			(st.mesh as BoxMesh).size = Vector3(0.05, 0.45, 0.02)
-	# Pescoço e cabeça
-	var neck := _part(CylinderMesh.new(), skin, torso, Vector3(0, 0.64, 0))
-	(neck.mesh as CylinderMesh).top_radius = 0.06
-	(neck.mesh as CylinderMesh).bottom_radius = 0.07
-	(neck.mesh as CylinderMesh).height = 0.1
-	head = Node3D.new()
-	head.position = Vector3(0, 0.79, 0)
-	torso.add_child(head)
-	var hm := _part(SphereMesh.new(), skin, head, Vector3.ZERO)
-	(hm.mesh as SphereMesh).radius = 0.13
-	(hm.mesh as SphereMesh).height = 0.28
-	hm.scale = Vector3(0.95, 1.05, 1.0)
-	for x in [-0.045, 0.045]:
-		var e := _part(SphereMesh.new(), Color("1b1410"), head, Vector3(x, 0.02, -0.118))
-		(e.mesh as SphereMesh).radius = 0.018
-		(e.mesh as SphereMesh).height = 0.036
-	var nose := _part(BoxMesh.new(), skin.darkened(0.08), head, Vector3(0, -0.02, -0.13))
-	(nose.mesh as BoxMesh).size = Vector3(0.03, 0.05, 0.03)
-	_build_hair(app.get("hair_style", "short"), hair)
-	if app.get("beard", false):
-		var bd := _part(SphereMesh.new(), hair, head, Vector3(0, -0.07, -0.05))
-		(bd.mesh as SphereMesh).radius = 0.1
-		(bd.mesh as SphereMesh).height = 0.12
-		bd.scale = Vector3(1.05, 0.8, 0.9)
-	if app.get("mustache", false):
-		var mu := _part(BoxMesh.new(), Color("6a6a6a"), head, Vector3(0, -0.055, -0.125))
-		(mu.mesh as BoxMesh).size = Vector3(0.08, 0.02, 0.02)
+	var top := "Top_jacket" if app.get("jacket", false) else ("Top_long" if app.get("top", "") == "long" else "Top_tee")
+	var bottom: String = {"shorts": "Bottom_shorts", "skirt": "Bottom_skirt"}.get(str(app.get("bottom", "")), "Bottom_pants")
+	var style := str(app.get("hair_style", "short"))
+	var hair_mesh: String = {"bald": "", "short": "Hair_short", "slick": "Hair_slick", "messy": "Hair_messy", "curly": "Hair_curly",
+		"long": "Hair_long", "bob": "Hair_bob", "bun": "Hair_bun", "ponytail": "Hair_ponytail"}.get(style, "Hair_short")
+	var on: Dictionary = {"Body": skin, "Eyes": null, "Lashes": null, top: shirt, bottom: pants, "Shoes": shoes}
 	if app.has("cap"):
-		var cap := _part(SphereMesh.new(), Color(app.cap), head, Vector3(0, 0.07, 0))
-		(cap.mesh as SphereMesh).radius = 0.135
-		(cap.mesh as SphereMesh).height = 0.14
-		(cap.mesh as SphereMesh).is_hemisphere = true
-		var brim := _part(BoxMesh.new(), Color(app.cap), head, Vector3(0, 0.07, -0.15))
-		(brim.mesh as BoxMesh).size = Vector3(0.2, 0.02, 0.12)
+		on["Cap"] = Color(app.cap)
+		if hair_mesh in ["Hair_messy", "Hair_curly"]:
+			hair_mesh = "Hair_short"
 	if app.has("beanie"):
-		var bn := _part(SphereMesh.new(), Color(app.beanie), head, Vector3(0, 0.05, 0))
-		(bn.mesh as SphereMesh).radius = 0.14
-		(bn.mesh as SphereMesh).height = 0.16
-		(bn.mesh as SphereMesh).is_hemisphere = true
-	# Braços (ombro → cotovelo → mão)
-	arm_l = _limb(torso, Vector3(-0.235, 0.55, 0), shirt, 0.055, 0.3)
-	arm_r = _limb(torso, Vector3(0.235, 0.55, 0), shirt, 0.055, 0.3)
-	forearm_l = _limb(arm_l, Vector3(0, -0.3, 0), skin, 0.045, 0.28)
-	forearm_r = _limb(arm_r, Vector3(0, -0.3, 0), skin, 0.045, 0.28)
-	for fa in [forearm_l, forearm_r]:
-		var hand := _part(SphereMesh.new(), skin, fa, Vector3(0, -0.31, 0))
-		(hand.mesh as SphereMesh).radius = 0.05
-		(hand.mesh as SphereMesh).height = 0.1
-	# Pernas (quadril → joelho → pé)
-	leg_l = _limb(hips, Vector3(-0.095, -0.04, 0), pants, 0.08, 0.44)
-	leg_r = _limb(hips, Vector3(0.095, -0.04, 0), pants, 0.08, 0.44)
-	knee_l = _limb(leg_l, Vector3(0, -0.44, 0), pants, 0.07, 0.42)
-	knee_r = _limb(leg_r, Vector3(0, -0.44, 0), pants, 0.07, 0.42)
-	for k in [knee_l, knee_r]:
-		var shoe := _part(BoxMesh.new(), shoes, k, Vector3(0, -0.43, -0.04))
-		(shoe.mesh as BoxMesh).size = Vector3(0.11, 0.07, 0.25)
+		on["Beanie"] = Color(app.beanie)
+		hair_mesh = "" if hair_mesh in ["Hair_short", "Hair_slick", "Hair_messy", "Hair_curly"] else hair_mesh
+	if hair_mesh != "":
+		on[hair_mesh] = hair
+	if app.get("beard", false):
+		on["Beard"] = hair
+	if app.get("mustache", false):
+		on["Mustache"] = Color("6a6a6a") if _elderly else hair
+	if app.has("backpack"):
+		on["Backpack"] = Color(app.backpack)
+	if app.has("apron"):
+		on["Apron"] = Color(app.apron)
+	if app.get("overalls", false):
+		on["Overalls"] = pants
+	var hide := 0
+	for n in on:
+		if HIDE_BITS.has(n):
+			hide |= int(HIDE_BITS[n])
+	for n in on:
+		var mi: MeshInstance3D = meshes.get(n)
+		if mi == null:
+			continue
+		mi.visible = true
+		for i in mi.mesh.get_surface_count():
+			var src := mi.mesh.surface_get_material(i)
+			var mname := str(src.resource_name) if src else ""
+			mi.set_surface_override_material(i, _material(n, mname, on[n], skin, hair, hide))
+		_apply_shape(mi, app)
 
-func _build_hair(style: String, hair: Color) -> void:
-	match style:
-		"bald":
-			return
-		"short", "slick":
-			var h := _part(SphereMesh.new(), hair, head, Vector3(0, 0.035, 0.012))
-			(h.mesh as SphereMesh).radius = 0.138
-			(h.mesh as SphereMesh).height = 0.2
-			(h.mesh as SphereMesh).is_hemisphere = true
-			h.scale = Vector3(1.0, 0.8 if style == "slick" else 1.0, 1.05)
-		"curly", "messy":
-			var c := _part(SphereMesh.new(), hair, head, Vector3(0, 0.06, 0.01))
-			(c.mesh as SphereMesh).radius = 0.16
-			(c.mesh as SphereMesh).height = 0.24
-			c.scale = Vector3(1.05, 0.85, 1.05)
-		"long", "bob":
-			var top := _part(SphereMesh.new(), hair, head, Vector3(0, 0.035, 0.015))
-			(top.mesh as SphereMesh).radius = 0.142
-			(top.mesh as SphereMesh).height = 0.2
-			(top.mesh as SphereMesh).is_hemisphere = true
-			var back := _part(BoxMesh.new(), hair, head, Vector3(0, -0.08 if style == "long" else -0.02, 0.07))
-			(back.mesh as BoxMesh).size = Vector3(0.27, 0.32 if style == "long" else 0.18, 0.14)
-		"bun", "ponytail":
-			var top2 := _part(SphereMesh.new(), hair, head, Vector3(0, 0.035, 0.012))
-			(top2.mesh as SphereMesh).radius = 0.14
-			(top2.mesh as SphereMesh).height = 0.2
-			(top2.mesh as SphereMesh).is_hemisphere = true
-			var bun := _part(SphereMesh.new(), hair, head, Vector3(0, 0.1 if style == "bun" else -0.02, 0.13))
-			(bun.mesh as SphereMesh).radius = 0.065
-			(bun.mesh as SphereMesh).height = 0.13
-			if style == "ponytail":
-				bun.scale = Vector3(0.8, 1.8, 0.8)
+func _apply_shape(mi: MeshInstance3D, app: Dictionary) -> void:
+	var b := float(app.get("build", 1.0))
+	var vals := {
+		"heavy": clampf((b - 1.0) / 0.2, 0.0, 1.0),
+		"thin": clampf((1.0 - b) / 0.15, 0.0, 1.0),
+		"old": 0.85 if _elderly else 0.0,
+	}
+	# variação de traços do rosto: estável por aparência
+	var h := absi(hash(str(app.get("skin", "")) + str(app.get("hair", "")) + str(app.get("shirt", ""))))
+	var skin := Color(app.get("skin", "#d9a98a"))
+	vals["face_a"] = clampf((0.75 - skin.v) * 1.6, 0.0, 0.8) + float(h % 7) * 0.03
+	vals["face_b"] = float(int(h / 7.0) % 5) * 0.12
+	for k in vals:
+		var idx := mi.find_blend_shape_by_name(k)
+		if idx >= 0:
+			mi.set_blend_shape_value(idx, vals[k])
 
-func _part(mesh: Mesh, c: Color, parent: Node3D, pos: Vector3) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	mi.material_override = Mat.color(c, 0.8)
-	mi.position = pos
-	parent.add_child(mi)
-	return mi
+func _material(piece: String, mname: String, tint, skin: Color, hair: Color, hide: int) -> Material:
+	match mname:
+		"skin":
+			return _skin_material(skin, hair, hide)
+		"eye":
+			return _std("eye", Color.WHITE, CHAR_TEX % "eye", "", 1.0, 0.15)
+		"lash":
+			return _std("lash", Color(0.03, 0.025, 0.02), "", "", 1.0, 0.8)
+		"metal":
+			return _std("metal", Color(0.75, 0.75, 0.78), "", "", 1.0, 0.3, 0.9)
+		"sole":
+			return _std("sole", Color(0.86, 0.84, 0.8), TEX % ["rubber", "albedo"], TEX % ["rubber", "normal"], 2.0, 0.85)
+		"strap":
+			return _std("strap", Color(0.13, 0.13, 0.14), TEX % ["cloth_canvas", "albedo"], TEX % ["cloth_canvas", "normal"], 2.0, 0.85)
+		"hair":
+			return _std("hair", tint, TEX % ["hair", "albedo"], TEX % ["hair", "normal"], 1.0, 0.55)
+	var c: Color = tint if tint is Color else Color.WHITE
+	var fab: Array = FABRIC.get(piece, ["cloth_knit", 2.0])
+	return _std(fab[0], c, TEX % [fab[0], "albedo"], TEX % [fab[0], "normal"], float(fab[1]), 0.9)
 
-func _limb(parent: Node3D, pivot_pos: Vector3, c: Color, radius: float, length: float) -> Node3D:
-	var pivot := Node3D.new()
-	pivot.position = pivot_pos
-	parent.add_child(pivot)
-	var cap := CapsuleMesh.new()
-	cap.radius = radius
-	cap.height = length + radius * 2.0
-	cap.radial_segments = 8
-	cap.rings = 2
-	_part(cap, c, pivot, Vector3(0, -length * 0.5, 0))
-	return pivot
+static func _std(kind: String, c: Color, albedo: String, normal: String, uv: float, rough: float, metal: float = 0.0) -> StandardMaterial3D:
+	var key := "%s|%s|%.2f" % [kind, c.to_html(), uv]
+	if _mats.has(key):
+		return _mats[key]
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = rough
+	m.metallic = metal
+	if albedo != "":
+		m.albedo_texture = _tex(albedo)
+	if normal != "" and _tex(normal):
+		m.normal_enabled = true
+		m.normal_texture = _tex(normal)
+		m.normal_scale = 0.8
+	m.uv1_scale = Vector3(uv, uv, uv)
+	_mats[key] = m
+	return m
+
+static func _skin_material(skin: Color, hair: Color, hide: int) -> ShaderMaterial:
+	var key := "skin|%s|%s|%d" % [skin.to_html(), hair.to_html(), hide]
+	if _mats.has(key):
+		return _mats[key]
+	if _skin_shader == null:
+		_skin_shader = Shader.new()
+		_skin_shader.code = """
+shader_type spatial;
+uniform sampler2D detail : source_color, filter_linear_mipmap;
+uniform sampler2D mask : filter_nearest;
+uniform vec3 skin_color : source_color;
+uniform vec3 hair_color : source_color;
+uniform int hide = 0;
+void fragment() {
+	vec4 m = texture(mask, UV);
+	int reg = int(round(m.r * 16.0));
+	if (((hide >> reg) & 1) == 1) {
+		discard;
+	}
+	vec3 c = skin_color * texture(detail, UV).rgb;
+	c = mix(c, c * vec3(0.8, 0.52, 0.52), m.b * 0.6);
+	c = mix(c, hair_color * 0.85, m.g * 0.9);
+	ALBEDO = c;
+	ROUGHNESS = 0.6;
+	SPECULAR = 0.3;
+}
+"""
+	var m := ShaderMaterial.new()
+	m.shader = _skin_shader
+	m.set_shader_parameter("detail", _tex(CHAR_TEX % "skin_detail"))
+	m.set_shader_parameter("mask", _tex(CHAR_TEX % "skin_mask"))
+	m.set_shader_parameter("skin_color", skin)
+	m.set_shader_parameter("hair_color", hair)
+	m.set_shader_parameter("hide", hide)
+	_mats[key] = m
+	return m
 
 func set_pose(p: String) -> void:
 	if p == pose:
 		return
 	pose = p
-	_reset_limbs()
+	if anim and anim.has_animation(p):
+		var blend := 0.12 if p in ["walk", "run"] else 0.3
+		if p in ["lie", "knocked", "sit"]:
+			blend = 0.0
+		anim.play(p, blend)
+		anim.speed_scale = 0.0 if lod_far else _anim_rate()
 
-func _reset_limbs() -> void:
-	body.transform = Transform3D(Basis().scaled(Vector3(float(appearance.get("build", 1.0)), height_scale, float(appearance.get("build", 1.0)))), Vector3.ZERO)
-	for n in [hips, torso, head, arm_l, arm_r, leg_l, leg_r, knee_l, knee_r, forearm_l, forearm_r]:
-		n.rotation = Vector3.ZERO
-	hips.position = Vector3(0, 0.92, 0)
+func _anim_rate() -> float:
+	var r := 0.8 if _elderly else 1.0
+	if pose in CYCLE_SPEED:
+		r = clampf(maxf(speed, 0.6) / float(CYCLE_SPEED[pose]), 0.5, 1.9)
+	return r
 
-func _process(delta: float) -> void:
-	if body == null or lod_far or not is_visible_in_tree():
+func _process(_delta: float) -> void:
+	if anim == null or lod_far or not is_visible_in_tree():
 		return
-	_t += delta
-	var elderly: bool = appearance.get("elderly", false)
-	match pose:
-		"walk", "run":
-			var running := pose == "run"
-			var stride := 1.4 if running else 1.15
-			_phase += delta * max(speed, 0.8) / stride * PI
-			var a := (0.85 if running else 0.5) * (0.7 if elderly else 1.0)
-			var s := sin(_phase)
-			leg_l.rotation.x = s * a
-			leg_r.rotation.x = -s * a
-			knee_l.rotation.x = -max(0.0, -s) * a * 1.3 - (0.15 if running else 0.0)
-			knee_r.rotation.x = -max(0.0, s) * a * 1.3 - (0.15 if running else 0.0)
-			arm_l.rotation.x = -s * a * 0.8
-			arm_r.rotation.x = s * a * 0.8
-			forearm_l.rotation.x = 0.25 + (0.9 if running else 0.15)
-			forearm_r.rotation.x = 0.25 + (0.9 if running else 0.15)
-			hips.position.y = 0.92 + absf(cos(_phase)) * (0.06 if running else 0.025)
-			torso.rotation.x = 0.18 if running else (0.15 if elderly else 0.03)
-			arm_l.rotation.z = 0.08
-			arm_r.rotation.z = -0.08
-		"idle", "talk", "eat", "search":
-			hips.position.y = 0.92
-			torso.rotation.x = (0.12 if elderly else 0.0) + sin(_t * 1.6) * 0.012
-			arm_l.rotation.z = 0.1
-			arm_r.rotation.z = -0.1
-			leg_l.rotation.x = 0.0
-			leg_r.rotation.x = 0.0
-			knee_l.rotation.x = 0.0
-			knee_r.rotation.x = 0.0
-			arm_l.rotation.x = 0.0
-			arm_r.rotation.x = 0.0
-			forearm_l.rotation.x = 0.0
-			forearm_r.rotation.x = 0.0
-			if pose == "talk":
-				arm_r.rotation.x = -0.4 + sin(_t * 3.0) * 0.25
-				forearm_r.rotation.x = -0.9
-				head.rotation.y = sin(_t * 0.9) * 0.15
-			elif pose == "eat":
-				arm_r.rotation.x = -0.6 + absf(sin(_t * 1.5)) * -0.5
-				forearm_r.rotation.x = -1.6
-			elif pose == "search":
-				torso.rotation.x = 0.55
-				arm_l.rotation.x = -0.9 + sin(_t * 4.0) * 0.2
-				arm_r.rotation.x = -0.9 - sin(_t * 4.0) * 0.2
-		"work":
-			hips.position.y = 0.92
-			torso.rotation.x = 0.1
-			arm_l.rotation.x = -0.75 + sin(_t * 5.0) * 0.12
-			arm_r.rotation.x = -0.75 - sin(_t * 5.0 + 1.0) * 0.12
-			forearm_l.rotation.x = -0.7
-			forearm_r.rotation.x = -0.7
-			leg_l.rotation.x = 0.0
-			leg_r.rotation.x = 0.0
-			knee_l.rotation.x = 0.0
-			knee_r.rotation.x = 0.0
-		"sit":
-			hips.position.y = 0.47
-			leg_l.rotation.x = PI * 0.5
-			leg_r.rotation.x = PI * 0.5
-			knee_l.rotation.x = -PI * 0.5
-			knee_r.rotation.x = -PI * 0.5
-			arm_l.rotation.x = -0.35
-			arm_r.rotation.x = -0.35
-			forearm_l.rotation.x = -0.6
-			forearm_r.rotation.x = -0.6
-			torso.rotation.x = -0.05 + sin(_t * 1.6) * 0.01
-		"lie", "knocked":
-			body.basis = LIE_BASIS.scaled(Vector3(float(appearance.get("build", 1.0)), height_scale, float(appearance.get("build", 1.0))))
-			body.position = Vector3(0, 0.0, 0.0)
-			arm_l.rotation.z = 0.15
-			arm_r.rotation.z = -0.15
-			if pose == "knocked":
-				knee_l.rotation.x = -0.6
-				arm_r.rotation.x = -0.8
+	if pose in CYCLE_SPEED:
+		anim.speed_scale = _anim_rate()

@@ -145,6 +145,15 @@ func _new_game_panel() -> void:
 	_name_edit.text = Game.player.name
 	_name_edit.max_length = 20
 	v.add_child(_name_edit)
+	v.add_child(UITheme.label(tr("Corpo"), 15, UITheme.MUTED))
+	var sb := OptionButton.new()
+	sb.add_item(tr("Masculino"))
+	sb.add_item(tr("Feminino"))
+	sb.select(1 if Humanoid.infer_sex(_app) == "f" else 0)
+	sb.item_selected.connect(func(i):
+		_app.sex = "f" if i == 1 else "m"
+		_rebuild_preview())
+	v.add_child(sb)
 	_swatches(v, tr("Tom de pele"), SKINS, "skin")
 	_swatches(v, tr("Cor do cabelo"), HAIRS, "hair")
 	_swatches(v, tr("Camisa"), SHIRTS, "shirt")
