@@ -167,8 +167,8 @@ def pedra_portuguesa():
     stone = smoothstep(0.06, 0.2, edge)
     r = per_id(ids, 82, cells * cells)
     tex = spectral(N, 83, 0.8, 90)
-    white_c = np.array([0.82, 0.8, 0.75]) * (0.88 + 0.12 * r)[..., None]
-    black_c = np.array([0.16, 0.16, 0.17]) * (0.8 + 0.4 * r)[..., None]
+    white_c = np.array([0.76, 0.74, 0.69]) * (0.88 + 0.12 * r)[..., None]
+    black_c = np.array([0.27, 0.27, 0.28]) * (0.8 + 0.4 * r)[..., None]
     sc = np.where(black[..., None], black_c, white_c) * (0.9 + 0.12 * tex)[..., None]
     grout = np.array([0.42, 0.38, 0.32]) * (0.8 + 0.3 * tex)[..., None]
     albedo = lerp(grout, sc, stone)

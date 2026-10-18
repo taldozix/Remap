@@ -58,8 +58,8 @@ static func grass_material() -> ShaderMaterial:
 	sh.code = """
 shader_type spatial;
 render_mode cull_disabled, diffuse_lambert_wrap;
-uniform vec3 root_color : source_color = vec3(0.07, 0.13, 0.045);
-uniform vec3 tip_color : source_color = vec3(0.30, 0.44, 0.13);
+uniform vec3 root_color : source_color = vec3(0.075, 0.11, 0.045);
+uniform vec3 tip_color : source_color = vec3(0.27, 0.34, 0.14);
 uniform float wind_strength = 0.18;
 uniform float wetness = 0.0;
 varying float tipness;
@@ -76,7 +76,7 @@ void vertex() {
 	NORMAL = normalize(mix(NORMAL, vec3(0.0, 1.0, 0.0), 0.75));
 }
 void fragment() {
-	vec3 c = mix(root_color, tip_color, smoothstep(0.0, 1.0, tipness)) * COLOR.rgb * 1.5;
+	vec3 c = mix(root_color, tip_color, smoothstep(0.0, 1.0, tipness)) * COLOR.rgb * 1.3;
 	ALBEDO = c * (1.0 - wetness * 0.2);
 	ROUGHNESS = mix(0.95, 0.55, wetness);
 	SPECULAR = 0.2;

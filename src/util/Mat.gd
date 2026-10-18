@@ -65,6 +65,17 @@ static func windows() -> StandardMaterial3D:
 		window_material.emission_energy_multiplier = 0.0
 	return window_material
 
+static func water() -> StandardMaterial3D:
+	if _cache.has("water"):
+		return _cache["water"]
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.16, 0.26, 0.3, 0.85)
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.roughness = 0.05
+	m.metallic = 0.3
+	_cache["water"] = m
+	return m
+
 static func lamps() -> StandardMaterial3D:
 	if lamp_material == null:
 		lamp_material = StandardMaterial3D.new()
@@ -101,8 +112,8 @@ static func grass() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = _shader("grass", """
 shader_type spatial;
-uniform vec3 base_a : source_color = vec3(0.13, 0.22, 0.07);
-uniform vec3 base_b : source_color = vec3(0.22, 0.30, 0.10);
+uniform vec3 base_a : source_color = vec3(0.12, 0.17, 0.07);
+uniform vec3 base_b : source_color = vec3(0.2, 0.25, 0.11);
 uniform float wetness = 0.0;
 varying vec3 wpos;
 """ + NOISE_FN + """
@@ -200,3 +211,167 @@ static func set_wetness(w: float) -> void:
 	for k in ["grass", "asphalt", "sidewalk"]:
 		if _cache.has(k):
 			_cache[k].set_shader_parameter("wetness", w)
+	for m in _surfaces.values():
+		m.set_shader_parameter("wetness", w)
+
+# ------------------------------------------------------------------ superfícies PBR
+## Texturas PBR do projeto (assets/textures, geradas por tools/art/make_textures.py)
+## projetadas em caixa no espaço do mundo: dispensa UV na geometria procedural e mantém
+## a escala física (metros por repetição em textures.json). A cor de vértice tinge.
+static var _surfaces: Dictionary = {}
+static var _tex_meta: Dictionary = {}
+static var _tex_cache: Dictionary = {}
+
+const SURFACE_SHADER := """
+shader_type spatial;
+render_mode world_vertex_coords;
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D orm_tex : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float tile = 1.0;
+uniform vec3 tint : source_color = vec3(1.0);
+uniform float macro = 0.1;
+uniform float normal_strength = 1.0;
+uniform float wetness = 0.0;
+uniform float outdoor = 1.0;
+uniform bool detile = false;
+uniform bool swap_top = false;
+uniform float rough_bias = 0.0;
+varying vec3 wpos;
+varying vec3 wnrm;
+""" + NOISE_FN + """
+void vertex() {
+	wpos = VERTEX;
+	wnrm = NORMAL;
+	vec3 n = abs(NORMAL);
+	if (n.y >= n.x && n.y >= n.z) {
+		UV = swap_top ? vec2(VERTEX.z, -VERTEX.x) : VERTEX.xz;
+		TANGENT = swap_top ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+		BINORMAL = swap_top ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 0.0, -1.0);
+	} else if (n.x >= n.z) {
+		float s = sign(NORMAL.x);
+		UV = vec2(-VERTEX.z * s, -VERTEX.y);
+		TANGENT = vec3(0.0, 0.0, -s);
+		BINORMAL = vec3(0.0, 1.0, 0.0);
+	} else {
+		float s = sign(NORMAL.z);
+		UV = vec2(VERTEX.x * s, -VERTEX.y);
+		TANGENT = vec3(s, 0.0, 0.0);
+		BINORMAL = vec3(0.0, 1.0, 0.0);
+	}
+	UV /= tile;
+}
+void fragment() {
+	vec2 uv = UV;
+	vec4 a = texture(albedo_tex, uv);
+	vec3 nm = texture(normal_tex, uv).rgb;
+	vec3 orm = texture(orm_tex, uv).rgb;
+	if (detile) {
+		// segunda amostra em escala/deslocamento diferentes, misturada por ruído (quebra a repetição)
+		vec2 uv2 = uv * 0.61 + vec2(0.37, 0.71);
+		float k = smoothstep(0.35, 0.65, vnoise(wpos.xz * 0.11 + wpos.y * 0.07));
+		a = mix(a, texture(albedo_tex, uv2), k);
+		nm = mix(nm, texture(normal_tex, uv2).rgb, k);
+		orm = mix(orm, texture(orm_tex, uv2).rgb, k);
+	}
+	float m = vnoise(wpos.xz * 0.07 + wpos.y * 0.05) * 0.6 + vnoise(wpos.xz * 0.6 + wpos.y * 0.4) * 0.4;
+	vec3 col = a.rgb * tint * COLOR.rgb * (1.0 + (m - 0.5) * macro * 2.0);
+	float up = smoothstep(0.3, 0.9, wnrm.y);
+	float wet = wetness * outdoor * mix(0.35, 1.0, up);
+	ALBEDO = col * (1.0 - wet * 0.3);
+	ROUGHNESS = clamp(mix(orm.g + rough_bias, 0.12, wet * 0.85), 0.04, 1.0);
+	METALLIC = orm.b;
+	AO = orm.r;
+	AO_LIGHT_AFFECT = 0.35;
+	NORMAL_MAP = mix(nm, vec3(0.5, 0.5, 1.0), wet * 0.6);
+	NORMAL_MAP_DEPTH = normal_strength;
+}
+"""
+
+static func _texture(path: String) -> Texture2D:
+	if not _tex_cache.has(path):
+		_tex_cache[path] = load(path) if ResourceLoader.exists(path) else null
+	return _tex_cache[path]
+
+static func tile_of(name: String) -> float:
+	if _tex_meta.is_empty():
+		var f := FileAccess.open("res://assets/textures/textures.json", FileAccess.READ)
+		if f:
+			_tex_meta = JSON.parse_string(f.get_as_text())
+	return float(_tex_meta.get(name, {}).get("tile_m", 1.0))
+
+## Material de superfície: nome do conjunto de texturas + opções.
+## opts: tint (Color), tile (m), macro, detile, swap_top, outdoor, normal, rough.
+static func surface(name: String, opts: Dictionary = {}) -> ShaderMaterial:
+	var key := name + "|" + str(opts)
+	if _surfaces.has(key):
+		return _surfaces[key]
+	var m := ShaderMaterial.new()
+	m.shader = _shader("surface", SURFACE_SHADER)
+	m.set_shader_parameter("albedo_tex", _texture("res://assets/textures/%s_albedo.png" % name))
+	m.set_shader_parameter("normal_tex", _texture("res://assets/textures/%s_normal.png" % name))
+	m.set_shader_parameter("orm_tex", _texture("res://assets/textures/%s_orm.png" % name))
+	m.set_shader_parameter("tile", float(opts.get("tile", tile_of(name))))
+	m.set_shader_parameter("tint", opts.get("tint", Color.WHITE))
+	m.set_shader_parameter("macro", float(opts.get("macro", 0.1)))
+	m.set_shader_parameter("detile", bool(opts.get("detile", false)))
+	m.set_shader_parameter("swap_top", bool(opts.get("swap_top", false)))
+	m.set_shader_parameter("outdoor", float(opts.get("outdoor", 1.0)))
+	m.set_shader_parameter("normal_strength", float(opts.get("normal", 1.0)))
+	m.set_shader_parameter("rough_bias", float(opts.get("rough", 0.0)))
+	_surfaces[key] = m
+	return m
+
+## Atalhos com as escolhas da direção de arte para cada uso.
+const SURFACES := {
+	"asphalt": ["asphalt", {"detile": true, "macro": 0.18}],
+	"sidewalk": ["sidewalk", {"detile": true, "macro": 0.12, "tint": Color(0.8, 0.79, 0.77)}],
+	"plaza": ["pedra_portuguesa", {"macro": 0.08, "tint": Color(0.88, 0.87, 0.85)}],
+	"concrete": ["concrete", {"detile": true, "macro": 0.15}],
+	"curb": ["concrete", {"tile": 1.0, "macro": 0.1}],
+	"plaster": ["plaster", {"detile": true, "macro": 0.1}],
+	"plaster_in": ["plaster", {"macro": 0.05, "outdoor": 0.0}],
+	"brick": ["brick", {"macro": 0.12}],
+	"siding": ["wood_siding", {"macro": 0.08}],
+	"roof_tiles": ["roof_tiles", {"macro": 0.15}],
+	"roof_tiles_z": ["roof_tiles", {"macro": 0.15, "swap_top": true}],
+	"roof_flat": ["roof_flat", {"detile": true, "macro": 0.2}],
+	"roof_fiber": ["roof_fiber", {"macro": 0.12}],
+	"roof_fiber_z": ["roof_fiber", {"macro": 0.12, "swap_top": true}],
+	"wood_floor": ["wood_floor", {"outdoor": 0.0}],
+	"porcelain": ["porcelain", {"outdoor": 0.0}],
+	"wall_tiles": ["wall_tiles", {"outdoor": 0.0}],
+	"wood": ["wood", {"tile": 0.8}],
+	"wood_out": ["wood", {"tile": 0.8, "rough": 0.15}],
+	"fabric": ["fabric", {"outdoor": 0.0, "tile": 0.35}],
+	"metal": ["metal_painted", {"tile": 0.8}],
+	"steel": ["metal_brushed", {"tile": 0.6}],
+	"corrugated": ["corrugated", {"tile": 1.0}],
+	"canvas": ["cloth_canvas", {"tile": 0.4}],
+	"dirt": ["dirt", {"detile": true}],
+	"rubber": ["rubber", {"tile": 0.3}],
+}
+
+## Textura PBR em material padrão com projeção triplanar no espaço do objeto: para
+## peças que se movem (portas, carrinhos), sem a textura "escorregar".
+static func textured(name: String, c: Color = Color.WHITE, scale: float = 1.0, rough: float = -1.0) -> BaseMaterial3D:
+	var key := "tx|%s|%s|%.2f|%.2f" % [name, c.to_html(), scale, rough]
+	if _cache.has(key):
+		return _cache[key]
+	var m := ORMMaterial3D.new()
+	m.albedo_color = c
+	m.albedo_texture = _texture("res://assets/textures/%s_albedo.png" % name)
+	m.normal_enabled = true
+	m.normal_texture = _texture("res://assets/textures/%s_normal.png" % name)
+	m.orm_texture = _texture("res://assets/textures/%s_orm.png" % name)
+	if rough >= 0.0:
+		m.roughness = rough
+	m.uv1_triplanar = true
+	var t := 1.0 / (tile_of(name) * scale)
+	m.uv1_scale = Vector3(t, t, t)
+	_cache[key] = m
+	return m
+
+static func named(key: String) -> ShaderMaterial:
+	var d: Array = SURFACES.get(key, [key, {}])
+	return surface(d[0], d[1])

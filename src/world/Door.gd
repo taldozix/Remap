@@ -45,26 +45,55 @@ func setup(p_def: Dictionary, p_world: Node, p_building: String, wall_thickness:
 	mesh.mesh = bm
 	mesh.position = shape.position
 	if p_def.get("glass", false):
-		mesh.material_override = Mat.glass(Color(0.6, 0.78, 0.9, 0.5))
-		var frame := MeshInstance3D.new()
-		var fm := BoxMesh.new()
-		fm.size = Vector3(width, 0.12, wall_thickness * 0.7)
-		frame.mesh = fm
-		frame.material_override = Mat.color(Color(0.25, 0.25, 0.28), 0.4, 0.6)
-		frame.position = Vector3(width * 0.5, 1.0, 0)
-		body.add_child(frame)
+		mesh.material_override = Mat.glass(Color(0.55, 0.68, 0.76, 0.45))
+		# caixilho de alumínio: montantes, travessas e puxador
+		var alu := Mat.textured("metal_brushed", Color(0.75, 0.76, 0.78), 1.0, 0.35)
+		for fr in [[Vector3(width * 0.5, height - 0.04, 0), Vector3(width, 0.08, wall_thickness * 0.7)],
+				[Vector3(width * 0.5, 0.05, 0), Vector3(width, 0.1, wall_thickness * 0.7)],
+				[Vector3(0.04, height * 0.5, 0), Vector3(0.08, height, wall_thickness * 0.7)],
+				[Vector3(width - 0.04, height * 0.5, 0), Vector3(0.08, height, wall_thickness * 0.7)],
+				[Vector3(width * 0.5, 1.0, 0), Vector3(width, 0.06, wall_thickness * 0.7)],
+				[Vector3(width - 0.16, 1.05, 0), Vector3(0.03, 0.5, wall_thickness * 1.2)]]:
+			var frame := MeshInstance3D.new()
+			var fm := BoxMesh.new()
+			fm.size = fr[1]
+			frame.mesh = fm
+			frame.material_override = alu
+			frame.position = fr[0]
+			body.add_child(frame)
 	elif rollup:
-		mesh.material_override = Mat.color(Color(0.62, 0.64, 0.66), 0.5, 0.5)
+		mesh.material_override = Mat.textured("corrugated", Color(0.78, 0.79, 0.8), 1.0)
+		var rail := MeshInstance3D.new()
+		var rm := BoxMesh.new()
+		rm.size = Vector3(width, 0.08, wall_thickness * 0.7)
+		rail.mesh = rm
+		rail.material_override = Mat.textured("metal_painted", Color(0.3, 0.31, 0.33))
+		rail.position = Vector3(width * 0.5, 0.05, 0)
+		body.add_child(rail)
 	else:
-		mesh.material_override = Mat.color(color, 0.6)
+		# porta de madeira com almofadas (relevo) dos dois lados
+		mesh.material_override = Mat.textured("wood", color.lerp(Color(0.55, 0.38, 0.24), 0.35), 1.0, 0.6)
+		var pm := Mat.textured("wood", color.lerp(Color(0.4, 0.27, 0.17), 0.45), 1.0, 0.65)
+		for side in [-1.0, 1.0]:
+			for py in [0.55, 1.5]:
+				var panel := MeshInstance3D.new()
+				var pb := BoxMesh.new()
+				pb.size = Vector3(width - 0.3, 0.7 if py > 1.0 else 0.75, 0.02)
+				panel.mesh = pb
+				panel.material_override = pm
+				panel.position = Vector3(width * 0.5, py, side * wall_thickness * 0.3)
+				body.add_child(panel)
 		var knob := MeshInstance3D.new()
 		var km := SphereMesh.new()
-		km.radius = 0.045
-		km.height = 0.09
+		km.radius = 0.035
+		km.height = 0.07
 		knob.mesh = km
-		knob.material_override = Mat.color(Color(0.85, 0.75, 0.4), 0.3, 0.9)
-		knob.position = Vector3(width - 0.12, 1.0, wall_thickness * 0.35)
+		knob.material_override = Mat.color(Color(0.8, 0.7, 0.42), 0.3, 0.9)
+		knob.position = Vector3(width - 0.12, 1.0, wall_thickness * 0.38)
 		body.add_child(knob)
+		var knob2 := knob.duplicate()
+		knob2.position.z = -wall_thickness * 0.38
+		body.add_child(knob2)
 	body.add_child(mesh)
 	radius = 2.0
 

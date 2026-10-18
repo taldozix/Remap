@@ -70,7 +70,7 @@ func set_mood(highlight: Color, shadow: Color, saturation: float) -> void:
 func apply_settings() -> void:
 	var ts: int = Settings.get_value("graphics", "tilt_shift")
 	var grading: bool = Settings.get_value("graphics", "color_grading")
-	mat.set_shader_parameter("blur", [0.0, 0.7, 1.25][clampi(ts, 0, 2)])
+	mat.set_shader_parameter("blur", [0.0, 0.4, 1.0][clampi(ts, 0, 2)])
 	mat.set_shader_parameter("grading", 1.0 if grading else 0.0)
-	mat.set_shader_parameter("vignette", 0.32 if grading else 0.0)
+	mat.set_shader_parameter("vignette", 0.22 if grading else 0.0)
 	rect.visible = ts > 0 or grading

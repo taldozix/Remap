@@ -14,7 +14,7 @@ func _st(p: Vector3) -> SurfaceTool:
 	return chunks[k]
 
 ## Copa de árvore: `clusters` = [[centro, raio], ...]; `tint` = cor das folhas.
-func add_canopy(trunk_top: Vector3, clusters: Array, tint: Color, rng: RandomNumberGenerator, cards_per_cluster: int = 46) -> void:
+func add_canopy(trunk_top: Vector3, clusters: Array, tint: Color, rng: RandomNumberGenerator, cards_per_cluster: int = 46, card_size: float = 1.0) -> void:
 	var st := _st(trunk_top)
 	var canopy_center := Vector3.ZERO
 	for c in clusters:
@@ -26,7 +26,7 @@ func add_canopy(trunk_top: Vector3, clusters: Array, tint: Color, rng: RandomNum
 		for i in cards_per_cluster:
 			var dir := Vector3(rng.randf_range(-1, 1), rng.randf_range(-0.7, 1), rng.randf_range(-1, 1)).normalized()
 			var p := center + dir * radius * rng.randf_range(0.35, 1.0)
-			var size := rng.randf_range(0.55, 0.9)
+			var size := rng.randf_range(0.55, 0.9) * card_size
 			var n := Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), rng.randf_range(-1, 1)).normalized()
 			var t := n.cross(Vector3.UP if absf(n.y) < 0.9 else Vector3.RIGHT).normalized()
 			var b := n.cross(t).normalized()

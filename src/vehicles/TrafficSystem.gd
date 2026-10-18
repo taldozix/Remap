@@ -153,15 +153,23 @@ func _build_signal(center: Vector3) -> void:
 		pm.height = 3.4
 		pole.mesh = pm
 		pole.position = Vector3(0, 1.7, 0)
-		pole.material_override = Mat.color(Color(0.2, 0.22, 0.25), 0.5, 0.5)
+		pole.material_override = Mat.textured("metal_painted", Color(0.3, 0.33, 0.33))
 		root.add_child(pole)
 		var box := MeshInstance3D.new()
 		var bm := BoxMesh.new()
 		bm.size = Vector3(0.35, 0.95, 0.25)
 		box.mesh = bm
 		box.position = Vector3(0, 3.2, 0)
-		box.material_override = Mat.color(Color(0.1, 0.1, 0.12), 0.6)
+		box.material_override = Mat.textured("metal_painted", Color(0.14, 0.15, 0.16))
 		root.add_child(box)
+		for i in 3:
+			var visor := MeshInstance3D.new()
+			var vm := BoxMesh.new()
+			vm.size = Vector3(0.24, 0.03, 0.14)
+			visor.mesh = vm
+			visor.position = Vector3(0, 3.62 - i * 0.29, -0.2)
+			visor.material_override = box.material_override
+			root.add_child(visor)
 		var mats: Array = []
 		var cols := [Color(1, 0.15, 0.1), Color(1, 0.75, 0.1), Color(0.2, 1, 0.35)]
 		for i in 3:

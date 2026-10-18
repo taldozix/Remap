@@ -21,8 +21,16 @@ func setup(e: Dictionary, p_world: Node) -> void:
 		"bebida": col = Color("5fa8d3")
 		"valor": col = Color("d4af37")
 		"missao": col = Color("e05050")
-	mi.material_override = Mat.color(col, 0.6)
+	# sacola/pacote de papel pardo com faixa colorida da categoria
+	mi.material_override = Mat.textured("cloth_canvas", Color("c8a878"), 0.6, 0.9)
 	add_child(mi)
+	var band := MeshInstance3D.new()
+	var bb := BoxMesh.new()
+	bb.size = Vector3(0.31, 0.05, 0.26)
+	band.mesh = bb
+	band.position.y = 0.12
+	band.material_override = Mat.textured("metal_painted", col, 1.0, 0.6)
+	add_child(band)
 
 ## Itens no chão são pequenos: ganham do móvel ou da pessoa ao lado no foco.
 func focus_priority() -> float:

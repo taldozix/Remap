@@ -34,7 +34,7 @@ func setup(p_world: Node) -> void:
 	env.fog_density = 0.0025
 	env.fog_sky_affect = 0.2
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.08
+	env.adjustment_saturation = 0.98
 	env.adjustment_contrast = 1.04
 	we.environment = env
 	add_child(we)
@@ -153,7 +153,7 @@ func _process(delta: float) -> void:
 	if world.postfx:
 		var hl := Color(1.0, 1.0, 1.0).lerp(Color(1.08, 1.0, 0.85), golden)
 		var sh := Color(1.0, 1.0, 1.0).lerp(Color(0.86, 0.95, 1.04), golden)
-		var sat := 1.06 + golden * 0.08
+		var sat := 0.93 + golden * 0.08
 		hl = hl.lerp(Color(0.95, 0.98, 1.06), night * 0.8)
 		sh = sh.lerp(Color(0.85, 0.92, 1.1), night * 0.8)
 		sat = lerpf(sat, 0.85, night * 0.6)
