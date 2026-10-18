@@ -132,6 +132,9 @@ tools/                 Gerador do mapa, script de testes.
 | DriveThruJob | Data, Needs | Estações, TrafficCar (clientes), HUD |
 | WorldState | Data | Portas, contêineres, veículos, itens no chão |
 | TrafficSystem | mapa | Clientes do drive-thru, pedestres |
+| PropertySystem | Data | Portas (chave), móveis e contêineres ("owner"), aluguel/IPTU |
+| DeliveryJob | Data, Relations | Balcão do mercadinho, ponto de entrega, HUD |
+| EventDirector | Rules, Data, GameWorld | Promoções, turno extra, situações na rua |
 
 ## 5. Plano de desenvolvimento (fases verificáveis)
 
@@ -141,8 +144,8 @@ na seção "Prioridade máxima". Cada fase termina com uma versão executável e
 | Fase | Entregas | Estado |
 |---|---|---|
 | **0 — Protótipo dos 3 pilares (Vila Aurora)** | Bairro vivo, necessidades, inventário, economia, drive-thru, casa persistente, direção, trânsito, diálogos, missão com múltiplas soluções, salvar/carregar, menus e opções | **Entregue nesta versão** |
-| 1 — Validação e polimento do protótipo | Testes com jogadores, balanceamento (taxas de necessidades, salários, preços), feedback de som e animação, ajustes de legibilidade | Próxima |
-| 2 — Profundidade da vida | Temperatura e roupas, culinária com receitas, ferimentos localizados, mais itens, guarda-roupa com troca de roupa, compra de móveis | |
+| **1 — Profundidade da vida** | Compra/venda de imóveis e veículos, garagem, roupas e temperatura, dor, traços, mecânica e primeiros socorros, emprego de entregador, eventos dinâmicos por regras, foco de interação em lugares cheios | **Entregue** |
+| 2 — Validação e polimento | Testes com jogadores, medição de desempenho, balanceamento, feedback de som e animação; decoração de imóveis, receitas, ferimentos localizados | Próxima |
 | 3 — Cidade e mobilidade | Carregamento por setores, 2º e 3º bairros, ônibus, oficina com peças, motos e vans, garagens, multas de trânsito, polícia de trânsito | |
 | 4 — Progressão e liberdade | Mais profissões (entregador, caixa, mecânico), compra e venda de imóveis, aluguel de imóveis próprios, reputação por bairro, relacionamentos (amizade/romance/rivalidade), traços de personagem | |
 | 5 — Conflito e narrativa | Combate corpo a corpo e armas, polícia e perseguições, sistema judicial, história principal (6–9 h), missões secundárias e eventos dinâmicos | |

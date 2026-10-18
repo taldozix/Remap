@@ -1029,6 +1029,13 @@
 						"next": "remedio"
 					},
 					{
+						"text": "O senhor precisa de entregador?",
+						"if": {
+							"delivery_hired": false
+						},
+						"next": "entregador"
+					},
+					{
 						"text": "O que o senhor acha do Marcos?",
 						"next": "marcos"
 					},
@@ -1078,6 +1085,30 @@
 			"recusa": {
 				"text": "Olha... depois do que eu vi, prefiro que você compre em outro lugar.",
 				"next": null
+			},
+			"entregador": {
+				"text": "Preciso! Meus clientes mais velhos não carregam peso. Pago R$ 9 por entrega, mais R$ 5 se chegar no prazo. Pega a sacola aqui no balcão quando quiser.",
+				"choices": [
+					{
+						"text": "Fechado, pode contar comigo.",
+						"next": null,
+						"do": [
+							{
+								"delivery_hire": true
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 3
+								}
+							}
+						]
+					},
+					{
+						"text": "Vou pensar.",
+						"next": null
+					}
+				]
 			}
 		}
 	},
@@ -1367,6 +1398,22 @@
 						"next": "sem_dano"
 					},
 					{
+						"text": "Você vende peças e kits de reparo?",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "oficina"
+							}
+						]
+					},
+					{
+						"text": "E aquele sedã verde à venda?",
+						"if": {
+							"vehicle_for_sale": "carro_usado"
+						},
+						"next": "carro_usado"
+					},
+					{
 						"text": "O Marcos trabalha aqui?",
 						"next": "marcos"
 					},
@@ -1407,6 +1454,33 @@
 			},
 			"marcos": {
 				"text": "Trabalha. Entra às sete e meia, sai às cinco. Bom mecânico, péssimo humor.",
+				"next": null
+			},
+			"carro_usado": {
+				"text": "Áurea Sedã, motor bom, lataria judiada (uns 35% de dano) e pouca gasolina. R$ 700 e é seu, com documento.",
+				"choices": [
+					{
+						"text": "Fechado. Vou levar.",
+						"if": {
+							"money_gte": 700
+						},
+						"show_disabled": true,
+						"disabled_hint": "Requer R$ 700",
+						"next": "carro_vendido",
+						"do": [
+							{
+								"buy_vehicle": "carro_usado"
+							}
+						]
+					},
+					{
+						"text": "Vou juntar o dinheiro.",
+						"next": null
+					}
+				]
+			},
+			"carro_vendido": {
+				"text": "Tá na mão! Chave e documento. Se precisar de conserto, já sabe onde me achar.",
 				"next": null
 			}
 		}

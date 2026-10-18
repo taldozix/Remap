@@ -88,7 +88,19 @@ func _character() -> Control:
 		var val := n.get_need(id)
 		_row(v, tr(Needs.LABELS[id]), val, UITheme.GOOD.lerp(UITheme.BAD, val / 100.0), "%d/100" % int(val))
 	_row(v, tr("Saúde"), n.saude, UITheme.BAD.lerp(UITheme.GOOD, n.saude / 100.0), "%d/100" % int(n.saude))
+	_row(v, tr("Dor"), n.dor, UITheme.WARN.lerp(UITheme.BAD, n.dor / 100.0), "%d/100" % int(n.dor))
+	v.add_child(_wrap(tr("Temperatura corporal: %.1f °C · Roupa molhada: %d%% · Temperatura do ar: %.0f °C · Agasalho: %+.0f") % [n.body_temp, int(n.wetness), Game.ambient_temperature(), p.warmth()], 15))
 	v.add_child(_wrap(tr("Efeitos atuais: velocidade x%.2f · tarefas x%.2f mais lentas") % [n.speed_multiplier(), n.work_multiplier()], 14, UITheme.MUTED))
+	var worn: Array[String] = []
+	for slot in p.equipped:
+		worn.append(Data.item_name(p.equipped[slot]))
+	v.add_child(_wrap(tr("Vestindo: %s") % (", ".join(worn) if not worn.is_empty() else tr("nada de especial"))))
+	if not p.traits.is_empty():
+		v.add_child(HSeparator.new())
+		v.add_child(UITheme.label(tr("Traços"), 18, UITheme.ACCENT))
+		for t in p.traits:
+			var td: Dictionary = Data.trait_def(t)
+			v.add_child(_wrap("%s — + %s  − %s" % [tr(td.name), tr(td.pro), tr(td.con)], 14))
 	v.add_child(HSeparator.new())
 	v.add_child(UITheme.label(tr("Estatísticas"), 18, UITheme.ACCENT))
 	v.add_child(_wrap(tr("Dinheiro: R$ %d · Total ganho: R$ %d") % [p.money, int(p.stats.get("dinheiro_ganho", 0))]))
@@ -128,6 +140,7 @@ func _memory_text(tag: String) -> String:
 		"vitima_furto": "foi furtado(a) por você", "viu_invasao": "viu você invadir uma casa", "vitima_invasao": "teve a casa invadida por você",
 		"viu_atropelamento": "viu você atropelar alguém", "vitima_atropelamento": "foi atropelado(a) por você",
 		"vitima_ameaca": "foi ameaçado(a) por você", "viu_furto_veiculo": "viu você furtar um carro",
+		"devolveu_carteira": "você devolveu a carteira dele(a)",
 	}
 	return tr(t.get(tag, tag))
 
@@ -148,14 +161,29 @@ func _work() -> Control:
 			var nx: Dictionary = ranks[j.rank + 1]
 			v.add_child(_wrap(tr("Próxima promoção (%s): desempenho %d+ e %d pedidos.") % [tr(nx.title), int(nx.min_perf), int(nx.min_orders)], 14, UITheme.MUTED))
 	v.add_child(HSeparator.new())
-	v.add_child(UITheme.label(tr("Moradia"), 18, UITheme.ACCENT))
+	v.add_child(UITheme.label(tr("Entregas do Mercadinho"), 18, UITheme.ACCENT))
+	var dj := Game.delivery
+	if not dj.hired:
+		v.add_child(_wrap(tr("O Seu Antônio procura entregador. Pergunte a ele.")))
+	else:
+		v.add_child(_wrap(tr("Entregas feitas: %d (hoje: %d) · Atrasadas: %d") % [dj.total, dj.done_today, dj.late_total]))
+		if not dj.active.is_empty():
+			v.add_child(_wrap(tr("Em andamento: %s — %d min restantes") % [dj.active.label, int(dj.time_left(Clock.total_minutes))], 15, UITheme.QUEST))
+	v.add_child(HSeparator.new())
+	v.add_child(UITheme.label(tr("Imóveis e veículos"), 18, UITheme.ACCENT))
 	for id in Game.property.props:
 		var pr: Dictionary = Game.property.props[id]
-		var b: Dictionary = {}
-		for bb in Data.map().buildings:
-			if bb.id == id:
-				b = bb
-		v.add_child(_wrap(tr("%s — %s · Aluguel R$ %d/semana (domingo) · Dívida: R$ %d") % [tr(b.get("name", id)), tr(pr.status), int(pr.rent), int(pr.debt)]))
+		var cost := tr("Aluguel R$ %d/semana") % int(pr.rent) if pr.status == "alugada" else tr("IPTU R$ %d/semana · revenda R$ %d") % [int(pr.tax), Game.property.sale_value(id)]
+		v.add_child(_wrap(tr("%s — %s · %s · Dívida: R$ %d") % [tr(Data.property(id).get("name", id)), tr(pr.status), cost, int(pr.debt)]))
+	for id in Data.properties():
+		if Game.property.is_for_sale(id):
+			v.add_child(_wrap(tr("À venda: %s — R$ %d (placa na frente do imóvel)") % [tr(Data.property(id).name), Game.property.price(id)], 14, UITheme.MUTED))
+	for vid in Game.world_state.vehicles:
+		var vs: Dictionary = Game.world_state.vehicles[vid]
+		if vs.get("owner", "") == "player":
+			v.add_child(_wrap(tr("Veículo: %s — combustível %.0f L · dano %d%%") % [tr(Data.vehicle(vs.type).name), float(vs.fuel), int(vs.damage)]))
+		elif vs.has("for_sale"):
+			v.add_child(_wrap(tr("À venda na oficina: %s — R$ %d") % [tr(Data.vehicle(vs.type).name), int(vs.for_sale.price)], 14, UITheme.MUTED))
 	v.add_child(_wrap(tr("Guarde comida na geladeira (estraga 4x mais devagar) e objetos no guarda-roupa: tudo fica salvo."), 14, UITheme.MUTED))
 	return v
 

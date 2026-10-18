@@ -12,7 +12,8 @@ func _ready() -> void:
 		"test_needs", "test_inventory", "test_skills", "test_shop", "test_job_flow",
 		"test_job_abandon_and_burn", "test_quest_bribe_path", "test_quest_persuasion_and_buy",
 		"test_dialogue_conditions", "test_law", "test_rent", "test_save_roundtrip", "test_save_migration_and_corruption",
-		"test_data_integrity",
+		"test_data_integrity", "test_temperature_and_clothes", "test_pain_and_traits", "test_property_market",
+		"test_delivery_job", "test_event_director", "test_vehicle_market", "test_save_v2_fields",
 	]
 	for t in tests:
 		current = t
@@ -341,7 +342,7 @@ func test_save_roundtrip() -> void:
 func test_save_migration_and_corruption() -> void:
 	var old := {"clock": {"total_minutes": 600.0}, "player": {"money": 5}}
 	var m := Saves.migrate(old, 0)
-	check(int(m.version) == 1 and m.has("property"), "migração v0 → v1")
+	check(int(m.version) == 2 and m.has("property"), "migração v0 → v2")
 	var path := Saves.path_for("slot3")
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string("{isso não é json")
@@ -369,3 +370,166 @@ func test_data_integrity() -> void:
 						targets.append(c[k])
 			for t in targets:
 				check(nodes.has(str(t)), "nó %s/%s aponta para %s existente" % [did, nid, t])
+
+# ------------------------------------------------------------------ fase 1
+func test_temperature_and_clothes() -> void:
+	var p := Game.player
+	check(p.is_equipped("camiseta_azul"), "começa vestindo camiseta")
+	var n := p.needs
+	n.body_temp = 36.6
+	var env := {"ambient": 16.0, "outdoors": true, "raining": true, "warmth": 0.0, "rain_protect": false}
+	n.tick(2.0, "idle", 0, env)
+	check(n.wetness >= 99.0, "chuva sem proteção encharca a roupa")
+	check(n.body_temp < 35.9, "molhado no frio, a temperatura cai (%.1f)" % n.body_temp)
+	check(n.moodles().map(func(m): return m.id).has("frio"), "moodle de frio aparece")
+	var slow := n.work_multiplier()
+	check(slow > 1.0, "frio deixa o trabalho mais lento")
+	# Com capa e casaco, a mesma noite chuvosa é suportável.
+	p.inventory.add("capa_chuva", 1)
+	p.inventory.add("casaco", 1)
+	p.equip("capa_chuva")
+	p.equip("casaco")
+	check(p.rain_protected() and p.warmth() >= 6.0, "capa protege e casaco aquece")
+	check(p.visual_appearance().get("jacket", false), "casaco aparece no visual")
+	var n2 := Needs.new()
+	n2.tick(3.0, "idle", 0, {"ambient": 16.0, "outdoors": true, "raining": true, "warmth": p.warmth(), "rain_protect": true})
+	check(n2.wetness == 0.0 and n2.body_temp > 35.9, "agasalhado(a) e seco(a), sem frio (%.1f)" % n2.body_temp)
+	var n3 := Needs.new()
+	var n4 := Needs.new()
+	for i in 20:
+		n3.tick(0.1, "run", 0, {"ambient": 31.0, "outdoors": true, "raining": false, "warmth": 6.0, "rain_protect": false})
+		n4.tick(0.1, "run", 0, {"ambient": 22.0, "outdoors": true, "raining": false, "warmth": 0.0, "rain_protect": false})
+	check(n3.body_temp > 37.5, "correr de casaco no calor superaquece")
+	var sede_hot := n3.get_need("sede")
+	check(sede_hot > n4.get_need("sede"), "calor aumenta a sede")
+	p.unequip("agasalho")
+	check(p.warmth() < 6.0, "tirar o casaco reduz o agasalho")
+
+func test_pain_and_traits() -> void:
+	var n := Needs.new()
+	n.add_pain(60.0)
+	check(n.speed_multiplier() < 1.0 and n.work_multiplier() > 1.0, "dor reduz velocidade e desempenho")
+	n.consume({"dor": -50})
+	check(n.dor <= 10.0, "analgésico reduz a dor")
+	n.add_pain(30.0)
+	n.tick(5.0, "idle")
+	check(n.dor < 30.0, "dor passa com o tempo")
+	var p := Game.player
+	p.apply_traits(["atletico", "estomago_forte"])
+	check(p.skills.level("condicionamento") == 2, "traço dá nível inicial de habilidade")
+	var base := Needs.new()
+	base.v = {"fome": 0.0, "sede": 0.0, "sono": 0.0, "fadiga": 0.0, "higiene": 0.0}
+	base.tick(1.0, "run", 0)
+	p.needs.v = {"fome": 0.0, "sede": 0.0, "sono": 0.0, "fadiga": 0.0, "higiene": 0.0}
+	p.needs.tick(1.0, "run", 0)
+	check(p.needs.get_need("fadiga") < base.get_need("fadiga"), "atlético cansa menos correndo")
+	check(p.needs.get_need("fome") > base.get_need("fome"), "atlético sente mais fome")
+	p.needs.consume({"nausea": 4.0})
+	check(p.needs.nausea_hours == 0.0, "estômago forte ignora comida estragada")
+	var saved = JSON.parse_string(JSON.stringify(Game.to_dict()))
+	Game.from_dict(saved)
+	check(Game.player.traits.has("atletico") and Game.player.needs.mods.get("run_fatigue", 1.0) < 1.0, "traços e modificadores sobrevivem ao salvamento")
+
+func test_property_market() -> void:
+	var p := Game.player
+	var pr := Game.property
+	check(pr.owns_or_rents("casa_jogador") and not pr.owns("casa_jogador"), "começa alugando a casa 8")
+	check(Game.is_mine("owner", "casa_jogador") and not Game.is_mine("owner", "casa_5"), "dono resolvido pela propriedade")
+	p.money = 500
+	check(not pr.buy("casa_5", p).ok, "sem dinheiro não compra a casa")
+	check(pr.buy("garagem_3", p).ok and p.money == 50, "comprou a garagem (R$ 450)")
+	check(pr.owns("garagem_3") and Game.is_mine("owner", "garagem_3"), "garagem registrada como própria")
+	check(not pr.end_lease("casa_jogador").ok, "não pode entregar a única casa")
+	p.money = 1300
+	check(pr.buy("casa_5", p).ok, "comprou a casa 5")
+	check(pr.owned_homes().size() == 2, "duas casas registradas")
+	p.money = 300
+	var msgs := pr.charge_rent(p)
+	check(p.money == 300 - 120 - 15 - 6 and msgs.size() == 3, "domingo: aluguel + IPTU da casa e da garagem")
+	check(pr.end_lease("casa_jogador").ok and not pr.owns_or_rents("casa_jogador"), "entregou a casa alugada")
+	check(not pr.sell("casa_5", p).ok, "não vende a única casa")
+	var before := p.money
+	var r := pr.sell("garagem_3", p)
+	check(r.ok and p.money == before + 360, "vendeu a garagem por 80%")
+	check(pr.is_for_sale("garagem_3"), "garagem volta ao mercado")
+
+func test_delivery_job() -> void:
+	var p := Game.player
+	var dj := Game.delivery
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	check(not dj.take(0.0, rng, p.inventory).ok, "sem contratação não há entrega")
+	_run_dialogue("antonio", ["entregador", "Fechado"])
+	check(dj.hired, "contratado(a) como entregador pelo Seu Antônio")
+	var t := dj.take(100.0, rng, p.inventory)
+	check(t.ok and p.inventory.has("sacola_entrega"), "pegou a sacola")
+	check(not dj.take(100.0, rng, p.inventory).ok, "uma entrega por vez")
+	var money := p.money
+	var c := dj.complete(150.0, p)
+	check(c.ok and c.on_time and p.money > money + 9, "entrega no prazo paga com gorjeta")
+	dj.take(200.0, rng, p.inventory)
+	money = p.money
+	var c2 := dj.complete(200.0 + 200.0, p)
+	check(c2.ok and not c2.on_time and p.money - money < 9, "atraso paga menos")
+	dj.take(500.0, rng, p.inventory)
+	var rel := Game.relations.get_rel("antonio")
+	dj.tick(1.0, 500.0 + 300.0)
+	check(dj.active.is_empty() and not p.inventory.has("sacola_entrega") and Game.relations.get_rel("antonio") < rel, "entrega abandonada é cancelada e irrita o dono")
+
+func test_event_director() -> void:
+	var d := Game.director
+	Clock.set_time(1, 10, 0)
+	check(d.can_fire("promocao_mercadinho"), "promoção pode acontecer às 10h")
+	Clock.set_time(1, 22, 0)
+	check(not d.can_fire("promocao_mercadinho"), "promoção respeita o horário")
+	Clock.set_time(1, 10, 0)
+	var price := Game.shops.price_buy("mercadinho", "kit_curativo", Game.relations)
+	check(d.fire("promocao_mercadinho"), "promoção disparada")
+	check(Game.shops.price_buy("mercadinho", "kit_curativo", Game.relations) < price, "promoção reduz o preço de verdade")
+	check(not d.can_fire("promocao_mercadinho"), "não repete enquanto ativa / no mesmo dia")
+	Clock.advance(130.0)
+	d.tick(0.0)
+	check(not d.is_active("promocao_mercadinho"), "promoção acaba depois de 2 horas")
+	check(not d.can_fire("turno_extra"), "turno extra exige estar empregado")
+	Game.job.hire()
+	Clock.set_time(1, 11, 0)
+	check(d.fire("turno_extra"), "turno extra disparado")
+	Game.job.clock_in(11.0, Game.player.needs)
+	Game.job.tick(60.0, 11.5, true)
+	var s := Game.job.clock_out()
+	check(int(s.wage) == int(round(1.5 * Game.job.wage())), "turno extra paga 50%% a mais (R$ %d)" % int(s.wage))
+	check(not d.fire("carteira_perdida"), "eventos espaciais precisam do mundo")
+
+func test_vehicle_market() -> void:
+	var p := Game.player
+	var v: Dictionary = Game.world_state.vehicles.carro_usado
+	check(v.has("for_sale") and v.owner == "rafael", "sedã usado à venda na oficina")
+	p.money = 100
+	check(not Game.buy_vehicle("carro_usado"), "sem dinheiro não compra carro")
+	p.money = 800
+	check(Game.buy_vehicle("carro_usado") and p.money == 100, "comprou o carro por R$ 700")
+	check(v.owner == "player" and not v.has("for_sale"), "carro agora é do jogador")
+	var value := Game.sell_vehicle("carro_usado")
+	check(value > 0 and v.has("for_sale") and v.owner == "rafael", "vendeu de volta ao Rafael (R$ %d)" % value)
+
+func test_save_v2_fields() -> void:
+	var p := Game.player
+	p.money = 2000
+	Game.property.buy("casa_5", p)
+	Game.delivery.hire()
+	Game.player.needs.body_temp = 35.4
+	Game.player.needs.dor = 33.0
+	p.inventory.add("casaco", 1)
+	p.equip("casaco")
+	var data = JSON.parse_string(JSON.stringify(Game.to_dict()))
+	Game.new_game()
+	Game.from_dict(data)
+	check(Game.property.owns("casa_5"), "imóvel comprado preservado")
+	check(Game.delivery.hired, "contrato de entregador preservado")
+	check(absf(Game.player.needs.body_temp - 35.4) < 0.01 and absf(Game.player.needs.dor - 33.0) < 0.01, "temperatura e dor preservadas")
+	check(Game.player.is_equipped("casaco"), "roupa vestida preservada")
+	var old := {"version": 1, "clock": {"total_minutes": 600.0}, "player": {"money": 5}, "property": {"props": {"casa_jogador": {"status": "alugada", "rent": 120, "debt": 0}}}}
+	var m := Saves.migrate(old, 1)
+	check(int(m.version) == 2 and m.player.has("traits"), "migração v1 → v2")
+	Game.from_dict(m)
+	check(Game.property.owns_or_rents("casa_jogador") and int(Game.property.props.casa_jogador.tax) == 0, "save antigo carrega com campos novos")

@@ -19,6 +19,7 @@ const TITLES := {
 	"chair": "Cadeira", "bench": "Banco", "note": "Bilhete", "counter": "Balcão", "grill": "Chapa",
 	"fryer": "Fritadeira", "soda_machine": "Máquina de refrigerante", "drive_window": "Janela do drive-thru",
 	"time_clock": "Relógio de ponto", "pump": "Bomba de combustível", "doormat": "Tapete",
+	"sale_sign": "Placa de \"Vende-se\"", "mailbox": "Caixa de correio",
 }
 
 func setup(p_def: Dictionary, p_world: Node, p_building: String) -> void:
@@ -60,7 +61,7 @@ func interact_point() -> Vector3:
 	var off := 0.5
 	if kind in ["counter"]:
 		off = 0.75
-	if kind in ["doormat", "pump", "trash", "bench", "sofa", "chair", "note", "bed", "drive_window"]:
+	if kind in ["doormat", "pump", "trash", "bench", "sofa", "chair", "note", "bed", "drive_window", "sale_sign", "mailbox"]:
 		off = 0.0
 	return global_position + forward() * off
 
@@ -89,7 +90,7 @@ func _process(_delta: float) -> void:
 			status_label.modulate = Color(1, 0.3, 0.3)
 
 func _is_mine() -> bool:
-	return owner_id == "player" or owner_id == ""
+	return owner_id == "" or Game.is_mine(owner_id, building_id)
 
 func _job_actions_allowed() -> bool:
 	return Game.job.on_shift
@@ -98,7 +99,7 @@ func get_actions(player: Node) -> Array:
 	var out: Array = []
 	match kind:
 		"bed":
-			if owner_id == "player":
+			if Game.is_mine(owner_id, building_id):
 				out.append(action("sleep", tr("Dormir...")))
 				out.append(action("lie", tr("Deitar e descansar")))
 			else:
@@ -106,7 +107,7 @@ func get_actions(player: Node) -> Array:
 		"wardrobe", "fridge", "chest", "crate":
 			if container_id != "":
 				var label := tr("Abrir %s") % title
-				if owner_id != "player" and owner_id != "":
+				if owner_id != "" and not Game.is_mine(owner_id, building_id) and owner_id != "owner":
 					label += " " + tr("(pertence a %s)") % tr(Data.npc(owner_id).get("name", owner_id))
 				out.append(action("open", label))
 		"trash":
@@ -126,6 +127,15 @@ func get_actions(player: Node) -> Array:
 		"counter":
 			var reason: String = world.shop_unavailable_reason(def.get("shop", ""), self)
 			out.append(action("shop", tr("Comprar / vender"), reason == "", reason))
+			var staff: Node = world.staff_at(def.get("staff_spot", ""))
+			if staff:
+				out += world.extra_npc_actions(staff)
+				out.append(action("talk_staff", tr("Conversar com %s") % staff.display_name))
+			if def.get("shop", "") == "mercadinho" and Game.delivery.hired:
+				var c := Game.delivery.can_take()
+				if reason != "":
+					c = {"ok": false, "reason": reason}
+				out.append(action("delivery", tr("Pegar uma entrega"), c.ok, c.get("reason", "")))
 		"grill", "fryer":
 			out += _station_actions()
 		"soda_machine":
@@ -154,6 +164,33 @@ func get_actions(player: Node) -> Array:
 				out.append(action("fuel", tr("Abastecer %s (R$ %d/L, faltam %.0f L)") % [v.display_name(), price, need], need > 0.5))
 		"doormat":
 			out.append(action("search", tr("Olhar debaixo do tapete")))
+		"sale_sign":
+			out += _sale_actions()
+		"mailbox":
+			var pid: String = def.get("property", "")
+			out.append(action("mail", tr("Ver correspondência")))
+			if Game.property.props.get(pid, {}).get("status", "") == "alugada":
+				out.append(action("end_lease", tr("Entregar a casa ao senhorio (encerrar aluguel)"), Game.property.owned_homes().size() > 1, tr("Você precisa de outra casa antes")))
+	return out
+
+func _sale_actions() -> Array:
+	var out: Array = []
+	if def.has("vehicle"):
+		var vid: String = def.vehicle
+		var vst: Dictionary = Game.world_state.vehicles.get(vid, {})
+		if vst.has("for_sale"):
+			out.append(action("info", tr("À venda: %s — R$ %d (fale com o Rafael ou use o carro)") % [tr(Data.vehicle(vst.type).get("name", vid)), int(vst.for_sale.price)], false))
+		else:
+			out.append(action("none", tr("Vendido."), false))
+		return out
+	var pid: String = def.get("property", "")
+	var pdef := Data.property(pid)
+	if Game.property.owns(pid):
+		out.append(action("sell_property", tr("Vender %s por R$ %d") % [tr(pdef.name), Game.property.sale_value(pid)]))
+	elif Game.property.is_for_sale(pid):
+		var price := Game.property.price(pid)
+		out.append(action("buy_property", tr("Comprar %s por R$ %d") % [tr(pdef.name), price], Game.player.money >= price, tr("Dinheiro insuficiente (você tem R$ %d)") % Game.player.money))
+		out.append(action("property_info", tr("Ver detalhes do imóvel")))
 	return out
 
 func _station_actions() -> Array:
@@ -190,6 +227,10 @@ func _job_time(key: String) -> float:
 	return base * Game.player.needs.work_multiplier() * (1.0 - 0.05 * skill)
 
 func do_action(player: Node, id: String) -> void:
+	if kind == "counter":
+		var staff: Node = world.staff_at(def.get("staff_spot", ""))
+		if staff and world.do_extra_npc_action(staff, id):
+			return
 	match id:
 		"sleep":
 			Events.request_sleep.emit(item_id, 1.0)
@@ -238,6 +279,43 @@ func do_action(player: Node, id: String) -> void:
 			var v: Node = world.player_vehicle_near(global_position, 6.0)
 			if v != null:
 				player.start_timed(tr("Abastecendo..."), 3.0, _fuel.bind(v))
+		"talk_staff":
+			var staff: Node = world.staff_at(def.get("staff_spot", ""))
+			if staff:
+				world.start_dialogue(staff)
+		"delivery":
+			var r := Game.delivery.take(Clock.total_minutes, Game.rng, Game.player.inventory)
+			if not r.ok:
+				Events.notify.emit(r.reason, "bad")
+			else:
+				world.refresh_delivery()
+				Audio.play("pickup")
+		"buy_property":
+			var pid: String = def.property
+			var r2 := Game.property.buy(pid, Game.player)
+			if not r2.ok:
+				Events.notify.emit(r2.reason, "bad")
+			else:
+				Audio.play("cash")
+				Events.request_message.emit(tr(Data.property(pid).name), tr("O imóvel é seu. As portas agora abrem com a sua chave, e a cama, o chuveiro, o fogão e os armários podem ser usados livremente.\n\nIPTU: R$ %d por semana (domingo).") % int(Data.property(pid).get("tax", 0)))
+		"sell_property":
+			var r3 := Game.property.sell(def.property, Game.player)
+			if not r3.ok:
+				Events.notify.emit(r3.reason, "bad")
+			else:
+				Audio.play("cash")
+		"property_info":
+			var pd := Data.property(def.property)
+			Events.request_message.emit(tr(pd.name), tr("%s\n\nPreço: R$ %d · IPTU semanal: R$ %d · Revenda: %d%% do valor pago.") % [tr(pd.get("description", "")), int(pd.get("price", 0)), int(pd.get("tax", 0)), int(float(pd.get("sale_rate", 0.8)) * 100)])
+		"mail":
+			var debt := Game.property.total_debt()
+			var body := tr("Nada de novo. Só propaganda do Brasa Burger.") if debt == 0 else tr("Aviso do senhorio: você deve R$ %d. Pague até domingo.") % debt
+			if Game.law.pending_fines > 0:
+				body += "\n" + tr("Há uma notificação da Guarda Municipal a caminho.")
+			Events.request_message.emit(tr("Correspondência"), body)
+		"end_lease":
+			var r4 := Game.property.end_lease(def.get("property", ""))
+			Events.notify.emit(tr("Contrato encerrado. As chaves voltaram para o senhorio.") if r4.ok else r4.reason, "info" if r4.ok else "bad")
 		"search":
 			var hidden: String = def.get("hidden_item", "")
 			if hidden != "" and not Game.world_state.searched.has(item_id):

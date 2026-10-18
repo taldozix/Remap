@@ -1,6 +1,6 @@
 # Protótipo "Vila Aurora" — o que está pronto, como testar e o que falta
 
-Versão: protótipo 0.1 (Fase 0 — os 3 pilares). Engine: Godot 4.4.1.
+Versão: protótipo 0.2 (Fase 0 — os 3 pilares + Fase 1 — profundidade da vida). Engine: Godot 4.4.1.
 
 Este documento é o relatório honesto do estado atual: o que funciona, como foi verificado e quais são
 as limitações conhecidas.
@@ -14,7 +14,7 @@ as limitações conhecidas.
    ```bash
    GODOT=/caminho/do/godot tools/run_tests.sh          # unidade + aceitação
    GODOT=/caminho/do/godot tools/run_tests.sh unit     # só unidade (~5 s)
-   GODOT=/caminho/do/godot tools/run_tests.sh acceptance  # só aceitação (~3 min)
+   GODOT=/caminho/do/godot tools/run_tests.sh acceptance  # aceitação: protótipo + Fase 1 (~6 min)
    ```
 4. Capturas de tela automáticas (precisa de janela ou Xvfb):
    `godot --path . res://tests/VisualCheck.tscn -- --screens=/pasta/de/saida`
@@ -31,6 +31,7 @@ compatibilidade (o caminho de hardware mais modesto).
 | Correr | Shift |
 | Interagir (ação principal do objeto em foco) | E |
 | Outras ações do objeto em foco | 1, 2, 3, 4 |
+| Alternar entre alvos próximos (lugares cheios) | T |
 | Entrar/sair do veículo | F |
 | Freio de mão / buzina | Espaço / H |
 | Inventário / diário / mapa | Tab / J / M |
@@ -57,7 +58,26 @@ janelas de loja, diálogo, contêiner e sono são as mesmas da interface.
 | 8 | Conversar e iniciar uma missão | Diálogo com escolhas e testes de habilidade; missão "A Encomenda Extraviada" com 7 desfechos | Lúcia na calçada à tarde, missão iniciada, marcador no Marcos, suborno de R$ 40, entrega à Lúcia, missão concluída, relação sobe |
 | 9 | Salvar, sair e carregar | Salvamento JSON versionado, escrita atômica, backup, migração | Salva, zera o estado, carrega e confere dinheiro, necessidades, data/hora, geladeira, guarda-roupa, carro, combustível, missão, emprego, relações, inventário, posição, porta e uma consequência (desconto do Seu Antônio) |
 
-Último resultado: **75 verificações, 0 falhas** (aceitação) e **218 verificações, 0 falhas** (unidade).
+Último resultado: **75 verificações, 0 falhas** (aceitação do protótipo), **60 verificações, 0 falhas**
+(aceitação da Fase 1, abaixo) e **283 verificações, 0 falhas** (unidade), em execuções repetidas.
+
+## Fase 1 — profundidade da vida (sem aumentar o mapa)
+
+Verificado por `tests/AcceptanceFase1.tscn`, no mundo real:
+
+| Sistema | Como funciona | Verificação automática |
+|---|---|---|
+| **Comprar, vender e usar imóveis** | Placas "Vende-se" na Casa nº 5 (R$ 1.200) e na Garagem nº 3 (R$ 450). Comprar dá a chave das portas e o uso de cama, chuveiro, fogão e armários sem contar como furto. IPTU semanal; revenda por 80%; dá para entregar a casa alugada ao senhorio quando se tem outra (caixa de correio). | Compra pela placa, abre o portão com a chave, guarda objeto na prateleira sem registrar furto, compra a casa, entra com a chave nova e usa a cama |
+| **Garagem e conserto pelo jogador** | Kit de reparo (balcão da oficina). Conserto = 12 + 4×Mecânica pontos de dano, +50% na bancada de garagem própria; o portão bloqueia carros quando fechado. | Dirige o carro para dentro da garagem, conserta 50 → 26% de dano, ganha XP de Mecânica |
+| **Roupas e temperatura corporal** | Camisetas, camisa, casaco (+6 de agasalho), capa de chuva, boné, mochila — com visual no personagem. Chuva sem capa encharca a roupa; molhado no frio a temperatura cai (frio → trabalho mais lento, fadiga, saúde); casaco no sol do meio-dia superaquece (mais sede). | Na chuva sem proteção: roupa 100% molhada e temperatura em queda; com capa e casaco: seca e se recupera; o personagem aparece de casaco |
+| **Dor e analgésico** | Batidas de carro causam dor; dor reduz velocidade e desempenho e passa com o tempo; analgésico e kit aliviam. | Testes de unidade |
+| **Traços de personagem** | 7 traços com vantagem e desvantagem (ex.: Atlético, Bom de papo, Mão na graxa, Ex-socorrista, Estômago de avestruz), escolhidos na criação (até 2). | Habilidades iniciais aplicadas; modificadores salvos e carregados |
+| **Novas habilidades** | Mecânica (consertos) e Primeiros socorros (curativos mais eficientes; socorrer feridos na rua). | XP sobe ao consertar e ao socorrer |
+| **Segundo emprego: entregador** | Contratação com o Seu Antônio; sacolas no balcão; endereço marcado no mapa; prazo; pagamento + gorjeta no prazo; atraso paga menos; abandonar irrita o dono. | Contrata, pega a sacola, leva ao endereço, recebe |
+| **Compra e venda de veículos** | Sedã usado à venda na oficina (R$ 700, com 35% de dano); vender seus carros ao Rafael (50% do valor, menos o dano). Vários veículos por jogador. | Compra pelo diálogo com o Rafael e dirige o carro novo |
+| **Eventos dinâmicos por regras** | `data/events.json`: janela de horário, chance por hora, intervalo em dias, clima e condições. Carteira perdida (devolver ou ficar com o dinheiro), pedestre ferido (socorrer), discussão na praça entre Marcos e Tião (apaziguar com teste social), promoção relâmpago no mercadinho, turno extra no Brasa (+50%). | Carteira devolvida ao dono (+15 de relação), pedestre socorrido com kit (+reputação), discussão apaziguada |
+| **Foco em lugares cheios** | Pessoas têm prioridade sobre móveis, feridos têm prioridade máxima, atendentes oferecem as ações do balcão, e [T] alterna entre os alvos ao alcance. | Usado pelo próprio teste para escolher alvos |
+| **Persistência** | Salvamento v2 com migração de v1: imóveis, IPTU/dívidas, roupas vestidas, traços, temperatura, dor, entregas, histórico de eventos. | Salva, zera e carrega: imóveis, prateleira da garagem, carro dentro da garagem, conserto, segundo carro, entregas, roupas, traços, dinheiro |
 
 ## O que está implementado
 
@@ -145,9 +165,10 @@ janelas de loja, diálogo, contêiner e sono são as mesmas da interface.
 - **Retratos de diálogo** são iniciais coloridas, não rostos.
 - **Combate, polícia em campo e perseguições** não existem ainda (Fase 5). Crimes geram
   multas/reputação/memórias, não prisões.
-- **Compra de imóveis e de veículos** não está no protótipo (a estrutura `PropertySystem` já
-  separa "alugada" de "própria"). Há apenas a casa alugada e o carro do jogador.
-- **Temperatura corporal e troca de roupa** não foram implementadas.
+- **Decoração** (comprar e mover móveis) e **reformas** ainda não existem; os imóveis vêm mobiliados.
+- **Ferimentos localizados** (partes do corpo, sangramento) não existem: há saúde e dor gerais.
+- **Situações dos eventos** (carteira no chão, pedestre ferido, discussão) não são salvas no meio;
+  ao carregar, só o histórico de disparos é mantido.
 - **Turnos não são salvos no meio**: não é possível salvar durante um turno (o jogo avisa).
 - **Posições exatas dos NPCs não são salvas**: ao carregar, cada NPC aparece onde a agenda manda
   naquele horário (resultado coerente, ver arquitetura). Ferimentos e memórias são salvos.
@@ -172,7 +193,8 @@ janelas de loja, diálogo, contêiner e sono são as mesmas da interface.
 
 ## Próximos passos recomendados (Fase 1 — validação)
 
-1. Sessões de jogo com pessoas reais; medir FPS no hardware-alvo e definir metas.
+1. Sessões de jogo com pessoas reais; medir FPS no hardware-alvo e definir metas
+   (o mapa continua pequeno de propósito — a regra é validar sistemas antes de expandir).
 2. Balancear taxas de necessidades, salário, preços e aluguel com base nessas sessões.
 3. Feedback: sons de interface por contexto, animações de entrar/sair do carro, ícones de moodles.
 4. Clique do mouse para escolher alvos de interação em cômodos cheios.

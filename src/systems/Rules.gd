@@ -106,6 +106,12 @@ static func _check_one(key: String, arg, ctx: Dictionary) -> bool:
 			return Game.is_vehicle_near_spot(str(arg.vehicle), str(arg.spot), float(arg.get("radius", 12.0)))
 		"crimes_gte":
 			return Game.law.record.size() >= int(arg)
+		"owns_property":
+			return Game.property.owns(str(arg))
+		"delivery_hired":
+			return Game.delivery.hired == bool(arg)
+		"vehicle_for_sale":
+			return Game.world_state.vehicles.get(str(arg), {}).has("for_sale")
 		"today":
 			return int(Game.flags.get(str(arg), -1)) == Clock.day()
 		"not_today":
@@ -184,6 +190,10 @@ static func _apply_one(op: String, arg, ctx: Dictionary) -> void:
 				p.skills.add_xp(s, float(arg[s]))
 		"job_hire":
 			Game.job.hire()
+		"delivery_hire":
+			Game.delivery.hire()
+		"buy_vehicle":
+			Game.buy_vehicle(str(arg))
 		"notify":
 			Events.notify.emit(_t(str(arg)), "info")
 		"open_shop":

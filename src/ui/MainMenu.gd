@@ -7,6 +7,7 @@ var preview: Humanoid
 var _app: Dictionary = {}
 var _name_edit: LineEdit
 var _pivot: Node3D
+var _traits: Array = []
 
 const SKINS := ["#f0c8a8", "#e0b494", "#c68e6a", "#a8765a", "#8a5a3c", "#5e3b28"]
 const HAIRS := ["#1a1a1a", "#2b1d12", "#6b3d1e", "#a0522d", "#d8c080", "#9a9a9a"]
@@ -156,15 +157,47 @@ func _new_game_panel() -> void:
 		_app.hair_style = STYLES[i]
 		_rebuild_preview())
 	v.add_child(ob)
+	v.add_child(UITheme.label(tr("Traços (escolha até 2 — cada um tem vantagem e desvantagem)"), 15, UITheme.MUTED))
+	var tf := HFlowContainer.new()
+	for tid in Data.traits():
+		var td: Dictionary = Data.trait_def(tid)
+		var cb := CheckBox.new()
+		cb.text = tr(td.name)
+		cb.tooltip_text = "+ %s\n− %s" % [tr(td.pro), tr(td.con)]
+		cb.button_pressed = _traits.has(tid)
+		cb.toggled.connect(func(on):
+			if on and not _traits.has(tid):
+				if _traits.size() >= 2:
+					cb.set_pressed_no_signal(false)
+					return
+				_traits.append(tid)
+			elif not on:
+				_traits.erase(tid)
+			_trait_info.text = _traits_text())
+		tf.add_child(cb)
+	v.add_child(tf)
+	_trait_info = UITheme.label(_traits_text(), 13, UITheme.MUTED)
+	v.add_child(_trait_info)
 	v.add_child(UITheme.label(tr("Você acaba de se mudar para a casa 8 da Vila Aurora. Sem emprego, com R$ 60 no bolso e o aluguel vencendo no domingo."), 14, UITheme.MUTED))
 	var h := HBoxContainer.new()
 	v.add_child(h)
-	h.add_child(UITheme.button(tr("Começar"), func(): Saves.start_new_game(_name_edit.text, _app)))
+	h.add_child(UITheme.button(tr("Começar"), func(): Saves.start_new_game(_name_edit.text, _app, _traits)))
 	h.add_child(UITheme.button(tr("Voltar"), _clear_center))
 	for l in v.get_children():
 		if l is Label:
 			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			l.custom_minimum_size.x = 480
+
+var _trait_info: Label
+
+func _traits_text() -> String:
+	if _traits.is_empty():
+		return tr("Nenhum traço escolhido.")
+	var parts: Array[String] = []
+	for t in _traits:
+		var td: Dictionary = Data.trait_def(t)
+		parts.append("%s: + %s − %s" % [tr(td.name), tr(td.pro), tr(td.con)])
+	return "\n".join(parts)
 
 func _swatches(parent: Control, label: String, colors: Array, key: String) -> void:
 	parent.add_child(UITheme.label(label, 15, UITheme.MUTED))

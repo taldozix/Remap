@@ -34,7 +34,9 @@ func discount(shop_id: String, relations: Relations) -> float:
 		d += 0.10
 	if relations.reputation >= 25:
 		d += 0.05
-	return d
+	if Game.director:
+		d += Game.director.shop_discount(shop_id)
+	return min(d, 0.5)
 
 ## Quem tem reputação muito baixa (ou foi visto roubando o dono) não é atendido.
 func refuses_service(shop_id: String, relations: Relations) -> String:

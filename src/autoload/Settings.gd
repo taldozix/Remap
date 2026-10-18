@@ -42,6 +42,7 @@ const ACTIONS := {
 	"move_right": {"label": "Mover para a direita / virar", "keys": [KEY_D, KEY_RIGHT]},
 	"run": {"label": "Correr", "keys": [KEY_SHIFT]},
 	"interact": {"label": "Interagir", "keys": [KEY_E]},
+	"cycle_target": {"label": "Alternar alvo de interação", "keys": [KEY_T]},
 	"vehicle": {"label": "Entrar/sair do veículo", "keys": [KEY_F]},
 	"handbrake": {"label": "Freio de mão", "keys": [KEY_SPACE]},
 	"horn": {"label": "Buzina", "keys": [KEY_H]},

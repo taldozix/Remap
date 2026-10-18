@@ -48,6 +48,29 @@ func _ready() -> void:
 	world.player.global_position = Vector3(-20, 0.05, -6)
 	await _wait(4.0)
 	await _shot("10_chuva")
+	Game.player.inventory.add("capa_chuva", 1)
+	Game.player.inventory.add("casaco", 1)
+	Game.player.equip("casaco")
+	Game.player.equip("capa_chuva")
+	Game.player.inventory.add("mochila", 1)
+	Game.player.equip("mochila")
+	world.camera_rig._dist_goal = 11.0
+	await _shot("10b_roupas_chuva")
+	world.camera_rig._dist_goal = 21.0
+	Game.world_state.weather = {"state": "limpo", "until": Clock.total_minutes + 300}
+	world.player.global_position = Vector3(51, 0.05, -26)
+	await _wait(1.0)
+	await _shot("15_garagem_venda")
+	world.player.global_position = Vector3(-52.5, 0.05, -24)
+	await _shot("16_casa5_venda")
+	world.ui.open_panel("journal", load("res://src/ui/JournalPanel.gd").new())
+	await _wait(0.3)
+	var tabs: TabContainer = world.ui.current_panel.find_children("*", "TabContainer", true, false)[0]
+	tabs.current_tab = 1
+	await _shot("17_diario_personagem")
+	tabs.current_tab = 4
+	await _shot("18_diario_imoveis")
+	world.ui.close_current()
 	world.ui.open_panel("inventory", load("res://src/ui/InventoryPanel.gd").new())
 	await _shot("11_inventario")
 	world.ui.close_current()

@@ -218,6 +218,13 @@ func _refresh_hud() -> void:
 		if Game.quests.state_of(qid) == "active":
 			qtxt = "%s\n%s" % [tr(Data.quest(qid).title).to_upper(), Game.quests.objective(qid)]
 			break
+	if not Game.delivery.active.is_empty():
+		var left := Game.delivery.time_left(Clock.total_minutes)
+		qtxt += ("\n\n" if qtxt != "" else "") + "%s\n%s — %s" % [tr("ENTREGA DO MERCADINHO"), Game.delivery.active.label, tr("%d min restantes") % int(left) if left >= 0 else tr("atrasada!")]
+	if Game.director.is_active("promocao_mercadinho"):
+		qtxt += ("\n\n" if qtxt != "" else "") + tr("PROMOÇÃO no Mercadinho (-25%)")
+	if Game.director.is_active("turno_extra") and Game.job.employed:
+		qtxt += ("\n\n" if qtxt != "" else "") + tr("TURNO EXTRA no Brasa: +50% por hora até 18h")
 	quest_panel.visible = qtxt != ""
 	quest_label.text = qtxt
 	quest_label.add_theme_color_override("font_color", UITheme.QUEST)
@@ -283,6 +290,8 @@ func _refresh_prompt() -> void:
 		_last_prompt_key = ""
 		return
 	var title: String = pl.focus.interact_title() if pl.focus.has_method("interact_title") else ""
+	if pl.focus_candidates.size() > 1:
+		title += "   [%s] %s (%d/%d)" % [Settings.primary_key_text("cycle_target"), tr("outro alvo"), pl._cycle % pl.focus_candidates.size() + 1, pl.focus_candidates.size()]
 	var key := title + str(pl.focus_actions)
 	if key == _last_prompt_key:
 		return

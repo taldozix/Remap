@@ -13,7 +13,8 @@ var money: int = 0
 var position := Vector3.ZERO
 var rotation_y: float = 0.0
 var vehicle_id: String = ""
-var equipped: Dictionary = {}   # slot -> item id (ex.: "costas": "mochila")
+var equipped: Dictionary = {}   # slot -> item id (ex.: "costas": "mochila", "camisa": "camiseta_azul")
+var traits: Array = []          # ids de data/traits.json escolhidos na criação
 var activity: String = "idle"   # atividade atual, usada pela simulação de necessidades
 var stats: Dictionary = {"km_dirigidos": 0.0, "pedidos_entregues": 0, "dinheiro_ganho": 0}
 
@@ -25,6 +26,59 @@ func capacity() -> float:
 
 func refresh_capacity() -> void:
 	inventory.capacity = capacity()
+	needs.mods = trait_mods()
+
+## Soma dos modificadores dos traços (multiplicadores multiplicam; booleanos valem se algum tiver).
+func trait_mods() -> Dictionary:
+	var out := {}
+	for t in traits:
+		var m: Dictionary = Data.trait_def(t).get("mods", {})
+		for k in m:
+			if typeof(m[k]) == TYPE_BOOL:
+				out[k] = bool(out.get(k, false)) or bool(m[k])
+			else:
+				out[k] = float(out.get(k, 1.0)) * float(m[k])
+	return out
+
+func apply_traits(ids: Array) -> void:
+	traits = []
+	for t in ids:
+		if not Data.trait_def(t).is_empty() and not traits.has(t):
+			traits.append(t)
+			var start: Dictionary = Data.trait_def(t).get("skills", {})
+			for sk in start:
+				skills.xp[sk] = max(float(skills.xp.get(sk, 0.0)), float(Skills.THRESHOLDS[int(start[sk])]))
+	refresh_capacity()
+
+## Isolamento térmico somado das roupas vestidas.
+func warmth() -> float:
+	var w := 0.0
+	for slot in equipped:
+		w += float(Data.item(equipped[slot]).get("warmth", 0.0))
+	return w
+
+func rain_protected() -> bool:
+	for slot in equipped:
+		if Data.item(equipped[slot]).get("rain_protect", false):
+			return true
+	return false
+
+## Aparência final: cores das roupas vestidas sobrepõem a base escolhida na criação.
+func visual_appearance() -> Dictionary:
+	var a := appearance.duplicate()
+	if equipped.has("camisa"):
+		a.shirt = Data.item(equipped.camisa).get("color", a.get("shirt", "#4477aa"))
+	if equipped.has("agasalho"):
+		a.shirt = Data.item(equipped.agasalho).get("color", a.shirt)
+		a.jacket = true
+	if equipped.has("chuva"):
+		a.shirt = Data.item(equipped.chuva).get("color", a.shirt)
+		a.jacket = true
+	if equipped.has("cabeca"):
+		a.cap = Data.item(equipped.cabeca).get("color", "#333333")
+	if equipped.has("costas"):
+		a.backpack = Data.item(equipped.costas).get("color", "#5a4a3a")
+	return a
 
 func is_overloaded() -> bool:
 	return inventory.weight() > capacity()
@@ -54,11 +108,13 @@ func equip(item_id: String) -> bool:
 		return false
 	equipped[slot] = item_id
 	refresh_capacity()
+	Events.appearance_changed.emit()
 	return true
 
 func unequip(slot: String) -> void:
 	equipped.erase(slot)
 	refresh_capacity()
+	Events.appearance_changed.emit()
 
 func is_equipped(item_id: String) -> bool:
 	return equipped.values().has(item_id)
@@ -75,6 +131,7 @@ func to_dict() -> Dictionary:
 		"rotation_y": rotation_y,
 		"vehicle_id": vehicle_id,
 		"equipped": equipped.duplicate(),
+		"traits": traits.duplicate(),
 		"stats": stats.duplicate(),
 	}
 
@@ -90,6 +147,7 @@ func from_dict(d: Dictionary) -> void:
 	rotation_y = float(d.get("rotation_y", 0.0))
 	vehicle_id = str(d.get("vehicle_id", ""))
 	equipped = d.get("equipped", {}).duplicate()
+	traits = d.get("traits", []).duplicate()
 	for slot in equipped.keys():
 		if not inventory.has(equipped[slot]):
 			equipped.erase(slot)

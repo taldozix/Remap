@@ -1,17 +1,84 @@
 {
 	"mercadinho": {
-		"name": "Mercadinho Bom Preço", "owner": "antonio", "hours": [7, 21], "markup": 1.0,
-		"sells": {"agua": 20, "refrigerante": 15, "cafe_lata": 10, "pao": 8, "banana": 20, "queijo": 6, "miojo": 20, "sanduiche": 6, "kit_curativo": 3, "remedio_pressao": 2, "mochila": 1},
-		"buys": [], "buy_rate": 0.0
+		"name": "Mercadinho Bom Preço",
+		"owner": "antonio",
+		"hours": [
+			7,
+			21
+		],
+		"markup": 1.0,
+		"sells": {
+			"agua": 20,
+			"refrigerante": 15,
+			"cafe_lata": 10,
+			"pao": 8,
+			"banana": 20,
+			"queijo": 6,
+			"miojo": 20,
+			"sanduiche": 6,
+			"kit_curativo": 3,
+			"remedio_pressao": 2,
+			"mochila": 1,
+			"capa_chuva": 3,
+			"analgesico": 6,
+			"bone": 2
+		},
+		"buys": [],
+		"buy_rate": 0.0
 	},
 	"penhores": {
-		"name": "Penhores do Beto", "owner": "beto", "hours": [9, 19], "markup": 1.3,
-		"sells": {"radio_velho": 1, "celular_velho": 1},
-		"buys": ["valor", "sucata", "equipamento"], "buy_rate": 0.55
+		"name": "Penhores do Beto",
+		"owner": "beto",
+		"hours": [
+			9,
+			19
+		],
+		"markup": 1.3,
+		"sells": {
+			"radio_velho": 1,
+			"celular_velho": 1,
+			"casaco": 2,
+			"camisa_xadrez": 2,
+			"camiseta_branca": 3
+		},
+		"buys": [
+			"valor",
+			"sucata",
+			"equipamento",
+			"roupa"
+		],
+		"buy_rate": 0.55
 	},
 	"brasa_balcao": {
-		"name": "Brasa Burger — Balcão", "owner": "kleber", "hours": [10, 22], "markup": 1.0,
-		"sells": {"x_brasa_combo": 40, "refrigerante": 30, "agua": 20},
-		"buys": [], "buy_rate": 0.0
+		"name": "Brasa Burger — Balcão",
+		"owner": "kleber",
+		"hours": [
+			10,
+			22
+		],
+		"markup": 1.0,
+		"sells": {
+			"x_brasa_combo": 40,
+			"refrigerante": 30,
+			"agua": 20
+		},
+		"buys": [],
+		"buy_rate": 0.0
+	},
+	"oficina": {
+		"name": "Oficina do Rafael — Balcão",
+		"owner": "rafael",
+		"hours": [
+			7.5,
+			18
+		],
+		"markup": 1.0,
+		"sells": {
+			"kit_reparo": 5
+		},
+		"buys": [
+			"ferramenta"
+		],
+		"buy_rate": 0.5
 	}
 }

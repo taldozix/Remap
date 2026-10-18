@@ -68,6 +68,8 @@ func _ready() -> void:
 	traffic.name = "Traffic"
 	add_child(traffic)
 	traffic.setup(self, Data.map())
+	refresh_delivery()
+	Events.appearance_changed.connect(func(): if player: player.rebuild_visual())
 	Clock.running = true
 	ready_done = true
 	Audio.stop_music()
@@ -257,6 +259,22 @@ func shop_unavailable_reason(shop_id: String, _counter: Node) -> String:
 		return tr("Ninguém no balcão agora")
 	return Game.shops.refuses_service(shop_id, Game.relations)
 
+func counter_for_staff(spot_id: String) -> Furniture:
+	if spot_id == "":
+		return null
+	for f in furniture.values():
+		if f.kind == "counter" and f.def.get("staff_spot", "") == spot_id:
+			return f
+	return null
+
+func staff_at(spot_id: String) -> NPC:
+	if spot_id == "":
+		return null
+	for n in npcs.values():
+		if n.spot_id == spot_id and n.state == "at_spot" and not n.is_sleeping():
+			return n
+	return null
+
 func player_vehicle_near(pos: Vector3, r: float) -> Vehicle:
 	for v in vehicles.values():
 		if v.is_players() and v.global_position.distance_to(pos) <= r:
@@ -281,6 +299,9 @@ func is_vehicle_near_spot(vid: String, spot: String, radius: float) -> bool:
 func refresh_vehicle(vid: String) -> void:
 	if vehicles.has(vid):
 		vehicles[vid].refresh_from_state()
+
+func player_outdoors() -> bool:
+	return player != null and player_building == "" and player.state != "driving"
 
 func is_player_in_job_area() -> bool:
 	return player != null and buildings.has("brasa") and buildings.brasa.contains(player.global_position, 1.0)
@@ -353,7 +374,11 @@ func on_player_fainted() -> void:
 	n.set_need("fome", min(n.get_need("fome"), 70.0))
 	n.set_need("sede", min(n.get_need("sede"), 60.0))
 	Game.player.add_money(-80, "Atendimento no posto de saúde")
-	var bed: Furniture = furniture.get("cama_jogador")
+	var bed: Furniture = null
+	for home in Game.property.owned_homes():
+		for f in furniture.values():
+			if f.kind == "bed" and f.building_id == home:
+				bed = f
 	if bed:
 		player.stand_up()
 		player.global_position = bed.global_position + Vector3(1.2, 0.05, 0.6)
@@ -447,7 +472,7 @@ func on_player_used_key(building_id: String) -> void:
 func on_container_take(container_id: String) -> void:
 	var meta := Game.world_state.meta(container_id)
 	var owner: String = meta.get("owner", "")
-	if owner == "" or owner == "player" or not meta.get("private", true):
+	if owner in ["", "player", "owner"] or not meta.get("private", true):
 		return
 	if container_id.begins_with("trunk_") and Game.has_flag("roubado_" + container_id.substr(6)):
 		pass
@@ -469,6 +494,7 @@ func _process(delta: float) -> void:
 			_incidents.erase(inc)
 			_resolve_incident(inc)
 	_check_trespass(delta)
+	_process_events(delta)
 
 func _update_cutaway() -> void:
 	var pp: Vector3 = player.vehicle.global_position if player.state == "driving" and player.vehicle else player.global_position
@@ -510,7 +536,7 @@ func _check_trespass(delta: float) -> void:
 					Game.relations.change(n.npc_id, -1)
 					break
 	var owner: String = b.def.get("owner", "")
-	if not b.def.get("private", false) or owner == "" or owner == "player" or Game.property.owns_or_rents(bid):
+	if not b.def.get("private", false) or owner in ["", "player", "owner"] or Game.property.owns_or_rents(bid):
 		return
 	if not npcs.has(owner):
 		return
@@ -528,6 +554,8 @@ func _check_trespass(delta: float) -> void:
 ## Posições dos marcadores de missão (para o HUD).
 func marker_positions() -> Array:
 	var out: Array = []
+	if not Game.delivery.active.is_empty() and spots.has(Game.delivery.active.spot):
+		out.append({"pos": spots[Game.delivery.active.spot].pos + Vector3(0, 1.5, 0), "label": tr("Entrega")})
 	for m in Game.quests.active_markers():
 		var parts: PackedStringArray = str(m).split(":")
 		if parts.size() != 2:
@@ -537,6 +565,130 @@ func marker_positions() -> Array:
 			var p: Vector3 = n.global_position if n.visible else n.spot.get("pos", n.global_position)
 			out.append({"pos": p + Vector3(0, 2.4, 0), "label": n.display_name})
 	return out
+
+# ------------------------------------------------------------------ entregas
+var _drop: DeliveryDrop = null
+
+func refresh_delivery() -> void:
+	if _drop and is_instance_valid(_drop):
+		_drop.queue_free()
+	_drop = null
+	var a: Dictionary = Game.delivery.active
+	if a.is_empty() or not spots.has(a.spot):
+		return
+	_drop = DeliveryDrop.new()
+	_drop.setup(self, a.label)
+	get_node("Props").add_child(_drop)
+	_drop.global_position = spots[a.spot].pos
+
+# ------------------------------------------------------------------ eventos dinâmicos
+var _argue_t := 0.0
+var _argue_i := 0
+
+## Cria a situação no mundo. Retorna {} se as condições espaciais não existem agora.
+func start_event(id: String, def: Dictionary) -> Dictionary:
+	match id:
+		"carteira_perdida":
+			var owners: Array = npcs.values().filter(func(n): return n.visible and not n.is_sleeping() and n.state != "knocked" and n.activity != "leave")
+			if owners.is_empty():
+				return {}
+			var owner: NPC = owners[Game.director.rng.randi() % owners.size()]
+			var ws: Array = Data.map().get("wander_spots", [])
+			var sp: String = ws[Game.director.rng.randi() % ws.size()]
+			var pos: Vector3 = spots[sp].pos + Vector3(Game.director.rng.randf_range(-1.5, 1.5), 0, Game.director.rng.randf_range(-1.5, 1.5))
+			var e := {"id": "carteira_perdida", "qty": 1, "age": 0.0, "pos": [pos.x, 0.0, pos.z]}
+			Game.world_state.ground_items.append(e)
+			_spawn_ground_item(e)
+			Game.set_flag("carteira_dono_" + owner.npc_id)
+			_notify_near(def, pos)
+			return {"owner": owner.npc_id, "pos": [pos.x, pos.z]}
+		"pedestre_ferido":
+			var cands: Array = npcs.values().filter(func(n): return n.is_ambient and n.visible and n.state in ["moving", "at_spot"] and building_at(n.global_position) == "")
+			if cands.is_empty():
+				return {}
+			var n2: NPC = cands[Game.director.rng.randi() % cands.size()]
+			n2.knock_down(Vector3.ZERO, 0.5, false, 240.0)
+			for w in npcs_near(n2.global_position, 15.0):
+				if w != n2:
+					w.bark(tr("Alguém ajuda aqui!"))
+					break
+			_notify_near(def, n2.global_position)
+			return {"npc": n2.npc_id}
+		"discussao_praca":
+			var parts: Array = def.get("participants", [])
+			for pid in parts:
+				if not npcs.has(pid) or npcs[pid].state != "at_spot" or npcs[pid].building_at_spot() != "":
+					return {}
+			if npcs[parts[0]].global_position.distance_to(npcs[parts[1]].global_position) > 14.0:
+				return {}
+			_argue_t = 0.0
+			_argue_i = 0
+			_notify_near(def, npcs[parts[0]].global_position)
+			return {"participants": parts}
+	return {}
+
+func end_event(id: String, _info: Dictionary) -> void:
+	if id == "discussao_praca":
+		for pid in Data.events().get(id, {}).get("participants", []):
+			if npcs.has(pid):
+				npcs[pid].bark(tr("Hunf."))
+
+func _notify_near(def: Dictionary, pos: Vector3) -> void:
+	if player and player.global_position.distance_to(pos) <= float(def.get("notify_radius", 40.0)):
+		Events.notify.emit(tr(def.get("notify", "")), "info")
+
+func _process_events(delta: float) -> void:
+	if not Game.director.is_active("discussao_praca"):
+		return
+	_argue_t -= delta
+	if _argue_t > 0.0:
+		return
+	_argue_t = 5.0
+	var def: Dictionary = Data.events().discussao_praca
+	var lines: Array = def.lines[_argue_i % def.lines.size()]
+	var parts: Array = def.participants
+	npcs[parts[_argue_i % 2]].bark(tr(lines[0]))
+	npcs[parts[(_argue_i + 1) % 2]].call_deferred("bark_later", tr(lines[1]), 2.4)
+	_argue_i += 1
+
+## Ações extras que eventos e itens acrescentam a um NPC.
+func extra_npc_actions(npc: NPC) -> Array:
+	var out: Array = []
+	if Game.player.inventory.has("carteira_perdida") and Game.has_flag("carteira_dono_" + npc.npc_id):
+		out.append(Interactable.action("return_wallet", tr("Devolver a carteira")))
+	if Game.director.is_active("discussao_praca") and Data.events().discussao_praca.participants.has(npc.npc_id):
+		var ch := clampf(0.35 + Game.player.skills.level("social") * 0.1 + Game.relations.reputation * 0.003, 0.05, 0.95)
+		out.append(Interactable.action("calm", tr("[Social %d%%] Apaziguar a discussão") % int(ch * 100)))
+	return out
+
+func do_extra_npc_action(npc: NPC, id: String) -> bool:
+	match id:
+		"return_wallet":
+			Game.player.inventory.remove("carteira_perdida", 1)
+			Game.clear_flag("carteira_dono_" + npc.npc_id)
+			Game.relations.change(npc.npc_id, 15)
+			Game.relations.change_reputation(3)
+			Game.relations.add_memory(npc.npc_id, "devolveu_carteira", Clock.day())
+			Game.player.add_money(10, "Recompensa")
+			npc.bark(tr("Minha carteira! Muito obrigado(a), tem gente honesta no mundo!"))
+			return true
+		"calm":
+			var ch := clampf(0.35 + Game.player.skills.level("social") * 0.1 + Game.relations.reputation * 0.003, 0.05, 0.95)
+			var parts: Array = Data.events().discussao_praca.participants
+			if Game.director.rng.randf() < ch:
+				for pid in parts:
+					Game.relations.change(pid, 5)
+					npcs[pid].bark(tr("...Tá bom, tá bom. Desculpa."))
+				Game.relations.change_reputation(3)
+				Game.player.skills.add_xp("social", 25)
+				Game.director.active.erase("discussao_praca")
+				Events.notify.emit(tr("Você acalmou os ânimos na praça."), "good")
+			else:
+				Game.relations.change("marcos", -3)
+				Game.player.skills.add_xp("social", 8)
+				npcs["marcos"].bark(tr("Não se mete, não!"))
+			return true
+	return false
 
 # ------------------------------------------------------------------ salvamento
 func sync_to_state() -> void:

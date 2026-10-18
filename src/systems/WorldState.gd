@@ -37,6 +37,8 @@ func init_from_map(map: Dictionary) -> void:
 			"fuel": float(v.get("fuel", vd.get("fuel_capacity", 40))), "damage": float(v.get("damage", 0)),
 			"owner": str(v.get("owner", "")), "locked": bool(v.get("locked", true)), "color": str(v.get("color", "#aaaaaa")),
 		}
+		if v.has("for_sale"):
+			vehicles[v.id]["for_sale"] = v.for_sale.duplicate()
 		var trunk := Inventory.new(float(vd.get("trunk_capacity", 30)), "trunk_" + v.id)
 		containers["trunk_" + v.id] = trunk
 		container_meta["trunk_" + v.id] = {"owner": str(v.get("owner", "")), "name": tr("Porta-malas"), "private": true, "building": ""}
@@ -114,6 +116,8 @@ func from_dict(d: Dictionary) -> void:
 	var vs: Dictionary = d.get("vehicles", {})
 	for id in vs:
 		if vehicles.has(id):
+			if not vs[id].has("for_sale"):
+				vehicles[id].erase("for_sale")
 			for k in vs[id]:
 				vehicles[id][k] = vs[id][k]
 	npcs = d.get("npcs", {}).duplicate(true)

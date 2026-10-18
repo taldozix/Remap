@@ -47,7 +47,8 @@ func skip_to(h: int, m: int = 0) -> void:
 	Clock.advance(jump)
 	if jump > 8 * 60:
 		fed()
-	await frames(3)
+	# NPCs decidem a cada 0,5 s: espera que todos se reposicionem conforme a agenda.
+	await wait(0.6)
 
 ## O teste verifica sistemas, não a sobrevivência: após saltos longos, simula que o
 ## personagem comeu e bebeu.
@@ -57,6 +58,7 @@ func fed() -> void:
 	n.saude = 100.0
 
 func start_world() -> void:
+	Game.director.auto_enabled = false
 	world = load("res://src/world/GameWorld.tscn").instantiate()
 	add_child(world)
 	while not world.ready_done:
@@ -106,6 +108,11 @@ func teleport(p: Vector3) -> void:
 ## Usa o sistema de foco do jogador (o que aparece no HUD) e executa a ação pedida.
 func use_focus(expected: Node, action_id: String) -> bool:
 	player()._scan_interactables()
+	# Como o jogador: se há vários alvos ao alcance, alterna com [T] até o desejado.
+	for i in player().focus_candidates.size():
+		if player().focus == expected:
+			break
+		player().cycle_target()
 	if player().focus != expected:
 		check(false, "foco esperado em %s, mas está em %s (jogador em %s, alvo em %s)" % [expected.name, player().focus.name if player().focus else "nada", str(player().global_position), str(expected.interact_point())])
 		return false
@@ -117,6 +124,23 @@ func use_focus(expected: Node, action_id: String) -> bool:
 			expected.do_action(player(), action_id)
 			return true
 	check(false, "ação %s não encontrada em %s" % [action_id, str(player().focus_actions)])
+	return false
+
+## Usa a ação pedida no que estiver em foco (balcão ou atendente, tanto faz).
+func use_focus_action(ids: Array) -> bool:
+	player()._scan_interactables()
+	for i in player().focus_candidates.size():
+		if player().focus and player().focus_actions.any(func(a): return a.id in ids and a.enabled):
+			break
+		player().cycle_target()
+	if player().focus == null:
+		check(false, "nada em foco para %s" % str(ids))
+		return false
+	for a in player().focus_actions:
+		if a.id in ids and a.enabled:
+			player().focus.do_action(player(), a.id)
+			return true
+	check(false, "ações %s não encontradas em %s (%s)" % [str(ids), player().focus.name, str(player().focus_actions)])
 	return false
 
 func wait_timed() -> void:
@@ -246,7 +270,7 @@ func _run() -> void:
 	var counter: Furniture = world.furniture["balcao_mercadinho"]
 	await teleport(counter.interact_point())
 	var money_before := p.money
-	check(use_focus(counter, "shop"), "balcão aberto com o Seu Antônio presente")
+	check(use_focus_action(["shop"]), "balcão aberto com o Seu Antônio presente")
 	await frames(3)
 	check(world.ui.current_kind == "shop", "janela da loja aberta")
 	var shop_panel: Node = world.ui.current_panel

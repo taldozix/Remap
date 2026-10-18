@@ -57,6 +57,12 @@ func build(app: Dictionary) -> void:
 	if app.has("apron"):
 		var ap := _part(BoxMesh.new(), Color(app.apron), torso, Vector3(0, 0.12, -0.115))
 		(ap.mesh as BoxMesh).size = Vector3(0.3, 0.5, 0.02)
+	if app.has("backpack"):
+		var bp := _part(BoxMesh.new(), Color(app.backpack), torso, Vector3(0, 0.3, 0.17))
+		(bp.mesh as BoxMesh).size = Vector3(0.3, 0.38, 0.14)
+	if app.get("jacket", false):
+		var col := _part(BoxMesh.new(), shirt.darkened(0.25), torso, Vector3(0, 0.6, 0.0))
+		(col.mesh as BoxMesh).size = Vector3(0.34, 0.07, 0.24)
 	if app.get("overalls", false):
 		for x in [-0.09, 0.09]:
 			var st := _part(BoxMesh.new(), pants, torso, Vector3(x, 0.35, -0.115))

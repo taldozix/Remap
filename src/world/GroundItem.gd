@@ -24,6 +24,10 @@ func setup(e: Dictionary, p_world: Node) -> void:
 	mi.material_override = Mat.color(col, 0.6)
 	add_child(mi)
 
+## Itens no chão são pequenos: ganham do móvel ou da pessoa ao lado no foco.
+func focus_priority() -> float:
+	return 0.6
+
 func get_actions(_player: Node) -> Array:
 	return [action("take", tr("Pegar %s") % title)]
 

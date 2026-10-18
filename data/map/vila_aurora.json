@@ -32,7 +32,7 @@
  "buildings": [
   {
    "id": "casa_jogador",
-   "name": "Sua casa (nº 8)",
+   "name": "Casa nº 8",
    "type": "house",
    "center": [
     -42,
@@ -50,7 +50,7 @@
     "floor": "#a7835a",
     "accent": "#3f6e8c"
    },
-   "owner": "player",
+   "owner": "owner",
    "private": true,
    "doors": [
     {
@@ -60,7 +60,7 @@
      "width": 1.1,
      "locked": true,
      "keys": [
-      "player"
+      "owner"
      ],
      "label": "Porta"
     }
@@ -96,7 +96,7 @@
      ],
      "rot": 0,
      "id": "cama_jogador",
-     "owner": "player",
+     "owner": "owner",
      "spot": "jogador_cama"
     },
     {
@@ -110,10 +110,13 @@
       "id": "guarda_roupa_jogador",
       "name": "Guarda-roupa",
       "capacity": 60,
-      "owner": "player",
+      "owner": "owner",
       "contents": {
        "mochila": 1,
-       "celular_velho": 1
+       "celular_velho": 1,
+       "casaco": 1,
+       "capa_chuva": 1,
+       "camiseta_branca": 1
       }
      }
     },
@@ -144,7 +147,7 @@
      ],
      "rot": 0,
      "id": "chuveiro_jogador",
-     "owner": "player"
+     "owner": "owner"
     },
     {
      "type": "toilet",
@@ -166,7 +169,7 @@
       "name": "Geladeira",
       "capacity": 25,
       "refrigerated": true,
-      "owner": "player",
+      "owner": "owner",
       "contents": {
        "pao": 1,
        "agua": 2,
@@ -184,7 +187,7 @@
      ],
      "rot": 90,
      "id": "fogao_jogador",
-     "owner": "player"
+     "owner": "owner"
     },
     {
      "type": "sink",
@@ -945,6 +948,221 @@
    ]
   },
   {
+   "id": "casa_5",
+   "name": "Casa nº 5 (à venda)",
+   "type": "house",
+   "center": [
+    -46,
+    -29
+   ],
+   "size": [
+    9,
+    8.0
+   ],
+   "height": 2.9,
+   "style": {
+    "wall": "#e6d3b3",
+    "roof": "#5f6b4a",
+    "trim": "#f3eee2",
+    "floor": "#9a7a55",
+    "accent": "#5f8a6a"
+   },
+   "owner": "owner",
+   "private": true,
+   "doors": [
+    {
+     "id": "porta_casa_5",
+     "side": "w",
+     "offset": 0.0,
+     "width": 1.1,
+     "locked": true,
+     "keys": [
+      "owner"
+     ],
+     "label": "Porta"
+    }
+   ],
+   "windows": [
+    {
+     "side": "w",
+     "offset": 2.6,
+     "width": 1.6
+    },
+    {
+     "side": "e",
+     "offset": -2.0,
+     "width": 1.4
+    },
+    {
+     "side": "n",
+     "offset": 0.0,
+     "width": 1.2
+    },
+    {
+     "side": "s",
+     "offset": 0.5,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "bed",
+     "pos": [
+      2.9,
+      -2.98
+     ],
+     "rot": 270,
+     "id": "cama_casa5",
+     "owner": "owner",
+     "spot": "casa5_cama"
+    },
+    {
+     "type": "wardrobe",
+     "pos": [
+      3.65,
+      -1.53
+     ],
+     "rot": 90,
+     "container": {
+      "id": "guarda_roupa_casa5",
+      "name": "Guarda-roupa",
+      "capacity": 60,
+      "owner": "owner"
+     }
+    },
+    {
+     "type": "nightstand",
+     "pos": [
+      3.6,
+      -2.12
+     ],
+     "rot": 90
+    },
+    {
+     "type": "partition",
+     "from": [
+      4.0,
+      1.1049999999999998
+     ],
+     "to": [
+      1.7,
+      1.1049999999999998
+     ]
+    },
+    {
+     "type": "shower",
+     "pos": [
+      3.2,
+      3.15
+     ],
+     "rot": 270,
+     "id": "chuveiro_casa5",
+     "owner": "owner"
+    },
+    {
+     "type": "toilet",
+     "pos": [
+      3.5,
+      1.78
+     ],
+     "rot": 90
+    },
+    {
+     "type": "fridge",
+     "pos": [
+      -0.2,
+      3.4
+     ],
+     "rot": 0,
+     "container": {
+      "id": "geladeira_casa5",
+      "name": "Geladeira",
+      "capacity": 25,
+      "refrigerated": true,
+      "owner": "owner"
+     }
+    },
+    {
+     "type": "stove",
+     "pos": [
+      -1.3,
+      3.4
+     ],
+     "rot": 0,
+     "id": "fogao_casa5",
+     "owner": "owner"
+    },
+    {
+     "type": "sink",
+     "pos": [
+      -2.4,
+      3.4
+     ],
+     "rot": 0,
+     "id": "pia_casa5"
+    },
+    {
+     "type": "table",
+     "pos": [
+      -1.9,
+      1.36
+     ],
+     "rot": 270,
+     "spot": "casa5_cozinha"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -1.1,
+      1.36
+     ],
+     "rot": 90
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -2.7,
+      1.36
+     ],
+     "rot": 270
+    },
+    {
+     "type": "sofa",
+     "pos": [
+      -1.8,
+      -3.19
+     ],
+     "rot": 180,
+     "id": "sofa_casa5",
+     "spot": "casa5_sofa"
+    },
+    {
+     "type": "tv",
+     "pos": [
+      -1.8,
+      -1.02
+     ],
+     "rot": 0
+    },
+    {
+     "type": "rug",
+     "pos": [
+      -1.8,
+      -2.04
+     ],
+     "rot": 270
+    },
+    {
+     "type": "plant",
+     "pos": [
+      -3.5,
+      0.76
+     ],
+     "rot": 270
+    }
+   ]
+  },
+  {
    "id": "mercadinho",
    "name": "Mercadinho Bom Preço",
    "type": "shop",
@@ -1231,6 +1449,78 @@
      "pose": "stand"
     }
    }
+  },
+  {
+   "id": "garagem_3",
+   "name": "Garagem nº 3 (à venda)",
+   "type": "garage",
+   "center": [
+    45,
+    -30
+   ],
+   "size": [
+    7,
+    6.5
+   ],
+   "height": 3.2,
+   "style": {
+    "wall": "#c8c2b4",
+    "roof": "#4b4f57",
+    "trim": "#e4e0d6",
+    "floor": "#7a7d82",
+    "accent": "#7a8a99"
+   },
+   "owner": "owner",
+   "private": true,
+   "doors": [
+    {
+     "id": "portao_garagem_3",
+     "side": "e",
+     "offset": 0.0,
+     "width": 3.6,
+     "locked": true,
+     "keys": [
+      "owner"
+     ],
+     "label": "Portão da garagem",
+     "rollup": true,
+     "manual": true
+    }
+   ],
+   "windows": [
+    {
+     "side": "n",
+     "offset": 0.0,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "workbench",
+     "id": "bancada_garagem_3",
+     "pos": [
+      -2.8,
+      -1.2
+     ],
+     "rot": 90,
+     "len": 2.6
+    },
+    {
+     "type": "crate",
+     "pos": [
+      -2.9,
+      2.4
+     ],
+     "rot": 0,
+     "container": {
+      "id": "prateleira_garagem_3",
+      "name": "Prateleira da garagem",
+      "capacity": 80,
+      "owner": "owner"
+     }
+    }
+   ],
+   "spots": {}
   },
   {
    "id": "brasa",
@@ -1526,6 +1816,19 @@
       -0.5
      ],
      "rot": 0
+    },
+    {
+     "type": "counter",
+     "id": "balcao_oficina",
+     "pos": [
+      3.0,
+      2.6
+     ],
+     "rot": 0,
+     "len": 2.0,
+     "shop": "oficina",
+     "staff_spot": "oficina_rafael",
+     "register": true
     },
     {
      "type": "workbench",
@@ -1880,7 +2183,39 @@
    "pos": [
     -45.5,
     -8.3
-   ]
+   ],
+   "id": "caixa_correio_8",
+   "property": "casa_jogador"
+  },
+  {
+   "type": "sale_sign",
+   "pos": [
+    -52.0,
+    -25.5
+   ],
+   "rot": -90,
+   "id": "placa_casa_5",
+   "property": "casa_5"
+  },
+  {
+   "type": "sale_sign",
+   "pos": [
+    51.6,
+    -34.3
+   ],
+   "rot": 90,
+   "id": "placa_garagem_3",
+   "property": "garagem_3"
+  },
+  {
+   "type": "sale_sign",
+   "pos": [
+    -24.0,
+    52.0
+   ],
+   "rot": 180,
+   "id": "placa_carro_usado",
+   "vehicle": "carro_usado"
   },
   {
    "type": "mailbox",
@@ -2055,14 +2390,6 @@
    "type": "tree",
    "pos": [
     -53.4,
-    -33
-   ],
-   "variant": 2
-  },
-  {
-   "type": "tree",
-   "pos": [
-    -53.4,
     -19
    ],
    "variant": 1
@@ -2418,14 +2745,6 @@
     -47
    ],
    "variant": 0
-  },
-  {
-   "type": "tree",
-   "pos": [
-    53.4,
-    -33
-   ],
-   "variant": 2
   },
   {
    "type": "tree",
@@ -3141,6 +3460,30 @@
    "rot": 180,
    "pose": "stand"
   },
+  "porta_silva": {
+   "pos": [
+    -20.0,
+    -47.6
+   ],
+   "rot": 180,
+   "pose": "stand"
+  },
+  "portaria_predio": {
+   "pos": [
+    -16.0,
+    50.6
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
+  "oficina_entrega": {
+   "pos": [
+    -36.0,
+    51.0
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
   "lixeira_mercadinho_spot": {
    "pos": [
     12.8,
@@ -3248,6 +3591,24 @@
     -24.0,
     14.5,
     -7.5
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    48.5,
+    -32.0,
+    55.5,
+    -28.0
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    -30.5,
+    49.0,
+    -23.5,
+    52.5
    ]
   },
   {
@@ -3361,6 +3722,23 @@
    "rot": 0,
    "owner": "paula",
    "color": "#3d7a50"
+  },
+  {
+   "id": "carro_usado",
+   "type": "sedan",
+   "pos": [
+    -27.0,
+    50.8
+   ],
+   "rot": 90,
+   "owner": "rafael",
+   "color": "#6d8f6a",
+   "fuel": 8,
+   "damage": 35,
+   "for_sale": {
+    "price": 700,
+    "seller": "rafael"
+   }
   },
   {
    "id": "picape_antonio",
@@ -3500,7 +3878,11 @@
   "hour": 7,
   "minute": 30,
   "player_items": {
-   "agua": 1
-  }
+   "agua": 1,
+   "camiseta_azul": 1
+  },
+  "player_equipped": [
+   "camiseta_azul"
+  ]
  }
 }

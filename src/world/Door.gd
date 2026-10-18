@@ -138,12 +138,19 @@ func player_has_key() -> bool:
 	var keys: Array = def.get("keys", [])
 	if keys.has("player"):
 		return true
+	if keys.has("owner") and Game.property.owns_or_rents(building_id):
+		return true
 	if keys.has("player_job") and Game.job.employed:
 		return true
 	for s in Game.player.inventory.items:
 		if Data.item(s.id).get("opens", []).has(door_id):
 			return true
 	return false
+
+## Chave "legítima" (dono/inquilino/funcionário), em oposição a uma chave achada.
+func player_has_key_by_right() -> bool:
+	var keys: Array = def.get("keys", [])
+	return keys.has("player") or (keys.has("owner") and Game.property.owns_or_rents(building_id)) or (keys.has("player_job") and Game.job.employed)
 
 func npc_has_key(npc_id: String) -> bool:
 	var keys: Array = def.get("keys", [])
@@ -195,7 +202,7 @@ func do_action(player: Node, id: String) -> void:
 			_player_opened = true
 			_set_swing_from(player.global_position)
 			set_open(true)
-			if not def.get("keys", []).has("player") and building_id != "":
+			if not player_has_key_by_right() and building_id != "":
 				world.on_player_used_key(building_id)
 		"unlock_only":
 			Game.world_state.set_door(door_id, is_open, false)

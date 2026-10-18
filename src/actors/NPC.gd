@@ -143,7 +143,14 @@ func _spot_data(id: String) -> Dictionary:
 		var r: Array = Data.map().get("jog_route", [[0, 0]])
 		var p: Array = r[_jog_i % r.size()]
 		return {"pos": Vector3(float(p[0]), 0, float(p[1])), "rot": 0.0, "pose": "stand", "hidden": false, "building": ""}
-	return world.spots.get(id, {})
+	var sp: Dictionary = world.spots.get(id, {})
+	# Pedestres passeando se espalham em volta do ponto em vez de empilhar no mesmo lugar.
+	if activity == "wander" and not sp.is_empty() and sp.get("building", "") == "" and not sp.get("hidden", false):
+		sp = sp.duplicate()
+		var a := randf() * TAU
+		sp.pos = sp.pos + Vector3(cos(a), 0, sin(a)) * randf_range(1.2, 2.6)
+		sp.rot = randf_range(-180.0, 180.0)
+	return sp
 
 func _snap_to(id: String) -> void:
 	spot_id = id
@@ -411,24 +418,53 @@ func _react_to_world() -> void:
 func interact_point() -> Vector3:
 	return global_position
 
+## Pessoas têm prioridade sobre móveis no foco; feridos, prioridade máxima.
+func focus_priority() -> float:
+	return 1.2 if state == "knocked" else 0.35
+
 func interact_title() -> String:
 	var role: String = def.get("role", "")
 	return "%s — %s" % [display_name, tr(role)] if role != "" else display_name
+
+func building_at_spot() -> String:
+	return str(spot.get("building", ""))
 
 func get_actions(_player: Node) -> Array:
 	if state == "hidden":
 		return []
 	if state == "knocked":
-		return [Interactable.action("help", tr("Ajudar %s a levantar") % display_name)]
+		var acts := [Interactable.action("help", tr("Ajudar %s a levantar") % display_name)]
+		acts.append(Interactable.action("first_aid", tr("Prestar primeiros socorros (kit) — Primeiros socorros %d") % Game.player.skills.level("primeiros_socorros"), Game.player.inventory.has("kit_curativo"), tr("Precisa de um kit de primeiros socorros")))
+		return acts
 	if is_sleeping():
 		return [Interactable.action("none", tr("%s está dormindo") % display_name, false)]
-	return [
-		Interactable.action("talk", tr("Conversar com %s") % display_name),
-		Interactable.action("greet", tr("Cumprimentar")),
-	]
+	var acts: Array = world.extra_npc_actions(self)
+	var counter: Node = _my_counter()
+	if counter:
+		for a in counter.get_actions(_player):
+			if a.id != "talk_staff":
+				acts.append(a)
+	acts.append(Interactable.action("talk", tr("Conversar com %s") % display_name))
+	acts.append(Interactable.action("greet", tr("Cumprimentar")))
+	return acts
 
-func do_action(_player: Node, id: String) -> void:
+## Atendente no balcão: oferece as ações da loja diretamente.
+func _my_counter() -> Node:
+	if state != "at_spot" or activity != "work":
+		return null
+	return world.counter_for_staff(spot_id)
+
+func do_action(player: Node, id: String) -> void:
+	if world.do_extra_npc_action(self, id):
+		return
+	var counter: Node = _my_counter()
+	if counter and id in ["shop", "delivery"]:
+		counter.do_action(player, id)
+		return
 	match id:
+		"first_aid":
+			var t := 4.0 * (1.0 - 0.06 * Game.player.skills.level("primeiros_socorros"))
+			player.start_timed(tr("Prestando primeiros socorros..."), t, _first_aid)
 		"talk":
 			world.start_dialogue(self)
 		"greet":
@@ -475,12 +511,12 @@ func can_witness() -> bool:
 	return visible and state not in ["knocked", "hidden"] and not is_sleeping()
 
 # ------------------------------------------------------------------ atropelamento
-func knock_down(from_dir: Vector3, severity: float, by_player: bool) -> void:
+func knock_down(from_dir: Vector3, severity: float, by_player: bool, duration: float = -1.0) -> void:
 	if state in ["knocked", "hidden"]:
 		return
 	state = "knocked"
 	_hit_by_player = by_player
-	_knock_t = 9.0 + severity * 3.0
+	_knock_t = duration if duration > 0.0 else 9.0 + severity * 3.0
 	_shape.disabled = true
 	visual.set_pose("knocked")
 	visual.position = Vector3(0, 0.12, 0)
@@ -494,6 +530,19 @@ func knock_down(from_dir: Vector3, severity: float, by_player: bool) -> void:
 	Game.world_state.npcs[npc_id] = st
 	if by_player:
 		world.on_npc_hit(self, severity)
+
+func _first_aid() -> void:
+	if state != "knocked" or not Game.player.inventory.has("kit_curativo"):
+		return
+	Game.player.inventory.remove("kit_curativo", 1)
+	Game.player.skills.add_xp("primeiros_socorros", 30)
+	Game.relations.change(npc_id, 10)
+	Game.relations.change_reputation(2)
+	Game.relations.add_memory(npc_id, "prestou_socorro", Clock.day())
+	var st: Dictionary = Game.world_state.npcs.get(npc_id, {})
+	st.erase("injured_until")
+	Game.world_state.npcs[npc_id] = st
+	help_up()
 
 func help_up() -> void:
 	if state != "knocked":

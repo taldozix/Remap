@@ -11,6 +11,10 @@ const FILES := {
 	"vehicles": "res://data/vehicles.json",
 	"jobs": "res://data/jobs.json",
 	"chatter": "res://data/chatter.json",
+	"traits": "res://data/traits.json",
+	"properties": "res://data/properties.json",
+	"events": "res://data/events.json",
+	"deliveries": "res://data/deliveries.json",
 	"map": "res://data/map/vila_aurora.json",
 }
 
@@ -89,6 +93,24 @@ func job(id: String) -> Dictionary:
 
 func chatter() -> Dictionary:
 	return db.get("chatter", {})
+
+func trait_def(id: String) -> Dictionary:
+	return db.get("traits", {}).get(id, {})
+
+func traits() -> Dictionary:
+	return db.get("traits", {})
+
+func property(id: String) -> Dictionary:
+	return db.get("properties", {}).get(id, {})
+
+func properties() -> Dictionary:
+	return db.get("properties", {})
+
+func events() -> Dictionary:
+	return db.get("events", {})
+
+func deliveries() -> Dictionary:
+	return db.get("deliveries", {})
 
 func map() -> Dictionary:
 	return db.get("map", {})

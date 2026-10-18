@@ -22,6 +22,19 @@ def mirror(f):
     g["rot"] = (180 - f.get("rot", 0)) % 360
     return g
 
+def rot_w(f):
+    """Gira o layout de uma casa (porta ao sul) para porta a oeste, mantendo a casa 9x8:
+    troca os eixos e escala para caber (layout aproximado e coerente)."""
+    g = dict(f)
+    if f["type"] == "partition":
+        g["from"] = [-f["from"][1] * 1.0, f["from"][0] * 0.85]
+        g["to"] = [-f["to"][1] * 1.0, f["to"][0] * 0.85]
+        return g
+    x, z = f["pos"]
+    g["pos"] = [round(-z * 1.0, 2), round(x * 0.85, 2)]
+    g["rot"] = (f.get("rot", 0) - 90) % 360
+    return g
+
 def house(bid, name, center, w, door_side, owner, style, extra_furniture=None, containers=None, prefix=None):
     p = prefix or bid
     hw = w / 2.0
@@ -47,14 +60,15 @@ def house(bid, name, center, w, door_side, owner, style, extra_furniture=None, c
         {"type": "plant", "pos": [hw - 3.6, 3.5], "rot": 0},
     ]
     f += extra_furniture or []
+    if door_side == "w":
+        f = [rot_w(x) for x in f]
     if door_side == "n":
         f = [mirror(x) if x["type"] != "partition" else
              dict(x, **{"from": [x["from"][0], -x["from"][1]], "to": [x["to"][0], -x["to"][1]]}) for x in f]
     door_offset = -2.0 if w >= 10 else 0.0
-    sides = ["e", "w"]
     windows = [{"side": door_side, "offset": 2.4 if w >= 10 else 2.6, "width": 1.6},
-               {"side": "n" if door_side == "s" else "s", "offset": -2.0, "width": 1.4},
-               {"side": "e", "offset": 0.0, "width": 1.2}, {"side": "w", "offset": 0.5, "width": 1.2}]
+               {"side": {"s": "n", "n": "s", "w": "e"}[door_side], "offset": -2.0, "width": 1.4},
+               {"side": "n" if door_side == "w" else "e", "offset": 0.0, "width": 1.2}, {"side": "s" if door_side == "w" else "w", "offset": 0.5, "width": 1.2}]
     return {
         "id": bid, "name": name, "type": "house", "center": center, "size": [w, 8.0], "height": 2.9,
         "style": style, "owner": owner, "private": True,
@@ -66,10 +80,10 @@ def house(bid, name, center, w, door_side, owner, style, extra_furniture=None, c
 buildings = []
 
 # ---------------------------------------------------------------- NW: residencial
-buildings.append(house("casa_jogador", "Sua casa (nº 8)", [-42, -17], 10, "s", "player",
+buildings.append(house("casa_jogador", "Casa nº 8", [-42, -17], 10, "s", "owner",
     {"wall": "#e9dcc3", "roof": "#8a3d30", "trim": "#f6f1e7", "floor": "#a7835a", "accent": "#3f6e8c"},
     extra_furniture=[{"type": "note", "pos": [2.1, 1.9], "rot": 0, "id": "bilhete_boas_vindas", "note": "boas_vindas"}],
-    containers={"wardrobe": {"contents": {"mochila": 1, "celular_velho": 1}},
+    containers={"wardrobe": {"contents": {"mochila": 1, "celular_velho": 1, "casaco": 1, "capa_chuva": 1, "camiseta_branca": 1}},
                 "fridge": {"contents": {"pao": 1, "agua": 2, "queijo": 1, "banana": 3, "miojo": 2}}}, prefix="jogador"))
 buildings.append(house("casa_lucia", "Casa da Dona Lúcia (nº 10)", [-20, -17], 9, "s", "lucia",
     {"wall": "#d8e3c8", "roof": "#6b4a3a", "trim": "#ffffff", "floor": "#9c7b56", "accent": "#7a5ea8"},
@@ -83,6 +97,9 @@ buildings.append(house("casa_marcos", "Casa do Marcos (nº 12)", [-40, -42], 9, 
 buildings.append(house("casa_silva", "Casa dos Silva (nº 14)", [-20, -42], 9, "n", "paula",
     {"wall": "#f0d2b8", "roof": "#7a2f2f", "trim": "#ffffff", "floor": "#a08060", "accent": "#2f7a5f"},
     containers={"fridge": {"contents": {"agua": 3, "sanduiche": 1}}}, prefix="silva"))
+
+buildings.append(house("casa_5", "Casa nº 5 (à venda)", [-46, -29], 9, "w", "owner",
+    {"wall": "#e6d3b3", "roof": "#5f6b4a", "trim": "#f3eee2", "floor": "#9a7a55", "accent": "#5f8a6a"}, prefix="casa5"))
 
 # ---------------------------------------------------------------- NE: comércio
 buildings.append({
@@ -126,6 +143,19 @@ buildings.append({
         "penhores_balcao": {"pos": [0.0, -1.3], "rot": 180, "pose": "stand"},
         "penhores_cliente": {"pos": [0.6, 0.7], "rot": 0, "pose": "stand"},
     },
+})
+
+buildings.append({
+    "id": "garagem_3", "name": "Garagem nº 3 (à venda)", "type": "garage", "center": [45, -30], "size": [7, 6.5], "height": 3.2,
+    "style": {"wall": "#c8c2b4", "roof": "#4b4f57", "trim": "#e4e0d6", "floor": "#7a7d82", "accent": "#7a8a99"},
+    "owner": "owner", "private": True,
+    "doors": [{"id": "portao_garagem_3", "side": "e", "offset": 0.0, "width": 3.6, "locked": True, "keys": ["owner"], "label": "Portão da garagem", "rollup": True, "manual": True}],
+    "windows": [{"side": "n", "offset": 0.0, "width": 1.2}],
+    "furniture": [
+        {"type": "workbench", "id": "bancada_garagem_3", "pos": [-2.8, -1.2], "rot": 90, "len": 2.6},
+        {"type": "crate", "pos": [-2.9, 2.4], "rot": 0, "container": {"id": "prateleira_garagem_3", "name": "Prateleira da garagem", "capacity": 80, "owner": "owner"}},
+    ],
+    "spots": {},
 })
 
 # ---------------------------------------------------------------- SE: drive-thru
@@ -172,6 +202,7 @@ buildings.append({
     "windows": [{"side": "e", "offset": 0.0, "width": 2.0}],
     "furniture": [
         {"type": "lift", "pos": [-2.2, -0.5], "rot": 0},
+        {"type": "counter", "id": "balcao_oficina", "pos": [3.0, 2.6], "rot": 0, "len": 2.0, "shop": "oficina", "staff_spot": "oficina_rafael", "register": True},
         {"type": "workbench", "pos": [3.0, -4.4], "rot": 180, "len": 3.0},
         {"type": "chest", "pos": [5.4, -1.0], "rot": 90, "color": "#b33a2a",
          "container": {"id": "caixa_ferramentas_rafael", "name": "Caixa de ferramentas", "capacity": 30, "owner": "rafael", "contents": {"radio_velho": 1, "lata_aluminio": 2}}},
@@ -207,6 +238,9 @@ spots = {
     "praca_conversa_1": {"pos": [-19.5, 28.0], "rot": -60, "pose": "stand"},
     "praca_conversa_2": {"pos": [-18.2, 28.8], "rot": 120, "pose": "stand"},
     "posto_frentista": {"pos": [30.0, -38.5], "rot": 180, "pose": "stand"},
+    "porta_silva": {"pos": [-20.0, -47.6], "rot": 180, "pose": "stand"},
+    "portaria_predio": {"pos": [-16.0, 50.6], "rot": 0, "pose": "stand"},
+    "oficina_entrega": {"pos": [-36.0, 51.0], "rot": 0, "pose": "stand"},
     "lixeira_mercadinho_spot": {"pos": [12.8, -10.8], "rot": -90, "pose": "work"},
 }
 # Praça
@@ -230,7 +264,10 @@ props.append({"type": "pump", "pos": [27, -42], "rot": 0, "id": "bomba_1"})
 props.append({"type": "pump", "pos": [33, -42], "rot": 0, "id": "bomba_2"})
 props.append({"type": "canopy", "pos": [30, -42], "size": [12, 8]})
 props.append({"type": "kiosk", "pos": [-44, 13.5], "rot": 180})
-props.append({"type": "mailbox", "pos": [-45.5, -8.3]})
+props.append({"type": "mailbox", "pos": [-45.5, -8.3], "id": "caixa_correio_8", "property": "casa_jogador"})
+props.append({"type": "sale_sign", "pos": [-52.0, -25.5], "rot": -90, "id": "placa_casa_5", "property": "casa_5"})
+props.append({"type": "sale_sign", "pos": [51.6, -34.3], "rot": 90, "id": "placa_garagem_3", "property": "garagem_3"})
+props.append({"type": "sale_sign", "pos": [-24.0, 52.0], "rot": 180, "id": "placa_carro_usado", "vehicle": "carro_usado"})
 props.append({"type": "mailbox", "pos": [-22.5, -8.3]})
 props.append({"type": "sign", "pos": [44.5, 8.6], "rot": 180, "text": "DRIVE-THRU ➜"})
 props.append({"type": "sign", "pos": [-12.5, 9.0], "rot": 180, "text": "PRAÇA DA AURORA"})
@@ -257,7 +294,8 @@ for c in ROADS["zs"]:
                 trees.add((x + 5, round(z, 1)))
 # remove árvores na frente de entradas (portas, garagem, drive-thru)
 blocked = [(-44, -7.5), (-32.5, -7.5), (-20, -7.5), (19, -7.5), (42, -7.5), (-40, -52.5), (-20, -52.5),
-           (-42, 52.5), (-16, 52.5), (45, 7.5), (13, 7.5), (30, -52.5), (-11.5, -52.5), (11, -7.5), (-33, 52.5)]
+           (-42, 52.5), (-16, 52.5), (45, 7.5), (13, 7.5), (30, -52.5), (-11.5, -52.5), (11, -7.5), (-33, 52.5),
+           (53, -30), (-53, -29), (-27, 52.5)]
 def ok_tree(x, z):
     return all(abs(x - bx) > 4.5 or abs(z - bz) > 4.0 for bx, bz in blocked)
 for x, z in sorted(trees):
@@ -291,6 +329,8 @@ areas = [
     {"type": "asphalt", "rect": [-48.0, 49.0, -36.0, 52.5]},
     {"type": "asphalt", "rect": [-36.0, 39.0, -30.0, 52.5]},
     {"type": "asphalt", "rect": [8.0, -24.0, 14.5, -7.5]},
+    {"type": "asphalt", "rect": [48.5, -32.0, 55.5, -28.0]},
+    {"type": "asphalt", "rect": [-30.5, 49.0, -23.5, 52.5]},
     {"type": "drive_lane", "points": [[42, 1.75], [45.5, 6], [46, 12], [46, 33], [44, 37.5], [39.5, 37.5], [37, 34], [37, 27], [37, 18], [35, 15], [16, 15], [13, 12], [12.5, 7], [14.5, 2.5]]},
 ]
 
@@ -299,6 +339,8 @@ vehicles = [
     {"id": "van_rafael", "type": "vanza", "pos": [-33.0, 46.0], "rot": 0, "owner": "rafael", "color": "#e8e4d8"},
     {"id": "carro_sandra", "type": "sedan", "pos": [14.5, 43.0], "rot": 90, "owner": "sandra", "color": "#7d2b3a"},
     {"id": "carro_paula", "type": "sedan", "pos": [-11.5, -43.0], "rot": 0, "owner": "paula", "color": "#3d7a50"},
+    {"id": "carro_usado", "type": "sedan", "pos": [-27.0, 50.8], "rot": 90, "owner": "rafael", "color": "#6d8f6a", "fuel": 8, "damage": 35,
+     "for_sale": {"price": 700, "seller": "rafael"}},
     {"id": "picape_antonio", "type": "picape", "pos": [11.2, -19.0], "rot": 180, "owner": "antonio", "color": "#c7b48a"},
 ]
 
@@ -325,7 +367,7 @@ data = {
     "drivethru": drivethru, "notes": notes,
     "jog_route": [[-48.5, 11.5], [-12, 11.5], [-12, 33], [-48.5, 33]],
     "wander_spots": ["praca_banco_5", "ponto_onibus", "mercadinho_cliente_2", "praca_conversa_1", "brasa_entrada", "penhores_cliente"],
-    "start": {"player_pos": [-44.0, -18.6], "player_rot": 180, "money": 60, "hour": 7, "minute": 30, "player_items": {"agua": 1}},
+    "start": {"player_pos": [-44.0, -18.6], "player_rot": 180, "money": 60, "hour": 7, "minute": 30, "player_items": {"agua": 1, "camiseta_azul": 1}, "player_equipped": ["camiseta_azul"]},
 }
 
 out = os.path.join(os.path.dirname(__file__), "..", "data", "map", "vila_aurora.json")

@@ -30,7 +30,7 @@ func setup(id: String, state: Dictionary, p_world: Node) -> void:
 
 func _ready() -> void:
 	collision_layer = 16
-	collision_mask = 1 | 16
+	collision_mask = 1 | 2 | 16
 	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
 	var st: Dictionary = Game.world_state.vehicles[vehicle_id]
 	var size: Array = data.get("size", [1.8, 1.4, 4.2])
@@ -84,6 +84,8 @@ func owner_id() -> String:
 	return str(Game.world_state.vehicles[vehicle_id].get("owner", ""))
 
 func is_players() -> bool:
+	if Game.world_state.vehicles.get(vehicle_id, {}).has("for_sale"):
+		return false
 	return owner_id() == "player" or Game.has_flag("roubado_" + vehicle_id)
 
 func interact_point() -> Vector3:
@@ -91,17 +93,53 @@ func interact_point() -> Vector3:
 
 func interact_title() -> String:
 	var who := tr("seu") if owner_id() == "player" else tr(Data.npc(owner_id()).get("name", "?"))
+	if Game.world_state.vehicles.get(vehicle_id, {}).has("for_sale"):
+		who = tr("à venda")
 	return "%s (%s)" % [display_name(), who]
 
 func get_actions(_player: Node) -> Array:
 	var out: Array = []
+	var st: Dictionary = Game.world_state.vehicles.get(vehicle_id, {})
+	if st.has("for_sale"):
+		var reason: String = world.shop_unavailable_reason("oficina", null) if world else ""
+		out.append(Interactable.action("buy", tr("Comprar %s por R$ %d") % [display_name(), int(st.for_sale.price)], reason == "" and Game.player.money >= int(st.for_sale.price), reason if reason != "" else tr("Dinheiro insuficiente")))
+		return out
 	if is_players():
-		out.append(Interactable.action("enter", tr("Entrar e dirigir [%s]") % Settings.primary_key_text("vehicle"), damage < 100.0, tr("Motor destruído — precisa de guincho/oficina")))
+		out.append(Interactable.action("enter", tr("Entrar e dirigir [%s]") % Settings.primary_key_text("vehicle"), damage < 100.0, tr("Motor destruído — precisa de conserto")))
 		out.append(Interactable.action("trunk", tr("Abrir porta-malas")))
+		if damage > 0.5:
+			var has_kit := Game.player.inventory.has("kit_reparo")
+			out.append(Interactable.action("repair", tr("Consertar com kit de reparo (Mecânica %d)") % Game.player.skills.level("mecanica"), has_kit, tr("Precisa de um kit de reparo (Oficina do Rafael)")))
+		if owner_id() == "player" and world and world.is_vehicle_near_spot(vehicle_id, "oficina_rafael", 18.0):
+			var reason2: String = world.shop_unavailable_reason("oficina", null)
+			out.append(Interactable.action("sell", tr("Vender ao Rafael por R$ %d") % Game.vehicle_sale_value(vehicle_id), reason2 == "", reason2))
 	else:
 		out.append(Interactable.action("locked", tr("Trancado (pertence a %s)") % tr(Data.npc(owner_id()).get("name", "?")), false))
 		out.append(Interactable.action("breakin", tr("Arrombar a porta (crime)")))
 	return out
+
+## Conserto feito pelo próprio jogador: Mecânica aumenta o dano reparado e a velocidade.
+## Numa garagem própria (bancada), o conserto rende 50% a mais.
+func repair_amount() -> float:
+	var lvl := Game.player.skills.level("mecanica")
+	var amount := 12.0 + 4.0 * lvl
+	var bid: String = world.building_at(global_position) if world else ""
+	if bid != "" and Data.property(bid).get("type", "") == "garagem" and Game.property.owns(bid):
+		amount *= 1.5
+	return amount
+
+func _repair_with_kit() -> void:
+	if not Game.player.inventory.has("kit_reparo"):
+		return
+	Game.player.inventory.remove("kit_reparo", 1)
+	var amount := repair_amount()
+	damage = max(0.0, damage - amount)
+	Game.player.skills.add_xp("mecanica", 20.0)
+	Game.player.needs.consume({"higiene": 8})
+	_update_damage_fx()
+	save_state()
+	Audio.play_at("door_locked", global_position, -4.0, 0.7)
+	Events.notify.emit(tr("Conserto feito: -%d%% de dano (agora %d%%).") % [int(amount), int(damage)], "good")
 
 func get_driver_actions(_player: Node) -> Array:
 	return [Interactable.action("exit", tr("Sair do veículo [%s]") % Settings.primary_key_text("vehicle"))]
@@ -117,6 +155,17 @@ func do_action(player: Node, id: String) -> void:
 			await get_tree().create_timer(0.35).timeout
 			if is_instance_valid(visual):
 				visual.set_door(false)
+		"buy":
+			if Game.buy_vehicle(vehicle_id):
+				Audio.play("cash")
+		"sell":
+			var value := Game.sell_vehicle(vehicle_id)
+			if value > 0:
+				Audio.play("cash")
+				Events.notify.emit(tr("Vendido por R$ %d.") % value, "money")
+		"repair":
+			var t := 6.0 * (1.0 - 0.05 * Game.player.skills.level("mecanica")) * Game.player.needs.work_multiplier()
+			player.start_timed(tr("Consertando o carro..."), t, _repair_with_kit)
 		"trunk":
 			Events.request_container.emit("trunk_" + vehicle_id, tr("Porta-malas — %s") % display_name())
 		"breakin":
@@ -231,7 +280,7 @@ func _physics_process(delta: float) -> void:
 	# Combustível, distância e habilidade
 	var moved := absf(speed) * delta
 	if driver:
-		fuel = max(0.0, fuel - (moved / 1000.0) * float(data.fuel_per_km) * 40.0 * (0.4 + throttle * 0.6) - delta * 0.0004)
+		fuel = max(0.0, fuel - (moved / 1000.0) * float(data.fuel_per_km) * 40.0 * float(Game.player.needs.mods.get("fuel", 1.0)) * (0.4 + throttle * 0.6) - delta * 0.0004)
 		if fuel <= 0.0 and throttle > 0.0 and _hit_cd <= 0.0:
 			_hit_cd = 3.0
 			Events.notify.emit(tr("Sem combustível!"), "bad")

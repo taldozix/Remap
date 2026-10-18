@@ -8,6 +8,8 @@ const DEFS := {
 	"social": {"name": "Social", "desc": "Aumenta a chance de persuadir e as gorjetas."},
 	"direcao": {"name": "Direção", "desc": "Melhora o controle do veículo e reduz danos em batidas."},
 	"condicionamento": {"name": "Condicionamento", "desc": "Cansa menos ao correr e corre mais rápido."},
+	"mecanica": {"name": "Mecânica", "desc": "Conserta mais dano do carro por kit de reparo e mais rápido."},
+	"primeiros_socorros": {"name": "Primeiros socorros", "desc": "Curativos tratam mais saúde e dor; permite socorrer feridos."},
 }
 const THRESHOLDS := [0, 50, 130, 250, 420, 650, 950, 1350, 1850, 2500, 3300]
 

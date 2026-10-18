@@ -14,6 +14,8 @@ var vehicle: Node = null
 var timed: Dictionary = {}   # {"label", "t", "dur", "cb", "sound"}
 var focus: Node = null
 var focus_actions: Array = []
+var focus_candidates: Array = []
+var _cycle := 0
 var input_locked := false
 var _scan_t := 0.0
 var _step_t := 0.0
@@ -34,8 +36,21 @@ func _ready() -> void:
 	add_child(_shape)
 	visual = Humanoid.new()
 	add_child(visual)
-	visual.build(Game.player.appearance)
+	visual.build(Game.player.visual_appearance())
 	add_to_group("player")
+
+## Troca de roupa: reconstrói o visual mantendo pose e posição.
+func rebuild_visual() -> void:
+	var pose := visual.pose
+	var pos := visual.position
+	var vis := visual.visible
+	visual.queue_free()
+	visual = Humanoid.new()
+	add_child(visual)
+	visual.build(Game.player.visual_appearance())
+	visual.position = pos
+	visual.visible = vis
+	visual.set_pose(pose)
 
 func _physics_process(delta: float) -> void:
 	_bump_t -= delta
@@ -125,8 +140,7 @@ func _scan_interactables() -> void:
 		focus = seat
 		focus_actions = _seated_actions()
 		return
-	var best: Node = null
-	var best_score := 1e9
+	var cands: Array = []
 	var fwd := -global_transform.basis.z
 	var space := get_world_3d().direct_space_state
 	for n in get_tree().get_nodes_in_group("interactable"):
@@ -140,22 +154,35 @@ func _scan_interactables() -> void:
 		if d > r:
 			continue
 		var score := d - (diff.normalized().dot(fwd) * 0.7 if d > 0.05 else 0.7)
-		if score >= best_score:
-			continue
+		if n.has_method("focus_priority"):
+			score -= n.focus_priority()
 		var q := PhysicsRayQueryParameters3D.create(global_position + Vector3(0, 1.1, 0), p + Vector3(0, 1.0, 0), 1)
 		var hit := space.intersect_ray(q)
 		if not hit.is_empty() and hit.position.distance_to(p + Vector3(0, 1.0, 0)) > 0.95:
 			continue
-		best = n
-		best_score = score
-	if best:
-		focus = best
-		focus_actions = best.get_actions(self)
+		cands.append([score, n])
+	cands.sort_custom(func(a, b): return a[0] < b[0])
+	var nodes: Array = cands.map(func(c): return c[1])
+	if nodes != focus_candidates:
+		# Mantém o alvo escolhido com [T] enquanto ele continuar ao alcance.
+		var keep = focus_candidates[_cycle % focus_candidates.size()] if not focus_candidates.is_empty() else null
+		focus_candidates = nodes
+		_cycle = nodes.find(keep) if is_instance_valid(keep) and nodes.has(keep) else 0
+	if not nodes.is_empty():
+		focus = nodes[_cycle % nodes.size()]
+		focus_actions = focus.get_actions(self)
+
+## Alterna entre os alvos ao alcance (útil em lugares cheios de gente e objetos).
+func cycle_target() -> void:
+	if focus_candidates.size() > 1:
+		_cycle = (_cycle + 1) % focus_candidates.size()
+		_scan_t = 0.0
+		_scan_interactables()
 
 func _seated_actions() -> Array:
 	var out := [Interactable.action("stand", tr("Levantar"))]
 	out.append(Interactable.action("wait", tr("Esperar 1 hora")))
-	if state == "lying" and seat and seat.kind == "bed" and seat.owner_id == "player":
+	if state == "lying" and seat and seat.kind == "bed" and Game.is_mine(seat.owner_id, seat.building_id):
 		out.append(Interactable.action("sleep", tr("Dormir...")))
 	return out
 
@@ -164,6 +191,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("interact"):
 		_do_focus_action(-1)
+	elif event.is_action_pressed("cycle_target"):
+		cycle_target()
 	elif event.is_action_pressed("vehicle"):
 		if state == "driving":
 			exit_vehicle()

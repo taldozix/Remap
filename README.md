@@ -4,13 +4,14 @@ Um RPG de mundo aberto sobre **viver** numa cidade simulada: a profundidade sist
 Project Zomboid, a liberdade urbana de GTA e a imersão de Red Dead Redemption 2 — sem zumbis,
 com identidade, cidade e personagens originais.
 
-Este repositório contém o **primeiro protótipo jogável** (Fase 0): um bairro pequeno, porém vivo,
-onde é possível trabalhar num drive-thru, fazer compras, cuidar das necessidades, dirigir, conversar,
-resolver uma missão de várias formas e salvar o progresso.
+Este repositório contém o **protótipo jogável** (Fases 0 e 1): um bairro pequeno, porém vivo,
+onde é possível trabalhar num drive-thru ou como entregador, fazer compras, cuidar das necessidades
+(inclusive frio, chuva e dor), dirigir, comprar casa, garagem e carro, consertar o próprio carro,
+conversar, resolver uma missão de várias formas, reagir a eventos na rua e salvar o progresso.
 
 - **Engine:** Godot 4.4 (GDScript) — abra `project.godot` e pressione F5.
 - **Testes:** `GODOT=/caminho/do/godot tools/run_tests.sh`
-  (218 verificações de unidade + teste de aceitação dos 9 critérios do protótipo).
+  (283 verificações de unidade + testes de aceitação do protótipo e da Fase 1).
 
 ## Capturas (renderizador de compatibilidade/OpenGL)
 

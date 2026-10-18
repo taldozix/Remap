@@ -1,0 +1,78 @@
+{
+	"atletico": {
+		"name": "Atlético",
+		"pro": "Começa com Condicionamento 2; correr cansa 25% menos.",
+		"con": "Sente fome 15% mais rápido.",
+		"skills": {
+			"condicionamento": 2
+		},
+		"mods": {
+			"run_fatigue": 0.75,
+			"fome": 1.15
+		}
+	},
+	"bom_de_papo": {
+		"name": "Bom de papo",
+		"pro": "Começa com Social 2 (persuasão e gorjetas melhores).",
+		"con": "Dorme tarde: sono acumula 10% mais rápido.",
+		"skills": {
+			"social": 2
+		},
+		"mods": {
+			"sono": 1.1
+		}
+	},
+	"cozinheiro": {
+		"name": "Mão de cozinheiro",
+		"pro": "Começa com Culinária 2 (mais rápido na chapa).",
+		"con": "Belisca o tempo todo: fome 10% mais rápida.",
+		"skills": {
+			"culinaria": 2
+		},
+		"mods": {
+			"fome": 1.1
+		}
+	},
+	"mao_na_graxa": {
+		"name": "Mão na graxa",
+		"pro": "Começa com Mecânica 2 (consertos melhores).",
+		"con": "Vive sujo: higiene piora 25% mais rápido.",
+		"skills": {
+			"mecanica": 2
+		},
+		"mods": {
+			"higiene": 1.25
+		}
+	},
+	"motorista_nato": {
+		"name": "Motorista nato",
+		"pro": "Começa com Direção 2.",
+		"con": "Pé pesado: o carro gasta 15% mais combustível.",
+		"skills": {
+			"direcao": 2
+		},
+		"mods": {
+			"fuel": 1.15
+		}
+	},
+	"socorrista": {
+		"name": "Ex-socorrista",
+		"pro": "Começa com Primeiros socorros 2.",
+		"con": "Lembra demais das coisas: sente dor 20% mais.",
+		"skills": {
+			"primeiros_socorros": 2
+		},
+		"mods": {
+			"dor": 1.2
+		}
+	},
+	"estomago_forte": {
+		"name": "Estômago de avestruz",
+		"pro": "Comida estragada não causa enjoo.",
+		"con": "Sede 10% mais rápida.",
+		"mods": {
+			"no_nausea": true,
+			"sede": 1.1
+		}
+	}
+}

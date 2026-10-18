@@ -102,6 +102,13 @@ func migrate(data: Dictionary, from_version: int) -> Dictionary:
 		if not d.has("law"):
 			d["law"] = {}
 		d["version"] = 1
+	if int(d.get("version", 1)) < 2:
+		# v2: dono "owner" nas casas, roupas vestidas, traços, entregas e eventos.
+		var pl: Dictionary = d.get("player", {})
+		if not pl.has("traits"):
+			pl["traits"] = []
+		d["player"] = pl
+		d["version"] = 2
 	return d
 
 ## Slot mais recente (para "Continuar").
@@ -131,8 +138,9 @@ func load_and_play(slot: String) -> bool:
 	get_tree().change_scene_to_file("res://src/world/GameWorld.tscn")
 	return true
 
-func start_new_game(player_name: String = "", appearance: Dictionary = {}) -> void:
+func start_new_game(player_name: String = "", appearance: Dictionary = {}, traits: Array = []) -> void:
 	Game.new_game()
+	Game.player.apply_traits(traits)
 	if player_name.strip_edges() != "":
 		Game.player.name = player_name.strip_edges()
 	if not appearance.is_empty():

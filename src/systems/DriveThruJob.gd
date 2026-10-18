@@ -80,7 +80,7 @@ func clock_out(reason: String = "normal") -> Dictionary:
 		return {}
 	on_shift = false
 	var hours := float(shift.minutes) / 60.0
-	var wage_pay := int(round(hours * wage()))
+	var wage_pay := int(round((hours + float(shift.get("extra", 0.0)) / 60.0) * wage()))
 	if reason == "abandono":
 		wage_pay = int(wage_pay * 0.5)
 		add_warning(tr("abandonou o turno"))
@@ -136,6 +136,8 @@ func tick(minutes: float, hour_f: float, player_in_area: bool) -> Dictionary:
 	if not is_open(hour_f):
 		return clock_out("fechamento")
 	shift.minutes = float(shift.minutes) + minutes
+	if Game.director and Game.director.wage_multiplier() > 1.0:
+		shift.extra = float(shift.get("extra", 0.0)) + minutes * (Game.director.wage_multiplier() - 1.0)
 	for s in stations:
 		var st: Dictionary = stations[s]
 		if st.state == "cooking" or st.state == "ready":

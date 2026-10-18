@@ -1,0 +1,82 @@
+{
+	"carteira_perdida": {
+		"title": "Carteira perdida",
+		"hours": [
+			8,
+			20
+		],
+		"chance": 0.35,
+		"cooldown_days": 2,
+		"if": {},
+		"no_rain": true,
+		"notify": "Alguém deixou cair uma carteira por aqui...",
+		"notify_radius": 30
+	},
+	"pedestre_ferido": {
+		"title": "Pedestre ferido",
+		"hours": [
+			7,
+			21
+		],
+		"chance": 0.18,
+		"cooldown_days": 1,
+		"if": {},
+		"notify": "Um pedestre caiu na calçada e está ferido!",
+		"notify_radius": 45
+	},
+	"promocao_mercadinho": {
+		"title": "Promoção relâmpago",
+		"hours": [
+			9,
+			17
+		],
+		"chance": 0.15,
+		"cooldown_days": 2,
+		"if": {},
+		"notify": "Promoção relâmpago no Mercadinho Bom Preço: 25% de desconto por 2 horas!",
+		"duration": 120,
+		"discount": 0.25
+	},
+	"turno_extra": {
+		"title": "Falta gente no Brasa",
+		"hours": [
+			9,
+			15
+		],
+		"chance": 0.25,
+		"cooldown_days": 1,
+		"if": {
+			"employed": true
+		},
+		"notify": "Mensagem da Sandra: \"Faltou gente hoje. Quem trabalhar até as 18h ganha 50% a mais por hora!\"",
+		"until_hour": 18,
+		"multiplier": 1.5
+	},
+	"discussao_praca": {
+		"title": "Discussão na praça",
+		"hours": [
+			17,
+			18.5
+		],
+		"chance": 0.4,
+		"cooldown_days": 2,
+		"if": {},
+		"participants": [
+			"marcos",
+			"tiao"
+		],
+		"notify": "Marcos e Tião estão discutindo na praça.",
+		"notify_radius": 40,
+		"duration": 50,
+		"lines": [
+			[
+				"Sai do meu banco, vagabundo!",
+				"O banco é da praça, não é seu!"
+			],
+			[
+				"Vou chamar a guarda!",
+				"Chama! Chama que eu quero ver!"
+			]
+		]
+	}
+}

@@ -14,6 +14,9 @@ signal reputation_changed(value: int)
 signal job_updated
 signal crime_recorded(crime: Dictionary)
 signal bark(npc_id: String, text: String)
+signal appearance_changed
+signal property_changed(building_id: String)
+signal situation_started(id: String)
 
 # Pedidos de interface (o mundo pede, a UI decide como mostrar).
 signal request_dialogue(npc_id: String, dialogue_id: String)

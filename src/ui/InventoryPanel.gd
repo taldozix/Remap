@@ -163,6 +163,11 @@ func _use() -> void:
 	var item_id: String = s.id
 	p.inventory.take_at(selected, 1)
 	p.needs.consume(it.use)
+	if it.has("use_money"):
+		p.add_money(int(it.use_money), "Dinheiro da carteira")
+		for npc_id in Data.npcs():
+			Game.clear_flag("carteira_dono_" + npc_id)
+		Game.set_flag("ficou_com_carteira")
 	if spoiled:
 		p.needs.consume({"nausea": 4.0, "saude": -8})
 		Events.notify.emit(tr("Estava estragado... Você está enjoado(a)."), "bad")

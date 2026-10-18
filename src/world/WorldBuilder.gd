@@ -739,6 +739,21 @@ func _build_prop(p: Dictionary) -> void:
 		"mailbox":
 			B.call(Vector3(0, 0.55, 0), Vector3(0.08, 1.1, 0.08), DARK)
 			B.call(Vector3(0, 1.15, 0), Vector3(0.45, 0.3, 0.3), Color("b03a2e"))
+			if p.has("id"):
+				_prop_furniture(p, pos, rot)
+		"sale_sign":
+			B.call(Vector3(-0.5, 0.7, 0), Vector3(0.07, 1.4, 0.07), Color("e8e4d8"))
+			B.call(Vector3(0.5, 0.7, 0), Vector3(0.07, 1.4, 0.07), Color("e8e4d8"))
+			B.call(Vector3(0, 1.25, 0), Vector3(1.3, 0.6, 0.05), Color("c0392b"))
+			var sl := Label3D.new()
+			sl.text = tr("VENDE-SE")
+			sl.font_size = 48
+			sl.pixel_size = 0.006
+			sl.outline_size = 8
+			sl.position = xf * Vector3(0, 1.25, -0.04)
+			sl.rotation_degrees.y = rot
+			world.get_node("Props").add_child(sl)
+			_prop_furniture(p, pos, rot)
 		"sign":
 			B.call(Vector3(0, 1.0, 0), Vector3(0.1, 2.0, 0.1), DARK)
 			B.call(Vector3(0, 2.1, 0), Vector3(2.6, 0.6, 0.08), Color("2a3a4a"))
@@ -756,6 +771,16 @@ func _build_prop(p: Dictionary) -> void:
 			var len := a.distance_to(e)
 			deco.box((a + e) * 0.5 + Vector3(0, 0.55, 0), Vector3(len, 1.1, 0.7), Color("3f6f33"), r2)
 			add_collider((a + e) * 0.5 + Vector3(0, 0.55, 0), Vector3(len, 1.1, 0.7), r2)
+
+func _prop_furniture(p: Dictionary, pos: Vector3, rot: float) -> void:
+	var fn := Furniture.new()
+	fn.name = str(p.id)
+	world.get_node("Props").add_child(fn)
+	fn.position = pos
+	var d := p.duplicate()
+	d.rot = rot
+	fn.setup(d, world, "")
+	furniture[p.id] = fn
 
 func _add_spot(id: String, pos: Vector3, rot: float, pose: String, hidden: bool, building: String, fn: Furniture = null) -> void:
 	spots[id] = {"pos": pos, "rot": rot, "pose": pose, "hidden": hidden, "building": building, "furniture": fn}
