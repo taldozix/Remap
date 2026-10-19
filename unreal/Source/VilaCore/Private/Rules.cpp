@@ -31,7 +31,7 @@ std::string Rules::npc(const Json& id, const Json& ctx) {
 	return to_str(id) == "self" ? jstr(ctx, "npc", "") : to_str(id);
 }
 
-bool Rules::check(const Json& cond, const Json& ctx) {
+bool Rules::evaluate(const Json& cond, const Json& ctx) {
 	for (const auto& [key, val] : as_object(cond).items()) {
 		if (!check_one(key, val, ctx)) return false;
 	}
@@ -42,15 +42,15 @@ bool Rules::check_one(const std::string& key, const Json& arg, const Json& ctx) 
 	PlayerState& p = game().player;
 	if (key == "all") {
 		for (const auto& c : as_array(arg))
-			if (!check(c, ctx)) return false;
+			if (!evaluate(c, ctx)) return false;
 		return true;
 	}
 	if (key == "any") {
 		for (const auto& c : as_array(arg))
-			if (check(c, ctx)) return true;
+			if (evaluate(c, ctx)) return true;
 		return false;
 	}
-	if (key == "not") return !check(arg, ctx);
+	if (key == "not") return !evaluate(arg, ctx);
 	if (key == "flag") return game().has_flag(to_str(arg));
 	if (key == "not_flag") return !game().has_flag(to_str(arg));
 	if (key == "quest_state") {

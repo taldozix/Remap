@@ -8,7 +8,7 @@ namespace vila {
 class PlayerState;
 class Relations;
 
-class ShopSystem {
+class VILACORE_API ShopSystem {
 public:
 	Json stock = Json::object();  // shop_id -> {item_id: qty}
 	int last_restock_day = 0;

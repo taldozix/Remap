@@ -1,6 +1,6 @@
 // Testes unitários do núcleo VilaCore — port 1:1 de tests/TestRunner.gd.
 // Rodar:
-//   cmake -S unreal/Source/VilaCore/Tests -B build/vilacore && cmake --build build/vilacore -j4
+//   cmake -S unreal/Tests/VilaCore -B build/vilacore && cmake --build build/vilacore -j4
 //   build/vilacore/vila_tests unreal/Content/Data
 // Sai com código 0 se tudo passar, 1 caso contrário.
 #include <cstdio>

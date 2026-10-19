@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class Relations {
+class VILACORE_API Relations {
 public:
 	Json rel = Json::object();          // npc_id -> int
 	Json memories = Json::object();     // npc_id -> [{"tag": String, "day": int}]

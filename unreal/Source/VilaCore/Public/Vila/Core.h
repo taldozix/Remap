@@ -21,12 +21,17 @@
 
 #include "ThirdParty/nlohmann/json.hpp"
 
+// No Unreal, o UBT define VILACORE_API (exportação da DLL do módulo). Fora dele, vazio.
+#ifndef VILACORE_API
+#define VILACORE_API
+#endif
+
 namespace vila {
 
 using Json = nlohmann::ordered_json;
 
 // ---------------------------------------------------------------- vetor
-struct Vec3 {
+struct VILACORE_API Vec3 {
 	double x = 0.0, y = 0.0, z = 0.0;
 	Vec3() = default;
 	Vec3(double px, double py, double pz) : x(px), y(py), z(pz) {}
@@ -74,21 +79,21 @@ private:
 
 // ---------------------------------------------------------------- acesso estilo GDScript
 // `d.get("k", padrão)` do GDScript. Funcionam com qualquer Json (se não for objeto, devolvem o padrão).
-const Json& empty_json();                      // null
-const Json& jget(const Json& j, const std::string& key);  // null se ausente
-bool has(const Json& j, const std::string& key);
-std::string to_str(const Json& v);             // str(v) do GDScript (números sem ".0" se inteiros)
-double to_num(const Json& v, double def = 0.0);   // float(v)
-int to_int(const Json& v, int def = 0);           // int(v) (trunca)
-bool to_bool(const Json& v, bool def = false);    // bool(v)
-bool truthy(const Json& v);                    // regra de verdade do GDScript
-std::string jstr(const Json& j, const std::string& key, const std::string& def = "");
-double jnum(const Json& j, const std::string& key, double def = 0.0);
-int jint(const Json& j, const std::string& key, int def = 0);
-bool jbool(const Json& j, const std::string& key, bool def = false);
-const Json& jobj(const Json& j, const std::string& key);  // objeto vazio se ausente/não-objeto
-const Json& jarr(const Json& j, const std::string& key);  // array vazio se ausente/não-array
-bool json_array_has(const Json& arr, const Json& v);
+VILACORE_API const Json& empty_json();                      // null
+VILACORE_API const Json& jget(const Json& j, const std::string& key);  // null se ausente
+VILACORE_API bool has(const Json& j, const std::string& key);
+VILACORE_API std::string to_str(const Json& v);             // str(v) do GDScript (números sem ".0" se inteiros)
+VILACORE_API double to_num(const Json& v, double def = 0.0);   // float(v)
+VILACORE_API int to_int(const Json& v, int def = 0);           // int(v) (trunca)
+VILACORE_API bool to_bool(const Json& v, bool def = false);    // bool(v)
+VILACORE_API bool truthy(const Json& v);                    // regra de verdade do GDScript
+VILACORE_API std::string jstr(const Json& j, const std::string& key, const std::string& def = "");
+VILACORE_API double jnum(const Json& j, const std::string& key, double def = 0.0);
+VILACORE_API int jint(const Json& j, const std::string& key, int def = 0);
+VILACORE_API bool jbool(const Json& j, const std::string& key, bool def = false);
+VILACORE_API const Json& jobj(const Json& j, const std::string& key);  // objeto vazio se ausente/não-objeto
+VILACORE_API const Json& jarr(const Json& j, const std::string& key);  // array vazio se ausente/não-array
+VILACORE_API bool json_array_has(const Json& arr, const Json& v);
 
 // ---------------------------------------------------------------- matemática
 inline double clampf(double v, double a, double b) { return std::max(a, std::min(b, v)); }
@@ -106,7 +111,7 @@ constexpr double TAU = 6.283185307179586;
 
 // ---------------------------------------------------------------- texto
 // Formatação estilo `"%s tem %d" % [a, b]` do GDScript (suporta %s %d %f %.Nf %0Nd %%).
-struct FmtArg {
+struct VILACORE_API FmtArg {
 	enum Kind { Str, Num } kind;
 	std::string s;
 	double n = 0.0;
@@ -120,22 +125,22 @@ struct FmtArg {
 	FmtArg(float v) : kind(Num), n(v) {}
 	FmtArg(const Json& v);
 };
-std::string fmt(const std::string& pattern, std::initializer_list<FmtArg> args);
-std::string join(const std::vector<std::string>& parts, const std::string& sep);
-std::string strip(const std::string& s);
-std::string lower(const std::string& s);
-std::string replace_all(std::string s, const std::string& from, const std::string& to);
-std::string capitalize_first(const std::string& s);
+VILACORE_API std::string fmt(const std::string& pattern, std::initializer_list<FmtArg> args);
+VILACORE_API std::string join(const std::vector<std::string>& parts, const std::string& sep);
+VILACORE_API std::string strip(const std::string& s);
+VILACORE_API std::string lower(const std::string& s);
+VILACORE_API std::string replace_all(std::string s, const std::string& from, const std::string& to);
+VILACORE_API std::string capitalize_first(const std::string& s);
 
 // Tradução: chaves são o texto em português (como no Godot). Idioma padrão pt_BR.
-void load_translations(const std::string& locale, const Json& table);
-void set_locale(const std::string& locale);
-const std::string& locale();
-std::string tr(const std::string& text);
+VILACORE_API void load_translations(const std::string& locale, const Json& table);
+VILACORE_API void set_locale(const std::string& locale);
+VILACORE_API const std::string& locale();
+VILACORE_API std::string tr(const std::string& text);
 
 // ---------------------------------------------------------------- aleatório
 // Mesma interface do RandomNumberGenerator do Godot.
-class Rng {
+class VILACORE_API Rng {
 public:
 	Rng() { randomize(); }
 	explicit Rng(uint64_t s) { seed(s); }
@@ -154,18 +159,18 @@ private:
 };
 
 // ---------------------------------------------------------------- arquivos
-bool read_text_file(const std::string& path, std::string& out);
-bool write_text_file(const std::string& path, const std::string& text);
-bool file_exists(const std::string& path);
-bool make_dirs(const std::string& path);
-bool remove_file(const std::string& path);
-bool copy_file(const std::string& from, const std::string& to);
-bool rename_file(const std::string& from, const std::string& to);
-double unix_time();
-std::string datetime_string();
+VILACORE_API bool read_text_file(const std::string& path, std::string& out);
+VILACORE_API bool write_text_file(const std::string& path, const std::string& text);
+VILACORE_API bool file_exists(const std::string& path);
+VILACORE_API bool make_dirs(const std::string& path);
+VILACORE_API bool remove_file(const std::string& path);
+VILACORE_API bool copy_file(const std::string& from, const std::string& to);
+VILACORE_API bool rename_file(const std::string& from, const std::string& to);
+VILACORE_API double unix_time();
+VILACORE_API std::string datetime_string();
 
 // Avisos (push_warning do Godot). O Unreal pode redirecionar para UE_LOG.
-extern std::function<void(const std::string&)> warning_sink;
-void push_warning(const std::string& msg);
+extern VILACORE_API std::function<void(const std::string&)> warning_sink;
+VILACORE_API void push_warning(const std::string& msg);
 
 }  // namespace vila

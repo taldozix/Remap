@@ -9,7 +9,7 @@ namespace vila {
 class Inventory;
 class Needs;
 
-class DriveThruJob {
+class VILACORE_API DriveThruJob {
 public:
 	static constexpr const char* JOB_ID = "brasa";
 

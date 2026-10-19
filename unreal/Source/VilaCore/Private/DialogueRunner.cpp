@@ -19,7 +19,7 @@ bool DialogueRunner::start(const std::string& p_npc, const std::string& p_dialog
 	finished = false;
 	const Json entries = jarr(dlg, "entry");
 	for (const auto& e : entries) {
-		if (Rules::check(jobj(e, "if"), ctx())) {
+		if (Rules::evaluate(jobj(e, "if"), ctx())) {
 			enter(jget(e, "node"));
 			return !finished;
 		}
@@ -77,7 +77,7 @@ Json DialogueRunner::choices() const {
 	const Json& list = jarr(node, "choices");
 	for (size_t i = 0; i < list.size(); ++i) {
 		const Json& c = list[i];
-		const bool ok = Rules::check(jobj(c, "if"), ctx());
+		const bool ok = Rules::evaluate(jobj(c, "if"), ctx());
 		if (!ok && !jbool(c, "show_disabled", false)) continue;
 		std::string label = substitute(tr(to_str(jget(c, "text"))));
 		double chance = -1.0;
@@ -104,7 +104,7 @@ void DialogueRunner::choose(int index) {
 	const Json list = jarr(node, "choices");  // cópia: enter() troca `node`
 	if (index < 0 || index >= static_cast<int>(list.size())) return;
 	const Json& c = list[static_cast<size_t>(index)];
-	if (!Rules::check(jobj(c, "if"), ctx())) return;
+	if (!Rules::evaluate(jobj(c, "if"), ctx())) return;
 	if (has(c, "do")) Rules::apply(jget(c, "do"), ctx());
 	if (has(c, "check")) {
 		const Json& chk = jget(c, "check");

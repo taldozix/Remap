@@ -52,7 +52,7 @@ Core.h, Data.h, Clock.h, Events.h, World.h, Game.h, Saves.h, Settings.h.
 
 ## Compilar e testar
 ```
-cmake -S unreal/Source/VilaCore/Tests -B /tmp/vilabuild && cmake --build /tmp/vilabuild -j4
+cmake -S unreal/Tests/VilaCore -B /tmp/vilabuild && cmake --build /tmp/vilabuild -j4
 /tmp/vilabuild/vila_tests unreal/Content/Data
 ```
 Para checar só um arquivo: `g++ -std=c++17 -fsyntax-only -Iunreal/Source/VilaCore/Public unreal/Source/VilaCore/Private/X.cpp`.

@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class IWorld {
+class VILACORE_API IWorld {
 public:
 	virtual ~IWorld() = default;
 	virtual bool player_outdoors() const { return true; }

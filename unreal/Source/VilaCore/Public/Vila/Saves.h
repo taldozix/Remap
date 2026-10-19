@@ -6,7 +6,7 @@
 
 namespace vila {
 
-class Saves {
+class VILACORE_API Saves {
 public:
 	static const std::vector<std::string>& slots();
 	static std::string slot_label(const std::string& slot);
@@ -31,6 +31,6 @@ private:
 	Json read(const std::string& path) const;
 };
 
-Saves& saves();
+VILACORE_API Saves& saves();
 
 }  // namespace vila

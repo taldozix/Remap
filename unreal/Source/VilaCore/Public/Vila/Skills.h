@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class Skills {
+class VILACORE_API Skills {
 public:
 	static const Json DEFS;                    // id -> {"name", "desc"}
 	static const std::vector<int> THRESHOLDS;  // xp mínimo por nível (0..10)

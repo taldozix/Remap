@@ -6,7 +6,7 @@
 
 namespace vila {
 
-class WorldState {
+class VILACORE_API WorldState {
 public:
 	std::map<std::string, Inventory> containers;  // id -> Inventory (ordem de registro: chaves de container_meta)
 	Json container_meta = Json::object();  // id -> {"owner", "name", "private", "building", "refill"}

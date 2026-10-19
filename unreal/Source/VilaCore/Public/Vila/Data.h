@@ -4,7 +4,7 @@
 
 namespace vila {
 
-class Data {
+class VILACORE_API Data {
 public:
 	Json db = Json::object();
 	std::vector<std::string> errors;
@@ -41,6 +41,6 @@ private:
 	std::string dir_;
 };
 
-Data& data();
+VILACORE_API Data& data();
 
 }  // namespace vila

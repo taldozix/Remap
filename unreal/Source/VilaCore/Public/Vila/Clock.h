@@ -4,7 +4,7 @@
 
 namespace vila {
 
-class Clock {
+class VILACORE_API Clock {
 public:
 	Signal<double, bool> time_advanced;  // (minutos, salto)
 	Signal<int> hour_changed;
@@ -41,6 +41,6 @@ private:
 	int holds_ = 0;
 };
 
-Clock& clock();
+VILACORE_API Clock& clock();
 
 }  // namespace vila

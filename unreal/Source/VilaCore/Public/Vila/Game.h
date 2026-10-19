@@ -17,7 +17,7 @@
 
 namespace vila {
 
-class Game {
+class VILACORE_API Game {
 public:
 	static constexpr int SAVE_VERSION = 2;
 
@@ -70,6 +70,6 @@ private:
 	bool initialized_ = false;
 };
 
-Game& game();
+VILACORE_API Game& game();
 
 }  // namespace vila

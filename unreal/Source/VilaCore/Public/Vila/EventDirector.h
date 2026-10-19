@@ -6,7 +6,7 @@
 
 namespace vila {
 
-class EventDirector {
+class VILACORE_API EventDirector {
 public:
 	Json last_fired = Json::object();  // id -> dia
 	Json active = Json::object();      // id -> {"until": minutos, ...}

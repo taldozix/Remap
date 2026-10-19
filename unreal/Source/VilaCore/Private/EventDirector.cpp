@@ -35,7 +35,7 @@ bool EventDirector::can_fire(const std::string& id) const {
 	if (!clock().hour_in(to_num(h[0]), to_num(h[1]))) return false;
 	if (has(last_fired, id) && clock().day() - to_int(last_fired[id]) < jint(e, "cooldown_days", 1)) return false;
 	if (jbool(e, "no_rain", false) && jstr(game().world_state.weather, "state", "") == "chuva") return false;
-	return Rules::check(jobj(e, "if"), Json::object());
+	return Rules::evaluate(jobj(e, "if"), Json::object());
 }
 
 bool EventDirector::fire(const std::string& id) {

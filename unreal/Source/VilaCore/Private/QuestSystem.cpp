@@ -76,7 +76,7 @@ void QuestSystem::check_advances() {
 		if (state_of(id) != "active") continue;
 		const Json stage = jobj(jobj(data().quest(id), "stages"), stage_of(id));
 		for (const auto& rule : jarr(stage, "advance")) {
-			if (Rules::check(jobj(rule, "if"), Json::object())) {
+			if (Rules::evaluate(jobj(rule, "if"), Json::object())) {
 				if (has(rule, "to")) set_stage(id, to_str(jget(rule, "to")));
 				if (has(rule, "do")) Rules::apply(jget(rule, "do"), Json::object());
 				break;

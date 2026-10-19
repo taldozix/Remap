@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class QuestSystem {
+class VILACORE_API QuestSystem {
 public:
 	Json states = Json::object();  // id -> {"state", "stage", "outcome", "log": []}
 

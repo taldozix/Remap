@@ -8,7 +8,7 @@ namespace vila {
 class Inventory;
 class PlayerState;
 
-class DeliveryJob {
+class VILACORE_API DeliveryJob {
 public:
 	bool hired = false;
 	Json active = Json::object();

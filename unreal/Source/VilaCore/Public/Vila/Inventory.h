@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class Inventory {
+class VILACORE_API Inventory {
 public:
 	Json items = Json::array();  // [{"id": String, "qty": int, "age": float}]
 	double capacity = 12.0;      // kg

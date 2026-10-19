@@ -7,9 +7,9 @@
 
 namespace vila {
 
-class Rules {
+class VILACORE_API Rules {
 public:
-	static bool check(const Json& cond, const Json& ctx = Json::object());
+	static bool evaluate(const Json& cond, const Json& ctx = Json::object());
 	// Probabilidade de um teste (persuasão, intimidação...). Mostrada ao jogador antes de escolher.
 	static double chance(const Json& spec, const Json& ctx = Json::object());
 	static void apply(const Json& effects, const Json& ctx = Json::object());

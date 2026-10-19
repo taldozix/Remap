@@ -7,7 +7,7 @@
 
 namespace vila {
 
-class PlayerState {
+class VILACORE_API PlayerState {
 public:
 	static constexpr double BASE_CAPACITY = 12.0;
 

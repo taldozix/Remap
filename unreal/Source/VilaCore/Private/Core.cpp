@@ -1,6 +1,9 @@
 #include "Vila/Core.h"
 
+#include <cctype>
 #include <chrono>
+#include <cstdlib>
+#include <cstring>
 #include <cstdio>
 #include <ctime>
 #include <filesystem>

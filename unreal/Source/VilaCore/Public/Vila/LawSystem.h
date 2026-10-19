@@ -8,7 +8,7 @@ namespace vila {
 
 class Relations;
 
-class LawSystem {
+class VILACORE_API LawSystem {
 public:
 	static const Json CRIMES;
 

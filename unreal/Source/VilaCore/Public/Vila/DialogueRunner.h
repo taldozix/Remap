@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class DialogueRunner {
+class VILACORE_API DialogueRunner {
 public:
 	std::string npc_id;
 	std::string dialogue_id;

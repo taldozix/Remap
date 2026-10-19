@@ -6,7 +6,7 @@
 
 namespace vila {
 
-class Needs {
+class VILACORE_API Needs {
 public:
 	static const std::vector<std::string> IDS;
 	static const Json LABELS;

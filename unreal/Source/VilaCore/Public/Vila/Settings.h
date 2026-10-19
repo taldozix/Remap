@@ -5,7 +5,7 @@
 
 namespace vila {
 
-class Settings {
+class VILACORE_API Settings {
 public:
 	Signal<std::string> changed;  // seção alterada ("graphics", "audio", "game", "input")
 
@@ -31,6 +31,6 @@ public:
 	Json default_bindings() const;
 };
 
-Settings& settings();
+VILACORE_API Settings& settings();
 
 }  // namespace vila

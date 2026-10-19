@@ -7,7 +7,7 @@ namespace vila {
 
 class PlayerState;
 
-class PropertySystem {
+class VILACORE_API PropertySystem {
 public:
 	// building_id -> {"status": "alugada"/"propria", "rent", "tax", "debt", "paid"}
 	Json props = Json::object();

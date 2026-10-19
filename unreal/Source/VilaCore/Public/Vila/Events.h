@@ -5,7 +5,7 @@
 
 namespace vila {
 
-struct Events {
+struct VILACORE_API Events {
 	Signal<std::string, std::string> notify;       // (texto, tipo: info/good/bad/quest/money/skill)
 	Signal<int, int> money_changed;                 // (total, variação)
 	Signal<std::string> inventory_changed;         // "player" ou id do contêiner
@@ -38,6 +38,6 @@ struct Events {
 	void clear_all();
 };
 
-Events& events();
+VILACORE_API Events& events();
 
 }  // namespace vila
