@@ -25,7 +25,6 @@ class AVilaNPC;
 class AVilaPlayerCharacter;
 class AVilaTrafficSystem;
 class AVilaVehicle;
-class UVilaGrass;
 class UVilaWorldBuilder;
 struct FVilaSpot;
 
@@ -84,7 +83,6 @@ public:
 	UPROPERTY() TObjectPtr<AVilaEnvironment> Environment;
 	UPROPERTY() TMap<FString, TObjectPtr<AVilaNPC>> NPCs;
 	UPROPERTY() TMap<FString, TObjectPtr<AVilaVehicle>> Vehicles;
-	UPROPERTY() TObjectPtr<UVilaGrass> Grass;
 	FString PlayerBuilding;  // prédio onde o jogador está ("" = rua)
 	bool bReady = false;
 	bool IsMenu() const { return bMenu; }
@@ -139,11 +137,6 @@ public:
 	virtual vila::Json start_event(const std::string& Id, const vila::Json& Def) override;
 	virtual void end_event(const std::string& Id, const vila::Json& Info) override;
 
-	// Aproximações do estado interno do NPC (o AVilaNPC do contrato não expõe state/activity):
-	// "at_spot" = visível, parado e não caído; atividade = a da agenda (com abrigo da chuva).
-	bool NpcAtSpot(const AVilaNPC* Npc) const;
-	FString NpcActivity(const AVilaNPC* Npc) const;
-
 private:
 	struct FIncident
 	{
@@ -164,7 +157,6 @@ private:
 	void DispatchPendingBeginPlay();
 	void PostBeginSetup();
 	void FinishStartup();
-	void OnSettingsChanged(const std::string& Section);
 
 	// quadro a quadro
 	void UpdateCutaway();
@@ -184,7 +176,6 @@ private:
 	bool bWaitingNav = false;
 	float NavWaitT = 0.f;
 	int32 NavWaitFrames = 0;
-	int32 GrassLevel = -1;
 	TArray<FIncident> Incidents;
 	float TrespassT = 0.f;
 	TSet<FString> TrespassReported;
@@ -197,6 +188,5 @@ private:
 	FTimerHandle SleepTimer;
 	double SavedTimeScale = 1.0;
 
-	int32 SettingsConn = 0;
 	int32 AppearanceConn = 0;
 };
