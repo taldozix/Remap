@@ -1,0 +1,1714 @@
+{
+	"lucia": {
+		"entry": [
+			{
+				"if": {
+					"memory": {
+						"npc": "self",
+						"tag": "viu_furto"
+					}
+				},
+				"node": "decepcionada"
+			},
+			{
+				"if": {
+					"quest_stage": {
+						"encomenda": "entregar"
+					},
+					"has_item": "encomenda_lucia"
+				},
+				"node": "entrega_encomenda"
+			},
+			{
+				"if": {
+					"quest_stage": {
+						"encomenda": "entregar"
+					},
+					"has_item": "remedio_pressao"
+				},
+				"node": "entrega_remedio"
+			},
+			{
+				"if": {
+					"quest_state": {
+						"encomenda": "completed"
+					}
+				},
+				"node": "grata"
+			},
+			{
+				"if": {
+					"quest_state": {
+						"encomenda": "active"
+					}
+				},
+				"node": "em_andamento"
+			},
+			{
+				"if": {
+					"flag": "lucia_recusou"
+				},
+				"node": "segunda_chance"
+			},
+			{
+				"node": "inicio"
+			}
+		],
+		"nodes": {
+			"inicio": {
+				"text": "Ah, olá! Você é quem se mudou para a casa 8, não é? Eu sou a Lúcia. Seja bem-vindo(a) à Vila Aurora!",
+				"choices": [
+					{
+						"text": "Prazer, Dona Lúcia. Está tudo bem com a senhora?",
+						"next": "problema",
+						"do": [
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 2
+								}
+							}
+						]
+					},
+					{
+						"text": "Obrigado(a). Preciso ir, até mais!",
+						"next": null
+					}
+				]
+			},
+			"problema": {
+				"text": "Ai, nem tanto... Meu remédio de pressão veio por entrega, e o aplicativo diz que foi entregue. Mas não chegou aqui!",
+				"next": "problema2"
+			},
+			"problema2": {
+				"text": "Eu vi pela janela: o entregador deixou na casa 12, do Marcos. Só que ele jura que não recebeu nada. Ele é... difícil. Você poderia falar com ele por mim?",
+				"choices": [
+					{
+						"text": "Deixa comigo. Vou ver o que consigo.",
+						"next": "aceitou",
+						"do": [
+							{
+								"quest_start": "encomenda"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 5
+								}
+							},
+							{
+								"clear_flag": "lucia_recusou"
+							}
+						]
+					},
+					{
+						"text": "O mercadinho não vende esse remédio?",
+						"next": "alternativa"
+					},
+					{
+						"text": "Agora não posso, me desculpe.",
+						"next": "recusou",
+						"do": [
+							{
+								"set_flag": "lucia_recusou"
+							}
+						]
+					}
+				]
+			},
+			"alternativa": {
+				"text": "Vende, sim, mas custa R$ 35, e minha aposentadoria só cai semana que vem. E aquela caixa é minha, já está paga!",
+				"choices": [
+					{
+						"text": "Entendi. Vou resolver isso para a senhora.",
+						"next": "aceitou",
+						"do": [
+							{
+								"quest_start": "encomenda"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 5
+								}
+							},
+							{
+								"clear_flag": "lucia_recusou"
+							}
+						]
+					},
+					{
+						"text": "Agora não posso, me desculpe.",
+						"next": "recusou",
+						"do": [
+							{
+								"set_flag": "lucia_recusou"
+							}
+						]
+					}
+				]
+			},
+			"aceitou": {
+				"text": "Deus te abençoe! O Marcos trabalha na oficina do Rafael durante o dia e, no fim da tarde, fica sentado na praça. À noite está em casa.",
+				"next": null
+			},
+			"recusou": {
+				"text": "Tudo bem, querido(a). Se mudar de ideia, eu estou sempre por aqui.",
+				"next": null
+			},
+			"segunda_chance": {
+				"text": "Oi de novo! Ainda estou sem o meu remédio... Será que você pode me ajudar agora?",
+				"choices": [
+					{
+						"text": "Posso, sim. Vou falar com o Marcos.",
+						"next": "aceitou",
+						"do": [
+							{
+								"quest_start": "encomenda"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 5
+								}
+							},
+							{
+								"clear_flag": "lucia_recusou"
+							}
+						]
+					},
+					{
+						"text": "Ainda não, desculpe.",
+						"next": null
+					}
+				]
+			},
+			"em_andamento": {
+				"text": "E então? Conseguiu alguma coisa com o Marcos?",
+				"choices": [
+					{
+						"text": "Onde o Marcos costuma ficar?",
+						"next": "aceitou"
+					},
+					{
+						"text": "Ainda não. Estou cuidando disso.",
+						"next": null
+					}
+				]
+			},
+			"entrega_encomenda": {
+				"text": "Minha encomenda! É ela mesma! Como você conseguiu?",
+				"choices": [
+					{
+						"text": "Conversei com o Marcos e ele devolveu.",
+						"if": {
+							"flag": "obtida_persuasao"
+						},
+						"next": "fim_diplomacia",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"diplomacia"
+								]
+							},
+							{
+								"take_item": {
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 25
+								}
+							},
+							{
+								"reputation": 10
+							},
+							{
+								"money": 30
+							},
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							},
+							{
+								"memory": {
+									"npc": "self",
+									"tag": "ajudou"
+								}
+							}
+						]
+					},
+					{
+						"text": "Precisei pagar R$ 40 para ele devolver.",
+						"if": {
+							"flag": "obtida_suborno"
+						},
+						"next": "fim_suborno",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"suborno"
+								]
+							},
+							{
+								"take_item": {
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 20
+								}
+							},
+							{
+								"reputation": 5
+							},
+							{
+								"money": 40
+							},
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							},
+							{
+								"memory": {
+									"npc": "self",
+									"tag": "ajudou"
+								}
+							}
+						]
+					},
+					{
+						"text": "Precisei dar um aperto nele.",
+						"if": {
+							"flag": "obtida_ameaca"
+						},
+						"next": "fim_ameaca",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"intimidacao"
+								]
+							},
+							{
+								"take_item": {
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 8
+								}
+							},
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							}
+						]
+					},
+					{
+						"text": "Para ser sincero(a): peguei na casa dele.",
+						"if": {
+							"not_flag": "obtida_persuasao",
+							"not": {
+								"any": [
+									{
+										"flag": "obtida_suborno"
+									},
+									{
+										"flag": "obtida_ameaca"
+									}
+								]
+							}
+						},
+						"next": "fim_furto_honesto",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"furto_honesto"
+								]
+							},
+							{
+								"take_item": {
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 10
+								}
+							},
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							}
+						]
+					},
+					{
+						"text": "O Marcos devolveu, foi tranquilo. (mentir)",
+						"if": {
+							"not_flag": "obtida_persuasao",
+							"not": {
+								"any": [
+									{
+										"flag": "obtida_suborno"
+									},
+									{
+										"flag": "obtida_ameaca"
+									}
+								]
+							}
+						},
+						"next": "fim_diplomacia",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"furto_mentira"
+								]
+							},
+							{
+								"take_item": {
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 22
+								}
+							},
+							{
+								"reputation": 6
+							},
+							{
+								"money": 30
+							},
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							},
+							{
+								"set_flag": "mentiu_para_lucia"
+							},
+							{
+								"memory": {
+									"npc": "self",
+									"tag": "ajudou"
+								}
+							}
+						]
+					}
+				]
+			},
+			"fim_diplomacia": {
+				"text": "Eu sabia que no fundo ele era bom! Tome, é pouco, mas é de coração. E leve esse bolo de fubá que eu fiz hoje. Vou contar para todo mundo o que você fez!",
+				"next": null
+			},
+			"fim_suborno": {
+				"text": "Quarenta reais?! Aquele sem-vergonha... Não, não, eu faço questão de te devolver. E leve esse bolo, por favor.",
+				"next": null
+			},
+			"fim_ameaca": {
+				"text": "Ai, meu Deus... Espero que ninguém tenha se machucado. Obrigada, mas não gosto de briga entre vizinhos. Tome o bolo.",
+				"next": null
+			},
+			"fim_furto_honesto": {
+				"text": "Você entrou na casa dele?! ...Bom, a caixa era minha mesmo. Mas tome cuidado, viu? Não quero você metido(a) em confusão por minha causa.",
+				"next": null
+			},
+			"entrega_remedio": {
+				"text": "Você comprou o remédio para mim? Ai, que vergonha... Deixa eu te pagar, pelo menos!",
+				"choices": [
+					{
+						"text": "Não precisa. É um presente.",
+						"next": "fim_presente",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"compra_presente"
+								]
+							},
+							{
+								"take_item": {
+									"id": "remedio_pressao"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 30
+								}
+							},
+							{
+								"reputation": 12
+							},
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							},
+							{
+								"memory": {
+									"npc": "self",
+									"tag": "ajudou"
+								}
+							}
+						]
+					},
+					{
+						"text": "Se a senhora puder, aceito.",
+						"next": "fim_reembolso",
+						"do": [
+							{
+								"quest_complete": [
+									"encomenda",
+									"compra_reembolso"
+								]
+							},
+							{
+								"take_item": {
+									"id": "remedio_pressao"
+								}
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 15
+								}
+							},
+							{
+								"reputation": 5
+							},
+							{
+								"money": 35
+							},
+							{
+								"memory": {
+									"npc": "self",
+									"tag": "ajudou"
+								}
+							}
+						]
+					}
+				]
+			},
+			"fim_presente": {
+				"text": "Você é um anjo! Leve esse bolo. E o Marcos que fique com a caixa dele, então... Vou contar para o bairro inteiro como você é bom(boa).",
+				"next": null
+			},
+			"fim_reembolso": {
+				"text": "Aqui, R$ 35, contadinho. Muito obrigada mesmo!",
+				"next": null
+			},
+			"grata": {
+				"text": "Que bom te ver! Estou tomando o remédio direitinho, viu?",
+				"choices": [
+					{
+						"text": "Sobrou um pedaço de bolo?",
+						"if": {
+							"relation_gte": {
+								"self": 30
+							},
+							"not_today": "bolo_lucia"
+						},
+						"next": "bolo",
+						"do": [
+							{
+								"give_item": {
+									"id": "bolo_fuba"
+								}
+							},
+							{
+								"set_today": "bolo_lucia"
+							}
+						]
+					},
+					{
+						"text": "O que tem para fazer no bairro?",
+						"next": "dicas"
+					},
+					{
+						"text": "Até mais, Dona Lúcia!",
+						"next": null
+					}
+				]
+			},
+			"bolo": {
+				"text": "Sempre tem bolo para quem me ajuda! Leve, leve.",
+				"next": null
+			},
+			"dicas": {
+				"text": "O Brasa Burger vive contratando. O seu Antônio, do mercadinho, é honesto. E o Beto... bem, o Beto compra qualquer coisa, não pergunta de onde veio.",
+				"next": null
+			},
+			"decepcionada": {
+				"text": "Eu vi você entrando na casa do Marcos sem ele estar lá. Isso não se faz, viu? Não importa o motivo.",
+				"choices": [
+					{
+						"text": "Foi pela senhora...",
+						"next": "decepcionada2"
+					},
+					{
+						"text": "(Ir embora)",
+						"next": null
+					}
+				]
+			},
+			"decepcionada2": {
+				"text": "Eu sei. Mas não quero esse tipo de ajuda. Vamos dar um tempo, está bem?",
+				"next": null
+			}
+		}
+	},
+	"marcos": {
+		"entry": [
+			{
+				"if": {
+					"memory": {
+						"npc": "self",
+						"tag": "vitima_furto"
+					}
+				},
+				"node": "furioso"
+			},
+			{
+				"if": {
+					"memory": {
+						"npc": "self",
+						"tag": "vitima_invasao"
+					}
+				},
+				"node": "furioso"
+			},
+			{
+				"if": {
+					"memory": {
+						"npc": "self",
+						"tag": "ameacado"
+					}
+				},
+				"node": "ressentido"
+			},
+			{
+				"if": {
+					"quest_stage": {
+						"encomenda": "investigar"
+					},
+					"container_has": {
+						"container": "bau_marcos",
+						"id": "encomenda_lucia"
+					}
+				},
+				"node": "encomenda_negar"
+			},
+			{
+				"if": {
+					"quest_state": {
+						"encomenda": "active"
+					},
+					"not_container_has": {
+						"container": "bau_marcos",
+						"id": "encomenda_lucia"
+					},
+					"not_flag": "obtida_persuasao",
+					"not": {
+						"any": [
+							{
+								"flag": "obtida_suborno"
+							},
+							{
+								"flag": "obtida_ameaca"
+							}
+						]
+					}
+				},
+				"node": "sumiu"
+			},
+			{
+				"if": {
+					"quest_outcome": {
+						"encomenda": "furto_mentira"
+					}
+				},
+				"node": "desconfiado"
+			},
+			{
+				"if": {
+					"quest_outcome": {
+						"encomenda": "furto_honesto"
+					}
+				},
+				"node": "desconfiado"
+			},
+			{
+				"if": {
+					"flag": "obtida_persuasao"
+				},
+				"node": "amolecido"
+			},
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Que é? Tô ocupado.",
+				"choices": [
+					{
+						"text": "Só passando para dizer oi.",
+						"next": "oi",
+						"do": [
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 1
+								}
+							}
+						]
+					},
+					{
+						"text": "Você conserta carro?",
+						"next": "carro"
+					},
+					{
+						"text": "Nada, não.",
+						"next": null
+					}
+				]
+			},
+			"oi": {
+				"text": "Hum. Oi.",
+				"next": null
+			},
+			"carro": {
+				"text": "Eu só trabalho lá. Quem cobra é o Rafael. Fala com ele na oficina.",
+				"next": null
+			},
+			"encomenda_negar": {
+				"text": "Encomenda? Não chegou nada aqui, não. Quem te mandou? Aquela velha da casa 10?",
+				"choices": [
+					{
+						"text": "A Dona Lúcia viu o entregador deixar na sua porta. É o remédio de pressão dela.",
+						"if": {
+							"not_flag": "marcos_irritado"
+						},
+						"check": {
+							"base": 0.3,
+							"skill": "social",
+							"per_level": 0.12,
+							"relation": "self",
+							"per_relation": 0.006,
+							"label": "Persuasão"
+						},
+						"success": "persuadido",
+						"fail": "persuasao_falhou"
+					},
+					{
+						"text": "Te dou R$ 40 pela caixa e ninguém precisa saber.",
+						"if": {
+							"money_gte": 40
+						},
+						"show_disabled": true,
+						"disabled_hint": "Requer R$ 40",
+						"next": "suborno",
+						"do": [
+							{
+								"money": -40
+							},
+							{
+								"container_take": {
+									"container": "bau_marcos",
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"give_item": {
+									"id": "encomenda_lucia"
+								}
+							},
+							{
+								"set_flag": "obtida_suborno"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 5
+								}
+							}
+						]
+					},
+					{
+						"text": "Devolve logo, ou você vai se arrepender.",
+						"check": {
+							"base": 0.35,
+							"skill": "condicionamento",
+							"per_level": 0.08,
+							"label": "Intimidação"
+						},
+						"success": "ameaca_ok",
+						"fail": "ameaca_falhou"
+					},
+					{
+						"text": "Deixa pra lá.",
+						"next": null
+					}
+				]
+			},
+			"persuadido": {
+				"text": "...Tá bom, tá bom! Chegou, sim. Eu ia devolver, só não gosto de gente me cobrando. Toma essa caixa e fala pra ela que foi engano do entregador.",
+				"do": [
+					{
+						"container_take": {
+							"container": "bau_marcos",
+							"id": "encomenda_lucia"
+						}
+					},
+					{
+						"give_item": {
+							"id": "encomenda_lucia"
+						}
+					},
+					{
+						"set_flag": "obtida_persuasao"
+					},
+					{
+						"relation": {
+							"npc": "self",
+							"delta": 4
+						}
+					},
+					{
+						"skill_xp": {
+							"social": 30
+						}
+					}
+				],
+				"next": null
+			},
+			"persuasao_falhou": {
+				"text": "Já falei que não tem nada! Vai cuidar da sua vida.",
+				"do": [
+					{
+						"relation": {
+							"npc": "self",
+							"delta": -5
+						}
+					},
+					{
+						"set_flag": "marcos_irritado"
+					},
+					{
+						"skill_xp": {
+							"social": 10
+						}
+					}
+				],
+				"next": null
+			},
+			"suborno": {
+				"text": "...Quarenta? Fechado. Toma essa caixa aí. E essa conversa não aconteceu.",
+				"next": null
+			},
+			"ameaca_ok": {
+				"text": "Tá maluco?! ...Toma essa porcaria e some da minha frente.",
+				"do": [
+					{
+						"container_take": {
+							"container": "bau_marcos",
+							"id": "encomenda_lucia"
+						}
+					},
+					{
+						"give_item": {
+							"id": "encomenda_lucia"
+						}
+					},
+					{
+						"set_flag": "obtida_ameaca"
+					},
+					{
+						"relation": {
+							"npc": "self",
+							"delta": -30
+						}
+					},
+					{
+						"memory": {
+							"npc": "self",
+							"tag": "ameacado"
+						}
+					},
+					{
+						"crime": {
+							"type": "ameaca",
+							"victim": "self",
+							"victim_only": true
+						}
+					}
+				],
+				"next": null
+			},
+			"ameaca_falhou": {
+				"text": "Ah, é? Sai da minha frente antes que eu chame a polícia. E não aparece mais aqui.",
+				"do": [
+					{
+						"relation": {
+							"npc": "self",
+							"delta": -20
+						}
+					},
+					{
+						"memory": {
+							"npc": "self",
+							"tag": "ameacado"
+						}
+					},
+					{
+						"set_flag": "marcos_irritado"
+					},
+					{
+						"crime": {
+							"type": "ameaca",
+							"victim": "self",
+							"victim_only": true
+						}
+					}
+				],
+				"next": null
+			},
+			"sumiu": {
+				"text": "Encomenda? Sei lá de encomenda nenhuma. E outra: alguém mexeu nas minhas coisas, sabia? Se eu descobrir quem foi...",
+				"next": null
+			},
+			"desconfiado": {
+				"text": "Alguém entrou na minha casa e levou uma caixa... e um relógio, talvez. Você mora aqui do lado. Viu alguma coisa?",
+				"choices": [
+					{
+						"text": "Fui eu. A caixa era da Dona Lúcia.",
+						"next": "confissao",
+						"do": [
+							{
+								"relation": {
+									"npc": "self",
+									"delta": -10
+								}
+							},
+							{
+								"set_flag": "confessou_marcos"
+							},
+							{
+								"memory": {
+									"npc": "self",
+									"tag": "confessou"
+								}
+							}
+						]
+					},
+					{
+						"text": "Não vi nada.",
+						"next": "negou"
+					}
+				]
+			},
+			"confissao": {
+				"text": "...Pelo menos você é honesto(a). A caixa era dela mesmo, eu sei. Mas se entrar na minha casa de novo, eu chamo a polícia.",
+				"next": null
+			},
+			"negou": {
+				"text": "Hum. Sei.",
+				"next": null
+			},
+			"amolecido": {
+				"text": "Ah, é você. A velha ficou feliz, né? ...Tá, tá. Fiz a coisa certa. Não espalha.",
+				"choices": [
+					{
+						"text": "Valeu, Marcos.",
+						"next": null,
+						"do": [
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 1
+								}
+							}
+						]
+					}
+				]
+			},
+			"ressentido": {
+				"text": "Você de novo? Não tenho nada pra falar com você.",
+				"next": null
+			},
+			"furioso": {
+				"text": "VOCÊ! Eu sei que foi você que entrou na minha casa! Some daqui antes que eu perca a cabeça!",
+				"next": null
+			}
+		}
+	},
+	"antonio": {
+		"entry": [
+			{
+				"if": {
+					"any": [
+						{
+							"memory": {
+								"npc": "self",
+								"tag": "viu_furto"
+							}
+						},
+						{
+							"reputation_lt": -30
+						}
+					]
+				},
+				"node": "recusa"
+			},
+			{
+				"if": {
+					"not_flag": "antonio_desconto",
+					"any": [
+						{
+							"quest_outcome": {
+								"encomenda": "diplomacia"
+							}
+						},
+						{
+							"quest_outcome": {
+								"encomenda": "compra_presente"
+							}
+						},
+						{
+							"quest_outcome": {
+								"encomenda": "suborno"
+							}
+						},
+						{
+							"quest_outcome": {
+								"encomenda": "furto_mentira"
+							}
+						}
+					]
+				},
+				"node": "soube"
+			},
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Bom dia, freguês! O que vai ser hoje?",
+				"choices": [
+					{
+						"text": "Quero fazer compras.",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "mercadinho"
+							}
+						]
+					},
+					{
+						"text": "Vende remédio para pressão?",
+						"next": "remedio"
+					},
+					{
+						"text": "O senhor precisa de entregador?",
+						"if": {
+							"delivery_hired": false
+						},
+						"next": "entregador"
+					},
+					{
+						"text": "O que o senhor acha do Marcos?",
+						"next": "marcos"
+					},
+					{
+						"text": "Só olhando, obrigado(a).",
+						"next": null
+					}
+				]
+			},
+			"remedio": {
+				"text": "Tenho, na prateleira da farmácia. R$ 35 a caixa. Receita? Aqui é bairro, a gente se conhece.",
+				"next": null
+			},
+			"marcos": {
+				"text": "O Marcos? Fechado, mal-humorado... mas paga a conta em dia. Desde que a esposa foi embora ficou assim.",
+				"next": null
+			},
+			"soube": {
+				"text": "A Lúcia passou aqui e me contou o que você fez por ela. Gente assim faz falta. Daqui para a frente, tem 10% de desconto aqui!",
+				"do": [
+					{
+						"set_flag": "antonio_desconto"
+					},
+					{
+						"relation": {
+							"npc": "self",
+							"delta": 30
+						}
+					}
+				],
+				"choices": [
+					{
+						"text": "Obrigado(a), seu Antônio!",
+						"next": null
+					},
+					{
+						"text": "Quero aproveitar e fazer compras.",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "mercadinho"
+							}
+						]
+					}
+				]
+			},
+			"recusa": {
+				"text": "Olha... depois do que eu vi, prefiro que você compre em outro lugar.",
+				"next": null
+			},
+			"entregador": {
+				"text": "Preciso! Meus clientes mais velhos não carregam peso. Pago R$ 9 por entrega, mais R$ 5 se chegar no prazo. Pega a sacola aqui no balcão quando quiser.",
+				"choices": [
+					{
+						"text": "Fechado, pode contar comigo.",
+						"next": null,
+						"do": [
+							{
+								"delivery_hire": true
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 3
+								}
+							}
+						]
+					},
+					{
+						"text": "Vou pensar.",
+						"next": null
+					}
+				]
+			}
+		}
+	},
+	"beto": {
+		"entry": [
+			{
+				"if": {
+					"has_item": "relogio_antigo"
+				},
+				"node": "relogio"
+			},
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Compro, vendo, troco. Se tem valor, o Beto negocia. Quer ver o que eu tenho?",
+				"choices": [
+					{
+						"text": "Vamos negociar.",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "penhores"
+							}
+						]
+					},
+					{
+						"text": "Vocês compram latinha?",
+						"next": "latinha"
+					},
+					{
+						"text": "Depois eu volto.",
+						"next": null
+					}
+				]
+			},
+			"latinha": {
+				"text": "Compro, mas é centavo. Tem gente que vive disso, vasculhando as lixeiras. Trabalho honesto.",
+				"next": null
+			},
+			"relogio": {
+				"text": "Opa... esse relógio de bolso aí. Eu conheço. Era do pai do Marcos. Não vou perguntar como chegou na sua mão.",
+				"choices": [
+					{
+						"text": "Quanto você paga?",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "penhores"
+							},
+							{
+								"set_flag": "beto_viu_relogio"
+							}
+						]
+					},
+					{
+						"text": "Esquece.",
+						"next": null
+					}
+				]
+			}
+		}
+	},
+	"sandra": {
+		"entry": [
+			{
+				"if": {
+					"fired": true
+				},
+				"node": "demitido"
+			},
+			{
+				"if": {
+					"employed": true
+				},
+				"node": "funcionario"
+			},
+			{
+				"node": "inicio"
+			}
+		],
+		"nodes": {
+			"inicio": {
+				"text": "Oi! Se for pedido, é no balcão com o Kleber. Posso ajudar em mais alguma coisa?",
+				"choices": [
+					{
+						"text": "Vi que vocês estão contratando.",
+						"next": "entrevista"
+					},
+					{
+						"text": "Não, obrigado(a).",
+						"next": null
+					}
+				]
+			},
+			"entrevista": {
+				"text": "Estamos, sim. Você já trabalhou com atendimento?",
+				"choices": [
+					{
+						"text": "Já, numa lanchonete na minha cidade.",
+						"next": "proposta",
+						"do": [
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 3
+								}
+							}
+						]
+					},
+					{
+						"text": "Não, mas aprendo rápido.",
+						"next": "proposta"
+					},
+					{
+						"text": "Na verdade, mudei de ideia.",
+						"next": null
+					}
+				]
+			},
+			"proposta": {
+				"text": "É corrido: chapa, fritadeira, refri e entrega na janela do drive. R$ 12 a hora, mais R$ 2 por pedido completo e as gorjetas. Funcionamos das 10h às 22h; você bate o ponto quando quiser, mas não abandona o turno no meio. Topa?",
+				"choices": [
+					{
+						"text": "Topo! Quando começo?",
+						"if": {
+							"need_lt": {
+								"higiene": 75
+							}
+						},
+						"next": "contratado",
+						"do": [
+							{
+								"job_hire": "brasa"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 5
+								}
+							}
+						]
+					},
+					{
+						"text": "Topo! Quando começo?",
+						"if": {
+							"need_gte": {
+								"higiene": 75
+							}
+						},
+						"next": "fedendo"
+					},
+					{
+						"text": "Vou pensar.",
+						"next": null
+					}
+				]
+			},
+			"fedendo": {
+				"text": "Olha... sem ofensa, mas aqui é cozinha. Volta depois de um banho e a gente conversa, tá?",
+				"next": null
+			},
+			"contratado": {
+				"text": "Bem-vindo(a) ao time! O relógio de ponto fica na parede, perto da minha mesa. Hambúrguer demora mais: põe na chapa primeiro e cuida da batata e do refri enquanto isso. Entrega na janela do lado leste.",
+				"next": null
+			},
+			"funcionario": {
+				"text": "E aí? Tudo certo por aqui?",
+				"choices": [
+					{
+						"text": "Como está meu desempenho?",
+						"next": "desempenho"
+					},
+					{
+						"text": "Como funciona o turno mesmo?",
+						"next": "contratado"
+					},
+					{
+						"text": "Tudo certo, chefe.",
+						"next": null
+					}
+				]
+			},
+			"desempenho": {
+				"text": "Você é {job_rank}. Desempenho: {job_perf}/100, {job_orders} pedidos entregues e {job_warnings} advertência(s). Continue assim e quem sabe uma promoção...",
+				"next": null
+			},
+			"demitido": {
+				"text": "Depois do que aconteceu, não tenho vaga para você aqui. Pode comprar no balcão, se quiser.",
+				"next": null
+			}
+		}
+	},
+	"kleber": {
+		"entry": [
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Fala! Vai querer o quê?",
+				"choices": [
+					{
+						"text": "Quero ver o cardápio.",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "brasa_balcao"
+							}
+						]
+					},
+					{
+						"text": "Alguma dica para quem trabalha aqui?",
+						"if": {
+							"employed": true
+						},
+						"next": "dica"
+					},
+					{
+						"text": "Nada, valeu.",
+						"next": null
+					}
+				]
+			},
+			"dica": {
+				"text": "Põe o hambúrguer na chapa logo que o pedido chega. Se deixar muito tempo, queima. E cansado(a) você fica lento(a) — dorme direito antes do turno!",
+				"next": null
+			}
+		}
+	},
+	"rafael": {
+		"entry": [
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Opa! Oficina do Rafael, conserto de tudo. Em que posso ajudar?",
+				"choices": [
+					{
+						"text": "Pode consertar meu carro?",
+						"if": {
+							"vehicle_damage_gte": {
+								"vehicle": "carro_jogador",
+								"value": 1
+							},
+							"vehicle_near": {
+								"vehicle": "carro_jogador",
+								"spot": "oficina_rafael",
+								"radius": 18
+							}
+						},
+						"next": "orcamento"
+					},
+					{
+						"text": "Pode consertar meu carro?",
+						"if": {
+							"not": {
+								"vehicle_near": {
+									"vehicle": "carro_jogador",
+									"spot": "oficina_rafael",
+									"radius": 18
+								}
+							}
+						},
+						"next": "traz_carro"
+					},
+					{
+						"text": "Pode consertar meu carro?",
+						"if": {
+							"not": {
+								"vehicle_damage_gte": {
+									"vehicle": "carro_jogador",
+									"value": 1
+								}
+							},
+							"vehicle_near": {
+								"vehicle": "carro_jogador",
+								"spot": "oficina_rafael",
+								"radius": 18
+							}
+						},
+						"next": "sem_dano"
+					},
+					{
+						"text": "Você vende peças e kits de reparo?",
+						"next": null,
+						"do": [
+							{
+								"open_shop": "oficina"
+							}
+						]
+					},
+					{
+						"text": "E aquele sedã verde à venda?",
+						"if": {
+							"vehicle_for_sale": "carro_usado"
+						},
+						"next": "carro_usado"
+					},
+					{
+						"text": "O Marcos trabalha aqui?",
+						"next": "marcos"
+					},
+					{
+						"text": "Nada, não.",
+						"next": null
+					}
+				]
+			},
+			"orcamento": {
+				"text": "Deixa eu dar uma olhada... Fica R$ {repair_cost}, e em uma hora tá pronto. Fechado?",
+				"choices": [
+					{
+						"text": "Fechado.",
+						"next": null,
+						"do": [
+							{
+								"repair_vehicle": {
+									"vehicle": "carro_jogador",
+									"cost_per_point": 3
+								}
+							}
+						]
+					},
+					{
+						"text": "Agora não.",
+						"next": null
+					}
+				]
+			},
+			"traz_carro": {
+				"text": "Traz o carro aqui na frente da oficina que eu dou uma olhada.",
+				"next": null
+			},
+			"sem_dano": {
+				"text": "Seu carro tá inteirinho. Só falta gasolina, talvez!",
+				"next": null
+			},
+			"marcos": {
+				"text": "Trabalha. Entra às sete e meia, sai às cinco. Bom mecânico, péssimo humor.",
+				"next": null
+			},
+			"carro_usado": {
+				"text": "Áurea Sedã, motor bom, lataria judiada (uns 35% de dano) e pouca gasolina. R$ 700 e é seu, com documento.",
+				"choices": [
+					{
+						"text": "Fechado. Vou levar.",
+						"if": {
+							"money_gte": 700
+						},
+						"show_disabled": true,
+						"disabled_hint": "Requer R$ 700",
+						"next": "carro_vendido",
+						"do": [
+							{
+								"buy_vehicle": "carro_usado"
+							}
+						]
+					},
+					{
+						"text": "Vou juntar o dinheiro.",
+						"next": null
+					}
+				]
+			},
+			"carro_vendido": {
+				"text": "Tá na mão! Chave e documento. Se precisar de conserto, já sabe onde me achar.",
+				"next": null
+			}
+		}
+	},
+	"tiao": {
+		"entry": [
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Ô, amigo(a)... tem um trocado aí? Qualquer coisa ajuda.",
+				"choices": [
+					{
+						"text": "Toma, R$ 5.",
+						"if": {
+							"money_gte": 5,
+							"not_today": "tiao_ajudado"
+						},
+						"next": "agradece",
+						"do": [
+							{
+								"money": -5
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 10
+								}
+							},
+							{
+								"reputation": 1
+							},
+							{
+								"set_today": "tiao_ajudado"
+							}
+						]
+					},
+					{
+						"text": "Tenho comida. Quer?",
+						"if": {
+							"has_category": "comida",
+							"not_today": "tiao_comida"
+						},
+						"next": "agradece_comida",
+						"do": [
+							{
+								"take_category": "comida"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 15
+								}
+							},
+							{
+								"reputation": 2
+							},
+							{
+								"set_today": "tiao_comida"
+							}
+						]
+					},
+					{
+						"text": "Você conhece o Marcos, da casa 12?",
+						"if": {
+							"quest_state": {
+								"encomenda": "active"
+							},
+							"relation_gte": {
+								"self": 10
+							}
+						},
+						"next": "dica"
+					},
+					{
+						"text": "Você conhece o Marcos, da casa 12?",
+						"if": {
+							"quest_state": {
+								"encomenda": "active"
+							},
+							"relation_lt": {
+								"self": 10
+							}
+						},
+						"next": "sem_dica"
+					},
+					{
+						"text": "Agora não, Tião.",
+						"next": null
+					}
+				]
+			},
+			"agradece": {
+				"text": "Deus lhe pague! Gente boa ainda existe nessa vila.",
+				"next": null
+			},
+			"agradece_comida": {
+				"text": "Comida! Muito obrigado. Faz dois dias que eu só como o que acho por aí.",
+				"next": null
+			},
+			"sem_dica": {
+				"text": "Hmm... minha memória funciona melhor de barriga cheia, sabe como é.",
+				"next": null
+			},
+			"dica": {
+				"text": "O Marcos? Aquele guarda tudo num baú na sala. Sai pra oficina umas sete e meia e só volta de noite. E deixa a chave reserva debaixo do tapete da porta, acredita? Mas não fui eu que te contei.",
+				"do": [
+					{
+						"set_flag": "dica_tapete"
+					}
+				],
+				"next": null
+			}
+		}
+	},
+	"julia": {
+		"entry": [
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Oi! Desculpa a pressa, estou sempre correndo entre a faculdade e o estágio.",
+				"choices": [
+					{
+						"text": "Você estuda o quê?",
+						"next": "estudo"
+					},
+					{
+						"text": "Estou meio machucado(a)...",
+						"if": {
+							"not_flag": "julia_curativo"
+						},
+						"next": "curativo",
+						"do": [
+							{
+								"give_item": {
+									"id": "kit_curativo"
+								}
+							},
+							{
+								"set_flag": "julia_curativo"
+							},
+							{
+								"relation": {
+									"npc": "self",
+									"delta": 5
+								}
+							}
+						]
+					},
+					{
+						"text": "Tchau, Júlia!",
+						"next": null
+					}
+				]
+			},
+			"estudo": {
+				"text": "Enfermagem! Se um dia se machucar, me procura. E não esquece de beber água, viu? Desidratação derruba qualquer um.",
+				"next": null
+			},
+			"curativo": {
+				"text": "Deixa eu ver... Toma, leva esse kit de primeiros socorros. Eu sempre carrego um extra.",
+				"next": null
+			}
+		}
+	},
+	"paula": {
+		"entry": [
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Oi, vizinho(a)! Tudo bem por aí na casa 8?",
+				"choices": [
+					{
+						"text": "Tudo ótimo. E a vizinhança?",
+						"next": "vizinhanca"
+					},
+					{
+						"text": "Tudo. Até mais!",
+						"next": null
+					}
+				]
+			},
+			"vizinhanca": {
+				"text": "Tranquila. O Marcos e a Dona Lúcia vivem se estranhando, mas ninguém é de briga de verdade. Ah, e cuidado com o trânsito na avenida.",
+				"next": null
+			}
+		}
+	},
+	"pedestre": {
+		"entry": [
+			{
+				"node": "padrao"
+			}
+		],
+		"nodes": {
+			"padrao": {
+				"text": "Oi? Posso ajudar?",
+				"choices": [
+					{
+						"text": "Onde fica o mercadinho?",
+						"next": "mercado"
+					},
+					{
+						"text": "Sabe onde tem emprego?",
+						"next": "emprego"
+					},
+					{
+						"text": "Nada, desculpe.",
+						"next": null
+					}
+				]
+			},
+			"mercado": {
+				"text": "Na avenida, do lado norte, perto do posto. Abre às sete.",
+				"next": null
+			},
+			"emprego": {
+				"text": "O Brasa Burger sempre tem vaga. Fala com a Sandra, a gerente.",
+				"next": null
+			}
+		}
+	}
+}

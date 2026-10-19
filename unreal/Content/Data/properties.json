@@ -1,0 +1,24 @@
+{
+	"casa_jogador": {
+		"name": "Casa nº 8",
+		"type": "casa",
+		"rent": 120,
+		"description": "Casa alugada de um quarto, cozinha e banheiro."
+	},
+	"casa_5": {
+		"name": "Casa nº 5",
+		"type": "casa",
+		"price": 1200,
+		"tax": 15,
+		"sale_rate": 0.8,
+		"description": "Casa pequena, vazia, com quintal. Cama, geladeira, fogão e armário inclusos."
+	},
+	"garagem_3": {
+		"name": "Garagem nº 3",
+		"type": "garagem",
+		"price": 450,
+		"tax": 6,
+		"sale_rate": 0.8,
+		"description": "Garagem fechada com bancada (consertos 50% melhores) e prateleira."
+	}
+}

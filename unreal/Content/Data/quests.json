@@ -1,0 +1,35 @@
+{
+	"encomenda": {
+		"title": "A Encomenda Extraviada",
+		"giver": "lucia",
+		"summary": "O remédio de pressão da Dona Lúcia foi entregue na casa errada — a do Marcos, que nega ter recebido.",
+		"start_stage": "investigar",
+		"stages": {
+			"investigar": {
+				"objective": "Recupere o remédio da Dona Lúcia. O Marcos (casa 12) diz que não recebeu nada.",
+				"hints": ["Converse com o Marcos (oficina de dia, praça no fim da tarde, casa à noite).", "Alguém na praça pode saber dos hábitos dele.", "O mercadinho vende o mesmo remédio."],
+				"markers": ["npc:marcos"],
+				"advance": [
+					{"if": {"has_item": "encomenda_lucia"}, "to": "entregar"},
+					{"if": {"has_item": "remedio_pressao"}, "to": "entregar"}
+				]
+			},
+			"entregar": {
+				"objective": "Leve o remédio até a Dona Lúcia (casa 10).",
+				"markers": ["npc:lucia"],
+				"advance": [
+					{"if": {"not_has_item": "encomenda_lucia", "not": {"has_item": "remedio_pressao"}}, "to": "investigar"}
+				]
+			}
+		},
+		"outcomes": {
+			"diplomacia": "Você convenceu o Marcos a devolver a encomenda. A Dona Lúcia está espalhando para o bairro o que você fez.",
+			"suborno": "Você pagou o Marcos para devolver a caixa. A Dona Lúcia fez questão de reembolsar.",
+			"intimidacao": "Você intimidou o Marcos. A Dona Lúcia recebeu o remédio, mas não gostou do jeito.",
+			"furto_honesto": "Você pegou a encomenda na casa do Marcos e contou a verdade à Dona Lúcia.",
+			"furto_mentira": "Você pegou a encomenda na casa do Marcos e disse à Dona Lúcia que ele devolveu.",
+			"compra_presente": "Você comprou o remédio e deu de presente à Dona Lúcia.",
+			"compra_reembolso": "Você comprou o remédio para a Dona Lúcia, que reembolsou o valor."
+		}
+	}
+}

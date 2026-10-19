@@ -1,0 +1,4022 @@
+{
+ "name": "Vila Aurora",
+ "city": "Porto Serra",
+ "bounds": [
+  -85,
+  -85,
+  85,
+  85
+ ],
+ "roads": {
+  "xs": [
+   -60,
+   0,
+   60
+  ],
+  "zs": [
+   -60,
+   0,
+   60
+  ],
+  "width": 9.0,
+  "sidewalk": 3.0,
+  "lane_offset": 1.75,
+  "speed_limit": 11.0,
+  "signals": [
+   [
+    0,
+    0
+   ]
+  ]
+ },
+ "buildings": [
+  {
+   "id": "casa_jogador",
+   "name": "Casa nº 8",
+   "type": "house",
+   "center": [
+    -42,
+    -17
+   ],
+   "size": [
+    10,
+    8.0
+   ],
+   "height": 2.9,
+   "style": {
+    "wall": "#e9dcc3",
+    "roof": "#8a3d30",
+    "trim": "#f6f1e7",
+    "floor": "#a7835a",
+    "accent": "#3f6e8c"
+   },
+   "owner": "owner",
+   "private": true,
+   "doors": [
+    {
+     "id": "porta_casa_jogador",
+     "side": "s",
+     "offset": -2.0,
+     "width": 1.1,
+     "locked": true,
+     "keys": [
+      "owner"
+     ],
+     "label": "Porta"
+    }
+   ],
+   "windows": [
+    {
+     "side": "s",
+     "offset": 2.4,
+     "width": 1.6
+    },
+    {
+     "side": "n",
+     "offset": -2.0,
+     "width": 1.4
+    },
+    {
+     "side": "e",
+     "offset": 0.0,
+     "width": 1.2
+    },
+    {
+     "side": "w",
+     "offset": 0.5,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "bed",
+     "pos": [
+      -4.0,
+      -2.9
+     ],
+     "rot": 0,
+     "id": "cama_jogador",
+     "owner": "owner",
+     "spot": "jogador_cama"
+    },
+    {
+     "type": "wardrobe",
+     "pos": [
+      -2.3,
+      -3.65
+     ],
+     "rot": 180,
+     "container": {
+      "id": "guarda_roupa_jogador",
+      "name": "Guarda-roupa",
+      "capacity": 60,
+      "owner": "owner",
+      "contents": {
+       "mochila": 1,
+       "celular_velho": 1,
+       "casaco": 1,
+       "capa_chuva": 1,
+       "camiseta_branca": 1
+      }
+     }
+    },
+    {
+     "type": "nightstand",
+     "pos": [
+      -3.0,
+      -3.6
+     ],
+     "rot": 180
+    },
+    {
+     "type": "partition",
+     "from": [
+      1.7999999999999998,
+      -4.0
+     ],
+     "to": [
+      1.7999999999999998,
+      -1.7
+     ]
+    },
+    {
+     "type": "shower",
+     "pos": [
+      4.2,
+      -3.2
+     ],
+     "rot": 0,
+     "id": "chuveiro_jogador",
+     "owner": "owner"
+    },
+    {
+     "type": "toilet",
+     "pos": [
+      2.6,
+      -3.5
+     ],
+     "rot": 180
+    },
+    {
+     "type": "fridge",
+     "pos": [
+      4.5,
+      0.2
+     ],
+     "rot": 90,
+     "container": {
+      "id": "geladeira_jogador",
+      "name": "Geladeira",
+      "capacity": 25,
+      "refrigerated": true,
+      "owner": "owner",
+      "contents": {
+       "pao": 1,
+       "agua": 2,
+       "queijo": 1,
+       "banana": 3,
+       "miojo": 2
+      }
+     }
+    },
+    {
+     "type": "stove",
+     "pos": [
+      4.5,
+      1.3
+     ],
+     "rot": 90,
+     "id": "fogao_jogador",
+     "owner": "owner"
+    },
+    {
+     "type": "sink",
+     "pos": [
+      4.5,
+      2.4
+     ],
+     "rot": 90,
+     "id": "pia_jogador"
+    },
+    {
+     "type": "table",
+     "pos": [
+      2.1,
+      1.9
+     ],
+     "rot": 0,
+     "spot": "jogador_cozinha"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      2.1,
+      1.1
+     ],
+     "rot": 180
+    },
+    {
+     "type": "chair",
+     "pos": [
+      2.1,
+      2.7
+     ],
+     "rot": 0
+    },
+    {
+     "type": "sofa",
+     "pos": [
+      -4.25,
+      1.8
+     ],
+     "rot": -90,
+     "id": "sofa_jogador",
+     "spot": "jogador_sofa"
+    },
+    {
+     "type": "tv",
+     "pos": [
+      -1.7000000000000002,
+      1.8
+     ],
+     "rot": 90
+    },
+    {
+     "type": "rug",
+     "pos": [
+      -2.9,
+      1.8
+     ],
+     "rot": 0
+    },
+    {
+     "type": "plant",
+     "pos": [
+      1.4,
+      3.5
+     ],
+     "rot": 0
+    },
+    {
+     "type": "note",
+     "pos": [
+      2.1,
+      1.9
+     ],
+     "rot": 0,
+     "id": "bilhete_boas_vindas",
+     "note": "boas_vindas"
+    }
+   ]
+  },
+  {
+   "id": "casa_lucia",
+   "name": "Casa da Dona Lúcia (nº 10)",
+   "type": "house",
+   "center": [
+    -20,
+    -17
+   ],
+   "size": [
+    9,
+    8.0
+   ],
+   "height": 2.9,
+   "style": {
+    "wall": "#d8e3c8",
+    "roof": "#6b4a3a",
+    "trim": "#ffffff",
+    "floor": "#9c7b56",
+    "accent": "#7a5ea8"
+   },
+   "owner": "lucia",
+   "private": true,
+   "doors": [
+    {
+     "id": "porta_casa_lucia",
+     "side": "s",
+     "offset": 0.0,
+     "width": 1.1,
+     "locked": true,
+     "keys": [
+      "lucia"
+     ],
+     "label": "Porta"
+    }
+   ],
+   "windows": [
+    {
+     "side": "s",
+     "offset": 2.6,
+     "width": 1.6
+    },
+    {
+     "side": "n",
+     "offset": -2.0,
+     "width": 1.4
+    },
+    {
+     "side": "e",
+     "offset": 0.0,
+     "width": 1.2
+    },
+    {
+     "side": "w",
+     "offset": 0.5,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "bed",
+     "pos": [
+      -3.5,
+      -2.9
+     ],
+     "rot": 0,
+     "id": "cama_lucia",
+     "owner": "lucia",
+     "spot": "lucia_cama"
+    },
+    {
+     "type": "wardrobe",
+     "pos": [
+      -1.7999999999999998,
+      -3.65
+     ],
+     "rot": 180,
+     "container": {
+      "id": "guarda_roupa_lucia",
+      "name": "Guarda-roupa",
+      "capacity": 60,
+      "owner": "lucia"
+     }
+    },
+    {
+     "type": "nightstand",
+     "pos": [
+      -2.5,
+      -3.6
+     ],
+     "rot": 180
+    },
+    {
+     "type": "partition",
+     "from": [
+      1.2999999999999998,
+      -4.0
+     ],
+     "to": [
+      1.2999999999999998,
+      -1.7
+     ]
+    },
+    {
+     "type": "shower",
+     "pos": [
+      3.7,
+      -3.2
+     ],
+     "rot": 0,
+     "id": "chuveiro_lucia",
+     "owner": "lucia"
+    },
+    {
+     "type": "toilet",
+     "pos": [
+      2.1,
+      -3.5
+     ],
+     "rot": 180
+    },
+    {
+     "type": "fridge",
+     "pos": [
+      4.0,
+      0.2
+     ],
+     "rot": 90,
+     "container": {
+      "id": "geladeira_lucia",
+      "name": "Geladeira",
+      "capacity": 25,
+      "refrigerated": true,
+      "owner": "lucia",
+      "private": true,
+      "contents": {
+       "queijo": 1,
+       "banana": 4,
+       "agua": 2
+      }
+     }
+    },
+    {
+     "type": "stove",
+     "pos": [
+      4.0,
+      1.3
+     ],
+     "rot": 90,
+     "id": "fogao_lucia",
+     "owner": "lucia"
+    },
+    {
+     "type": "sink",
+     "pos": [
+      4.0,
+      2.4
+     ],
+     "rot": 90,
+     "id": "pia_lucia"
+    },
+    {
+     "type": "table",
+     "pos": [
+      1.6,
+      1.9
+     ],
+     "rot": 0,
+     "spot": "lucia_cozinha"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      1.6,
+      1.1
+     ],
+     "rot": 180
+    },
+    {
+     "type": "chair",
+     "pos": [
+      1.6,
+      2.7
+     ],
+     "rot": 0
+    },
+    {
+     "type": "sofa",
+     "pos": [
+      -3.75,
+      1.8
+     ],
+     "rot": -90,
+     "id": "sofa_lucia",
+     "spot": "lucia_sofa"
+    },
+    {
+     "type": "tv",
+     "pos": [
+      -1.2000000000000002,
+      1.8
+     ],
+     "rot": 90
+    },
+    {
+     "type": "rug",
+     "pos": [
+      -2.4,
+      1.8
+     ],
+     "rot": 0
+    },
+    {
+     "type": "plant",
+     "pos": [
+      0.8999999999999999,
+      3.5
+     ],
+     "rot": 0
+    }
+   ]
+  },
+  {
+   "id": "casa_marcos",
+   "name": "Casa do Marcos (nº 12)",
+   "type": "house",
+   "center": [
+    -40,
+    -42
+   ],
+   "size": [
+    9,
+    8.0
+   ],
+   "height": 2.9,
+   "style": {
+    "wall": "#cfd6dc",
+    "roof": "#3e4a57",
+    "trim": "#e7ecef",
+    "floor": "#7d6a58",
+    "accent": "#a33b3b"
+   },
+   "owner": "marcos",
+   "private": true,
+   "doors": [
+    {
+     "id": "porta_casa_marcos",
+     "side": "n",
+     "offset": 0.0,
+     "width": 1.1,
+     "locked": true,
+     "keys": [
+      "marcos"
+     ],
+     "label": "Porta"
+    }
+   ],
+   "windows": [
+    {
+     "side": "n",
+     "offset": 2.6,
+     "width": 1.6
+    },
+    {
+     "side": "s",
+     "offset": -2.0,
+     "width": 1.4
+    },
+    {
+     "side": "e",
+     "offset": 0.0,
+     "width": 1.2
+    },
+    {
+     "side": "w",
+     "offset": 0.5,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "bed",
+     "pos": [
+      -3.5,
+      2.9
+     ],
+     "rot": 180,
+     "id": "cama_marcos",
+     "owner": "marcos",
+     "spot": "marcos_cama"
+    },
+    {
+     "type": "wardrobe",
+     "pos": [
+      -1.7999999999999998,
+      3.65
+     ],
+     "rot": 0,
+     "container": {
+      "id": "guarda_roupa_marcos",
+      "name": "Guarda-roupa",
+      "capacity": 60,
+      "owner": "marcos"
+     }
+    },
+    {
+     "type": "nightstand",
+     "pos": [
+      -2.5,
+      3.6
+     ],
+     "rot": 0
+    },
+    {
+     "type": "partition",
+     "from": [
+      1.2999999999999998,
+      4.0
+     ],
+     "to": [
+      1.2999999999999998,
+      1.7
+     ]
+    },
+    {
+     "type": "shower",
+     "pos": [
+      3.7,
+      3.2
+     ],
+     "rot": 180,
+     "id": "chuveiro_marcos",
+     "owner": "marcos"
+    },
+    {
+     "type": "toilet",
+     "pos": [
+      2.1,
+      3.5
+     ],
+     "rot": 0
+    },
+    {
+     "type": "fridge",
+     "pos": [
+      4.0,
+      -0.2
+     ],
+     "rot": 90,
+     "container": {
+      "id": "geladeira_marcos",
+      "name": "Geladeira",
+      "capacity": 25,
+      "refrigerated": true,
+      "owner": "marcos",
+      "contents": {
+       "refrigerante": 3,
+       "pao": 1
+      }
+     }
+    },
+    {
+     "type": "stove",
+     "pos": [
+      4.0,
+      -1.3
+     ],
+     "rot": 90,
+     "id": "fogao_marcos",
+     "owner": "marcos"
+    },
+    {
+     "type": "sink",
+     "pos": [
+      4.0,
+      -2.4
+     ],
+     "rot": 90,
+     "id": "pia_marcos"
+    },
+    {
+     "type": "table",
+     "pos": [
+      1.6,
+      -1.9
+     ],
+     "rot": 180,
+     "spot": "marcos_cozinha"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      1.6,
+      -1.1
+     ],
+     "rot": 0
+    },
+    {
+     "type": "chair",
+     "pos": [
+      1.6,
+      -2.7
+     ],
+     "rot": 180
+    },
+    {
+     "type": "sofa",
+     "pos": [
+      -3.75,
+      -1.8
+     ],
+     "rot": 270,
+     "id": "sofa_marcos",
+     "spot": "marcos_sofa"
+    },
+    {
+     "type": "tv",
+     "pos": [
+      -1.2000000000000002,
+      -1.8
+     ],
+     "rot": 90
+    },
+    {
+     "type": "rug",
+     "pos": [
+      -2.4,
+      -1.8
+     ],
+     "rot": 180
+    },
+    {
+     "type": "plant",
+     "pos": [
+      0.8999999999999999,
+      -3.5
+     ],
+     "rot": 180
+    },
+    {
+     "type": "chest",
+     "pos": [
+      -0.8,
+      -3.4
+     ],
+     "rot": 0,
+     "container": {
+      "id": "bau_marcos",
+      "name": "Baú do Marcos",
+      "capacity": 40,
+      "owner": "marcos",
+      "contents": {
+       "encomenda_lucia": 1,
+       "relogio_antigo": 1,
+       "lata_aluminio": 3
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "casa_silva",
+   "name": "Casa dos Silva (nº 14)",
+   "type": "house",
+   "center": [
+    -20,
+    -42
+   ],
+   "size": [
+    9,
+    8.0
+   ],
+   "height": 2.9,
+   "style": {
+    "wall": "#f0d2b8",
+    "roof": "#7a2f2f",
+    "trim": "#ffffff",
+    "floor": "#a08060",
+    "accent": "#2f7a5f"
+   },
+   "owner": "paula",
+   "private": true,
+   "doors": [
+    {
+     "id": "porta_casa_silva",
+     "side": "n",
+     "offset": 0.0,
+     "width": 1.1,
+     "locked": true,
+     "keys": [
+      "paula"
+     ],
+     "label": "Porta"
+    }
+   ],
+   "windows": [
+    {
+     "side": "n",
+     "offset": 2.6,
+     "width": 1.6
+    },
+    {
+     "side": "s",
+     "offset": -2.0,
+     "width": 1.4
+    },
+    {
+     "side": "e",
+     "offset": 0.0,
+     "width": 1.2
+    },
+    {
+     "side": "w",
+     "offset": 0.5,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "bed",
+     "pos": [
+      -3.5,
+      2.9
+     ],
+     "rot": 180,
+     "id": "cama_silva",
+     "owner": "paula",
+     "spot": "silva_cama"
+    },
+    {
+     "type": "wardrobe",
+     "pos": [
+      -1.7999999999999998,
+      3.65
+     ],
+     "rot": 0,
+     "container": {
+      "id": "guarda_roupa_silva",
+      "name": "Guarda-roupa",
+      "capacity": 60,
+      "owner": "paula"
+     }
+    },
+    {
+     "type": "nightstand",
+     "pos": [
+      -2.5,
+      3.6
+     ],
+     "rot": 0
+    },
+    {
+     "type": "partition",
+     "from": [
+      1.2999999999999998,
+      4.0
+     ],
+     "to": [
+      1.2999999999999998,
+      1.7
+     ]
+    },
+    {
+     "type": "shower",
+     "pos": [
+      3.7,
+      3.2
+     ],
+     "rot": 180,
+     "id": "chuveiro_silva",
+     "owner": "paula"
+    },
+    {
+     "type": "toilet",
+     "pos": [
+      2.1,
+      3.5
+     ],
+     "rot": 0
+    },
+    {
+     "type": "fridge",
+     "pos": [
+      4.0,
+      -0.2
+     ],
+     "rot": 90,
+     "container": {
+      "id": "geladeira_silva",
+      "name": "Geladeira",
+      "capacity": 25,
+      "refrigerated": true,
+      "owner": "paula",
+      "contents": {
+       "agua": 3,
+       "sanduiche": 1
+      }
+     }
+    },
+    {
+     "type": "stove",
+     "pos": [
+      4.0,
+      -1.3
+     ],
+     "rot": 90,
+     "id": "fogao_silva",
+     "owner": "paula"
+    },
+    {
+     "type": "sink",
+     "pos": [
+      4.0,
+      -2.4
+     ],
+     "rot": 90,
+     "id": "pia_silva"
+    },
+    {
+     "type": "table",
+     "pos": [
+      1.6,
+      -1.9
+     ],
+     "rot": 180,
+     "spot": "silva_cozinha"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      1.6,
+      -1.1
+     ],
+     "rot": 0
+    },
+    {
+     "type": "chair",
+     "pos": [
+      1.6,
+      -2.7
+     ],
+     "rot": 180
+    },
+    {
+     "type": "sofa",
+     "pos": [
+      -3.75,
+      -1.8
+     ],
+     "rot": 270,
+     "id": "sofa_silva",
+     "spot": "silva_sofa"
+    },
+    {
+     "type": "tv",
+     "pos": [
+      -1.2000000000000002,
+      -1.8
+     ],
+     "rot": 90
+    },
+    {
+     "type": "rug",
+     "pos": [
+      -2.4,
+      -1.8
+     ],
+     "rot": 180
+    },
+    {
+     "type": "plant",
+     "pos": [
+      0.8999999999999999,
+      -3.5
+     ],
+     "rot": 180
+    }
+   ]
+  },
+  {
+   "id": "casa_5",
+   "name": "Casa nº 5 (à venda)",
+   "type": "house",
+   "center": [
+    -46,
+    -29
+   ],
+   "size": [
+    9,
+    8.0
+   ],
+   "height": 2.9,
+   "style": {
+    "wall": "#e6d3b3",
+    "roof": "#5f6b4a",
+    "trim": "#f3eee2",
+    "floor": "#9a7a55",
+    "accent": "#5f8a6a"
+   },
+   "owner": "owner",
+   "private": true,
+   "doors": [
+    {
+     "id": "porta_casa_5",
+     "side": "w",
+     "offset": 0.0,
+     "width": 1.1,
+     "locked": true,
+     "keys": [
+      "owner"
+     ],
+     "label": "Porta"
+    }
+   ],
+   "windows": [
+    {
+     "side": "w",
+     "offset": 2.6,
+     "width": 1.6
+    },
+    {
+     "side": "e",
+     "offset": -2.0,
+     "width": 1.4
+    },
+    {
+     "side": "n",
+     "offset": 0.0,
+     "width": 1.2
+    },
+    {
+     "side": "s",
+     "offset": 0.5,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "bed",
+     "pos": [
+      2.9,
+      -2.98
+     ],
+     "rot": 270,
+     "id": "cama_casa5",
+     "owner": "owner",
+     "spot": "casa5_cama"
+    },
+    {
+     "type": "wardrobe",
+     "pos": [
+      3.65,
+      -1.53
+     ],
+     "rot": 90,
+     "container": {
+      "id": "guarda_roupa_casa5",
+      "name": "Guarda-roupa",
+      "capacity": 60,
+      "owner": "owner"
+     }
+    },
+    {
+     "type": "nightstand",
+     "pos": [
+      3.6,
+      -2.12
+     ],
+     "rot": 90
+    },
+    {
+     "type": "partition",
+     "from": [
+      4.0,
+      1.1049999999999998
+     ],
+     "to": [
+      1.7,
+      1.1049999999999998
+     ]
+    },
+    {
+     "type": "shower",
+     "pos": [
+      3.2,
+      3.15
+     ],
+     "rot": 270,
+     "id": "chuveiro_casa5",
+     "owner": "owner"
+    },
+    {
+     "type": "toilet",
+     "pos": [
+      3.5,
+      1.78
+     ],
+     "rot": 90
+    },
+    {
+     "type": "fridge",
+     "pos": [
+      -0.2,
+      3.4
+     ],
+     "rot": 0,
+     "container": {
+      "id": "geladeira_casa5",
+      "name": "Geladeira",
+      "capacity": 25,
+      "refrigerated": true,
+      "owner": "owner"
+     }
+    },
+    {
+     "type": "stove",
+     "pos": [
+      -1.3,
+      3.4
+     ],
+     "rot": 0,
+     "id": "fogao_casa5",
+     "owner": "owner"
+    },
+    {
+     "type": "sink",
+     "pos": [
+      -2.4,
+      3.4
+     ],
+     "rot": 0,
+     "id": "pia_casa5"
+    },
+    {
+     "type": "table",
+     "pos": [
+      -1.9,
+      1.36
+     ],
+     "rot": 270,
+     "spot": "casa5_cozinha"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -1.1,
+      1.36
+     ],
+     "rot": 90
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -2.7,
+      1.36
+     ],
+     "rot": 270
+    },
+    {
+     "type": "sofa",
+     "pos": [
+      -1.8,
+      -3.19
+     ],
+     "rot": 180,
+     "id": "sofa_casa5",
+     "spot": "casa5_sofa"
+    },
+    {
+     "type": "tv",
+     "pos": [
+      -1.8,
+      -1.02
+     ],
+     "rot": 0
+    },
+    {
+     "type": "rug",
+     "pos": [
+      -1.8,
+      -2.04
+     ],
+     "rot": 270
+    },
+    {
+     "type": "plant",
+     "pos": [
+      -3.5,
+      0.76
+     ],
+     "rot": 270
+    }
+   ]
+  },
+  {
+   "id": "mercadinho",
+   "name": "Mercadinho Bom Preço",
+   "type": "shop",
+   "center": [
+    22,
+    -18
+   ],
+   "size": [
+    14,
+    10
+   ],
+   "height": 3.4,
+   "style": {
+    "wall": "#e6e0d2",
+    "roof": "#5a6470",
+    "trim": "#2d7d46",
+    "floor": "#a9a397",
+    "accent": "#2d7d46",
+    "sign": "MERCADINHO BOM PREÇO"
+   },
+   "owner": "antonio",
+   "private": false,
+   "shop": "mercadinho",
+   "doors": [
+    {
+     "id": "porta_mercadinho",
+     "side": "s",
+     "offset": -3.0,
+     "width": 1.6,
+     "locked": false,
+     "hours": [
+      7,
+      21
+     ],
+     "keys": [
+      "antonio"
+     ],
+     "label": "Porta do mercadinho",
+     "glass": true
+    }
+   ],
+   "windows": [
+    {
+     "side": "s",
+     "offset": 2.5,
+     "width": 5.0,
+     "low": true
+    },
+    {
+     "side": "e",
+     "offset": 0,
+     "width": 2.0
+    }
+   ],
+   "furniture": [
+    {
+     "type": "shelf",
+     "pos": [
+      -5.2,
+      -1.2
+     ],
+     "rot": 90,
+     "len": 4.0
+    },
+    {
+     "type": "shelf",
+     "pos": [
+      -2.6,
+      -1.2
+     ],
+     "rot": 90,
+     "len": 4.0
+    },
+    {
+     "type": "shelf",
+     "pos": [
+      0.0,
+      -1.2
+     ],
+     "rot": 90,
+     "len": 4.0
+    },
+    {
+     "type": "fridge_display",
+     "pos": [
+      3.5,
+      -4.55
+     ],
+     "rot": 180,
+     "len": 5.0
+    },
+    {
+     "type": "shelf",
+     "pos": [
+      6.55,
+      -1.0
+     ],
+     "rot": 90,
+     "len": 2.4,
+     "color": "#e8f4f8",
+     "label": "Farmácia"
+    },
+    {
+     "type": "counter",
+     "id": "balcao_mercadinho",
+     "pos": [
+      4.0,
+      2.0
+     ],
+     "rot": 0,
+     "len": 2.6,
+     "shop": "mercadinho",
+     "staff_spot": "mercadinho_balcao",
+     "register": true
+    },
+    {
+     "type": "crate",
+     "pos": [
+      -6.2,
+      -4.2
+     ],
+     "rot": 0
+    }
+   ],
+   "spots": {
+    "mercadinho_balcao": {
+     "pos": [
+      4.0,
+      1.1
+     ],
+     "rot": 180,
+     "pose": "stand"
+    },
+    "mercadinho_cliente": {
+     "pos": [
+      -3.9,
+      0.6
+     ],
+     "rot": 90,
+     "pose": "stand"
+    },
+    "mercadinho_cliente_2": {
+     "pos": [
+      -1.3,
+      -2.5
+     ],
+     "rot": -90,
+     "pose": "stand"
+    },
+    "mercadinho_fila": {
+     "pos": [
+      4.0,
+      3.2
+     ],
+     "rot": 0,
+     "pose": "stand"
+    },
+    "mercadinho_quartinho": {
+     "pos": [
+      -6.0,
+      -3.0
+     ],
+     "rot": 0,
+     "pose": "stand",
+     "hidden": true
+    }
+   }
+  },
+  {
+   "id": "penhores",
+   "name": "Penhores do Beto",
+   "type": "shop",
+   "center": [
+    42,
+    -18
+   ],
+   "size": [
+    9,
+    8
+   ],
+   "height": 3.2,
+   "style": {
+    "wall": "#d9c48f",
+    "roof": "#4b3b2a",
+    "trim": "#7a5a2a",
+    "floor": "#8c7558",
+    "accent": "#b5832a",
+    "sign": "PENHORES DO BETO"
+   },
+   "owner": "beto",
+   "private": false,
+   "shop": "penhores",
+   "doors": [
+    {
+     "id": "porta_penhores",
+     "side": "s",
+     "offset": 0.0,
+     "width": 1.2,
+     "locked": false,
+     "hours": [
+      9,
+      19
+     ],
+     "keys": [
+      "beto"
+     ],
+     "label": "Porta da loja de penhores"
+    }
+   ],
+   "windows": [
+    {
+     "side": "s",
+     "offset": 2.6,
+     "width": 1.6,
+     "low": true
+    },
+    {
+     "side": "s",
+     "offset": -2.6,
+     "width": 1.6,
+     "low": true
+    }
+   ],
+   "furniture": [
+    {
+     "type": "counter",
+     "id": "balcao_penhores",
+     "pos": [
+      0.0,
+      -0.4
+     ],
+     "rot": 0,
+     "len": 3.0,
+     "shop": "penhores",
+     "staff_spot": "penhores_balcao",
+     "register": true
+    },
+    {
+     "type": "shelf",
+     "pos": [
+      -3.9,
+      -1.0
+     ],
+     "rot": 90,
+     "len": 3.0,
+     "color": "#6b5235"
+    },
+    {
+     "type": "shelf",
+     "pos": [
+      3.9,
+      -1.0
+     ],
+     "rot": 90,
+     "len": 3.0,
+     "color": "#6b5235"
+    },
+    {
+     "type": "shelf",
+     "pos": [
+      0.0,
+      -3.6
+     ],
+     "rot": 180,
+     "len": 4.0,
+     "color": "#6b5235"
+    }
+   ],
+   "spots": {
+    "penhores_balcao": {
+     "pos": [
+      0.0,
+      -1.3
+     ],
+     "rot": 180,
+     "pose": "stand"
+    },
+    "penhores_cliente": {
+     "pos": [
+      0.6,
+      0.7
+     ],
+     "rot": 0,
+     "pose": "stand"
+    }
+   }
+  },
+  {
+   "id": "garagem_3",
+   "name": "Garagem nº 3 (à venda)",
+   "type": "garage",
+   "center": [
+    45,
+    -30
+   ],
+   "size": [
+    7,
+    6.5
+   ],
+   "height": 3.2,
+   "style": {
+    "wall": "#c8c2b4",
+    "roof": "#4b4f57",
+    "trim": "#e4e0d6",
+    "floor": "#7a7d82",
+    "accent": "#7a8a99"
+   },
+   "owner": "owner",
+   "private": true,
+   "doors": [
+    {
+     "id": "portao_garagem_3",
+     "side": "e",
+     "offset": 0.0,
+     "width": 3.6,
+     "locked": true,
+     "keys": [
+      "owner"
+     ],
+     "label": "Portão da garagem",
+     "rollup": true,
+     "manual": true
+    }
+   ],
+   "windows": [
+    {
+     "side": "n",
+     "offset": 0.0,
+     "width": 1.2
+    }
+   ],
+   "furniture": [
+    {
+     "type": "workbench",
+     "id": "bancada_garagem_3",
+     "pos": [
+      -2.8,
+      -1.2
+     ],
+     "rot": 90,
+     "len": 2.6
+    },
+    {
+     "type": "crate",
+     "pos": [
+      -2.9,
+      2.4
+     ],
+     "rot": 0,
+     "container": {
+      "id": "prateleira_garagem_3",
+      "name": "Prateleira da garagem",
+      "capacity": 80,
+      "owner": "owner"
+     }
+    }
+   ],
+   "spots": {}
+  },
+  {
+   "id": "brasa",
+   "name": "Brasa Burger Drive-Thru",
+   "type": "restaurant",
+   "center": [
+    26,
+    26
+   ],
+   "size": [
+    14,
+    10
+   ],
+   "height": 3.6,
+   "style": {
+    "wall": "#e8d2b0",
+    "roof": "#b8432f",
+    "trim": "#e8a33a",
+    "floor": "#b0805f",
+    "accent": "#b8432f",
+    "sign": "BRASA BURGER"
+   },
+   "owner": "sandra",
+   "private": false,
+   "job": "brasa",
+   "doors": [
+    {
+     "id": "porta_brasa",
+     "side": "n",
+     "offset": -4.0,
+     "width": 1.6,
+     "locked": false,
+     "hours": [
+      10,
+      22
+     ],
+     "keys": [
+      "sandra",
+      "kleber",
+      "player_job"
+     ],
+     "label": "Porta do Brasa Burger",
+     "glass": true
+    }
+   ],
+   "windows": [
+    {
+     "side": "n",
+     "offset": 0.5,
+     "width": 4.0,
+     "low": true
+    },
+    {
+     "side": "w",
+     "offset": 0.0,
+     "width": 4.0,
+     "low": true
+    },
+    {
+     "side": "e",
+     "offset": 1.0,
+     "width": 1.3,
+     "drive": true
+    }
+   ],
+   "staff_zone": [
+    -0.6,
+    -5.0,
+    7.0,
+    5.0
+   ],
+   "furniture": [
+    {
+     "type": "counter",
+     "id": "balcao_brasa",
+     "pos": [
+      -1.0,
+      -1.4
+     ],
+     "rot": 90,
+     "len": 5.2,
+     "shop": "brasa_balcao",
+     "staff_spot": "brasa_balcao_func",
+     "register": true
+    },
+    {
+     "type": "table",
+     "pos": [
+      -5.4,
+      1.4
+     ],
+     "rot": 0,
+     "spot": "brasa_mesa_1"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -5.4,
+      0.6
+     ],
+     "rot": 180
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -5.4,
+      2.2
+     ],
+     "rot": 0
+    },
+    {
+     "type": "table",
+     "pos": [
+      -5.4,
+      3.8
+     ],
+     "rot": 0,
+     "spot": "brasa_mesa_2"
+    },
+    {
+     "type": "chair",
+     "pos": [
+      -5.4,
+      4.5
+     ],
+     "rot": 0
+    },
+    {
+     "type": "grill",
+     "pos": [
+      2.2,
+      -4.45
+     ],
+     "rot": 180,
+     "id": "estacao_chapa",
+     "station": "chapa"
+    },
+    {
+     "type": "fryer",
+     "pos": [
+      4.3,
+      -4.45
+     ],
+     "rot": 180,
+     "id": "estacao_fritadeira",
+     "station": "fritadeira"
+    },
+    {
+     "type": "soda_machine",
+     "pos": [
+      6.5,
+      -2.4
+     ],
+     "rot": 90,
+     "id": "estacao_refri",
+     "station": "refri"
+    },
+    {
+     "type": "drive_window",
+     "pos": [
+      6.55,
+      1.0
+     ],
+     "rot": 90,
+     "id": "janela_drive"
+    },
+    {
+     "type": "time_clock",
+     "pos": [
+      0.6,
+      4.75
+     ],
+     "rot": 0,
+     "id": "relogio_ponto"
+    },
+    {
+     "type": "desk",
+     "pos": [
+      3.6,
+      3.9
+     ],
+     "rot": 0
+    },
+    {
+     "type": "kitchen_counter",
+     "pos": [
+      2.0,
+      -0.9
+     ],
+     "rot": 0,
+     "len": 3.0
+    },
+    {
+     "type": "crate",
+     "pos": [
+      6.3,
+      4.3
+     ],
+     "rot": 0,
+     "container": {
+      "id": "estoque_brasa",
+      "name": "Estoque do Brasa",
+      "capacity": 50,
+      "owner": "sandra",
+      "contents": {
+       "refrigerante": 6,
+       "agua": 4
+      }
+     }
+    }
+   ],
+   "spots": {
+    "brasa_balcao_func": {
+     "pos": [
+      -0.25,
+      -1.4
+     ],
+     "rot": 90,
+     "pose": "stand"
+    },
+    "brasa_escritorio": {
+     "pos": [
+      3.6,
+      3.1
+     ],
+     "rot": 180,
+     "pose": "stand"
+    },
+    "brasa_cliente": {
+     "pos": [
+      -2.0,
+      -1.4
+     ],
+     "rot": -90,
+     "pose": "stand"
+    }
+   }
+  },
+  {
+   "id": "oficina",
+   "name": "Oficina do Rafael",
+   "type": "garage",
+   "center": [
+    -42,
+    44
+   ],
+   "size": [
+    12,
+    10
+   ],
+   "height": 4.2,
+   "style": {
+    "wall": "#b7bcc2",
+    "roof": "#3b4048",
+    "trim": "#e0b521",
+    "floor": "#7d8288",
+    "accent": "#e0b521",
+    "sign": "OFICINA DO RAFAEL"
+   },
+   "owner": "rafael",
+   "private": false,
+   "doors": [
+    {
+     "id": "portao_oficina",
+     "side": "s",
+     "offset": 0.0,
+     "width": 4.2,
+     "locked": false,
+     "hours": [
+      7.5,
+      18
+     ],
+     "keys": [
+      "rafael",
+      "marcos"
+     ],
+     "label": "Portão da oficina",
+     "rollup": true
+    }
+   ],
+   "windows": [
+    {
+     "side": "e",
+     "offset": 0.0,
+     "width": 2.0
+    }
+   ],
+   "furniture": [
+    {
+     "type": "lift",
+     "pos": [
+      -2.2,
+      -0.5
+     ],
+     "rot": 0
+    },
+    {
+     "type": "counter",
+     "id": "balcao_oficina",
+     "pos": [
+      3.0,
+      2.6
+     ],
+     "rot": 0,
+     "len": 2.0,
+     "shop": "oficina",
+     "staff_spot": "oficina_rafael",
+     "register": true
+    },
+    {
+     "type": "workbench",
+     "pos": [
+      3.0,
+      -4.4
+     ],
+     "rot": 180,
+     "len": 3.0
+    },
+    {
+     "type": "chest",
+     "pos": [
+      5.4,
+      -1.0
+     ],
+     "rot": 90,
+     "color": "#b33a2a",
+     "container": {
+      "id": "caixa_ferramentas_rafael",
+      "name": "Caixa de ferramentas",
+      "capacity": 30,
+      "owner": "rafael",
+      "contents": {
+       "radio_velho": 1,
+       "lata_aluminio": 2
+      }
+     }
+    },
+    {
+     "type": "tire_stack",
+     "pos": [
+      -5.2,
+      -4.0
+     ],
+     "rot": 0
+    },
+    {
+     "type": "tire_stack",
+     "pos": [
+      -5.2,
+      -3.0
+     ],
+     "rot": 0
+    }
+   ],
+   "spots": {
+    "oficina_rafael": {
+     "pos": [
+      2.5,
+      1.5
+     ],
+     "rot": 180,
+     "pose": "stand"
+    },
+    "oficina_marcos": {
+     "pos": [
+      -2.2,
+      1.6
+     ],
+     "rot": 0,
+     "pose": "work"
+    },
+    "oficina_fundos": {
+     "pos": [
+      4.5,
+      -3.5
+     ],
+     "rot": 0,
+     "pose": "stand",
+     "hidden": true
+    }
+   }
+  },
+  {
+   "id": "predio",
+   "name": "Edifício Aurora (residencial)",
+   "type": "apartment",
+   "center": [
+    -16,
+    44
+   ],
+   "size": [
+    12,
+    10
+   ],
+   "height": 6.4,
+   "style": {
+    "wall": "#c9b3a0",
+    "roof": "#594a42",
+    "trim": "#efe6dc",
+    "floor": "#8c7a6a",
+    "accent": "#54708c"
+   },
+   "owner": "",
+   "private": true,
+   "floors": 2,
+   "closed_interior": true,
+   "doors": [
+    {
+     "id": "porta_predio",
+     "side": "s",
+     "offset": 0.0,
+     "width": 1.4,
+     "locked": true,
+     "keys": [
+      "sandra",
+      "kleber",
+      "beto",
+      "julia",
+      "pedestre"
+     ],
+     "label": "Portaria (somente moradores)",
+     "glass": true
+    }
+   ],
+   "windows": [
+    {
+     "side": "s",
+     "offset": -3.6,
+     "width": 1.6
+    },
+    {
+     "side": "s",
+     "offset": 3.6,
+     "width": 1.6
+    },
+    {
+     "side": "e",
+     "offset": -2,
+     "width": 1.4
+    },
+    {
+     "side": "e",
+     "offset": 2,
+     "width": 1.4
+    },
+    {
+     "side": "w",
+     "offset": -2,
+     "width": 1.4
+    },
+    {
+     "side": "w",
+     "offset": 2,
+     "width": 1.4
+    }
+   ],
+   "furniture": [],
+   "spots": {
+    "predio_interior": {
+     "pos": [
+      0.0,
+      0.0
+     ],
+     "rot": 0,
+     "pose": "stand",
+     "hidden": true
+    }
+   }
+  }
+ ],
+ "props": [
+  {
+   "type": "fountain",
+   "pos": [
+    -31,
+    22
+   ]
+  },
+  {
+   "type": "bench",
+   "pos": [
+    -37.5,
+    22
+   ],
+   "rot": -90,
+   "spot": "praca_banco_1",
+   "id": "praca_banco_1"
+  },
+  {
+   "type": "bench",
+   "pos": [
+    -24.5,
+    22
+   ],
+   "rot": 90,
+   "spot": "praca_banco_2",
+   "id": "praca_banco_2"
+  },
+  {
+   "type": "bench",
+   "pos": [
+    -31,
+    15.5
+   ],
+   "rot": 180,
+   "spot": "praca_banco_3",
+   "id": "praca_banco_3"
+  },
+  {
+   "type": "bench",
+   "pos": [
+    -31,
+    28.5
+   ],
+   "rot": 0,
+   "spot": "praca_banco_4",
+   "id": "praca_banco_4"
+  },
+  {
+   "type": "bench",
+   "pos": [
+    -46,
+    31
+   ],
+   "rot": 0,
+   "spot": "praca_banco_5",
+   "id": "praca_banco_5"
+  },
+  {
+   "type": "bench",
+   "pos": [
+    -16,
+    14
+   ],
+   "rot": 180,
+   "spot": "praca_banco_6",
+   "id": "praca_banco_6"
+  },
+  {
+   "type": "trash",
+   "pos": [
+    -26.5,
+    15.0
+   ],
+   "rot": 0,
+   "container": {
+    "id": "lixeira_praca",
+    "name": "Lixeira da praça",
+    "capacity": 10,
+    "owner": "",
+    "private": false,
+    "contents": {
+     "lata_aluminio": 2
+    },
+    "refill": {
+     "lata_aluminio": 4
+    }
+   }
+  },
+  {
+   "type": "trash",
+   "pos": [
+    12.8,
+    -12.0
+   ],
+   "rot": 0,
+   "container": {
+    "id": "lixeira_mercadinho",
+    "name": "Lixeira do mercadinho",
+    "capacity": 10,
+    "owner": "",
+    "private": false,
+    "contents": {
+     "lata_aluminio": 3,
+     "banana": 1
+    },
+    "refill": {
+     "lata_aluminio": 5
+    }
+   }
+  },
+  {
+   "type": "trash",
+   "pos": [
+    17.0,
+    18.0
+   ],
+   "rot": 0,
+   "container": {
+    "id": "lixeira_brasa",
+    "name": "Lixeira do Brasa",
+    "capacity": 10,
+    "owner": "",
+    "private": false,
+    "contents": {
+     "lata_aluminio": 2
+    },
+    "refill": {
+     "lata_aluminio": 3
+    }
+   }
+  },
+  {
+   "type": "bus_stop",
+   "pos": [
+    -30,
+    6.6
+   ],
+   "rot": 0
+  },
+  {
+   "type": "doormat",
+   "pos": [
+    -40,
+    -46.9
+   ],
+   "rot": 0,
+   "id": "tapete_marcos",
+   "hidden_item": "chave_marcos"
+  },
+  {
+   "type": "pump",
+   "pos": [
+    27,
+    -42
+   ],
+   "rot": 0,
+   "id": "bomba_1"
+  },
+  {
+   "type": "pump",
+   "pos": [
+    33,
+    -42
+   ],
+   "rot": 0,
+   "id": "bomba_2"
+  },
+  {
+   "type": "canopy",
+   "pos": [
+    30,
+    -42
+   ],
+   "size": [
+    12,
+    8
+   ]
+  },
+  {
+   "type": "kiosk",
+   "pos": [
+    -44,
+    13.5
+   ],
+   "rot": 180
+  },
+  {
+   "type": "mailbox",
+   "pos": [
+    -45.5,
+    -8.3
+   ],
+   "id": "caixa_correio_8",
+   "property": "casa_jogador"
+  },
+  {
+   "type": "sale_sign",
+   "pos": [
+    -52.0,
+    -25.5
+   ],
+   "rot": -90,
+   "id": "placa_casa_5",
+   "property": "casa_5"
+  },
+  {
+   "type": "sale_sign",
+   "pos": [
+    51.6,
+    -34.3
+   ],
+   "rot": 90,
+   "id": "placa_garagem_3",
+   "property": "garagem_3"
+  },
+  {
+   "type": "sale_sign",
+   "pos": [
+    -24.0,
+    52.0
+   ],
+   "rot": 180,
+   "id": "placa_carro_usado",
+   "vehicle": "carro_usado"
+  },
+  {
+   "type": "mailbox",
+   "pos": [
+    -22.5,
+    -8.3
+   ]
+  },
+  {
+   "type": "sign",
+   "pos": [
+    44.5,
+    8.6
+   ],
+   "rot": 180,
+   "text": "DRIVE-THRU ➜"
+  },
+  {
+   "type": "sign",
+   "pos": [
+    -12.5,
+    9.0
+   ],
+   "rot": 180,
+   "text": "PRAÇA DA AURORA"
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -47.5,
+    -12.6
+   ],
+   "to": [
+    -47.5,
+    -7.8
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -36.4,
+    -12.6
+   ],
+   "to": [
+    -36.4,
+    -9.5
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -29.6,
+    -12.6
+   ],
+   "to": [
+    -29.6,
+    -7.8
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -15.0,
+    -12.6
+   ],
+   "to": [
+    -15.0,
+    -7.8
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -25.2,
+    -12.6
+   ],
+   "to": [
+    -25.2,
+    -7.8
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -47.5,
+    -52.2
+   ],
+   "to": [
+    -47.5,
+    -46.6
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -30,
+    -52.2
+   ],
+   "to": [
+    -30,
+    -46.6
+   ]
+  },
+  {
+   "type": "hedge",
+   "from": [
+    -15,
+    -52.2
+   ],
+   "to": [
+    -15,
+    -46.6
+   ]
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -66.6,
+    -47
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -66.6,
+    -33
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -66.6,
+    -19
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -66.6,
+    23
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -66.6,
+    37
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -66.6,
+    51
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -53.4,
+    -47
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -53.4,
+    -19
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -53.4,
+    23
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -53.4,
+    37
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -53.4,
+    51
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -45,
+    -66.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -45,
+    -53.4
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -45,
+    6.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -45,
+    66.6
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -31,
+    -66.6
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -31,
+    -53.4
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -31,
+    6.6
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -31,
+    66.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -17,
+    -66.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -17,
+    6.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -17,
+    66.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -6.6,
+    -47
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -6.6,
+    -33
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -6.6,
+    -19
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -6.6,
+    23
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -6.6,
+    37
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -6.6,
+    51
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    6.6,
+    -47
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    6.6,
+    -33
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    6.6,
+    -19
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    6.6,
+    23
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    6.6,
+    37
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    6.6,
+    51
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    25,
+    -66.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    25,
+    -53.4
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    25,
+    -6.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    25,
+    6.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    25,
+    53.4
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    25,
+    66.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    39,
+    -66.6
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    39,
+    -53.4
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    39,
+    6.6
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    39,
+    53.4
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    39,
+    66.6
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53,
+    -66.6
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53,
+    -53.4
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53,
+    -6.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53,
+    6.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53,
+    53.4
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53,
+    66.6
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53.4,
+    -47
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53.4,
+    -19
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53.4,
+    23
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53.4,
+    37
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    53.4,
+    51
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    66.6,
+    -47
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    66.6,
+    -33
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    66.6,
+    -19
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    66.6,
+    23
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    66.6,
+    37
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    66.6,
+    51
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    76.0,
+    0.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    77.8,
+    13.7
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    77.1,
+    28.0
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    65.8,
+    38.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    60.5,
+    50.8
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    52.7,
+    62.8
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    38.0,
+    65.8
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    27.0,
+    74.2
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    14.2,
+    80.8
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    0.0,
+    76.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -13.7,
+    77.8
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -28.0,
+    77.1
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -38.0,
+    65.8
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -50.8,
+    60.5
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -62.8,
+    52.7
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -65.8,
+    38.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -74.2,
+    27.0
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -80.8,
+    14.2
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -76.0,
+    0.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -77.8,
+    -13.7
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -77.1,
+    -28.0
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -65.8,
+    -38.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -60.5,
+    -50.8
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -52.7,
+    -62.8
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -38.0,
+    -65.8
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -27.0,
+    -74.2
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -14.2,
+    -80.8
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -0.0,
+    -76.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    13.7,
+    -77.8
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    28.0,
+    -77.1
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    38.0,
+    -65.8
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    50.8,
+    -60.5
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    62.8,
+    -52.7
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    65.8,
+    -38.0
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    74.2,
+    -27.0
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    80.8,
+    -14.2
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -46,
+    14
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -14,
+    31
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -46,
+    24
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -16,
+    22
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -38,
+    31.5
+   ],
+   "variant": 2.5
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -24,
+    13
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -42,
+    -27
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -17,
+    -28
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    -33,
+    -33
+   ],
+   "variant": 0
+  },
+  {
+   "type": "tree",
+   "pos": [
+    38,
+    45
+   ],
+   "variant": 2
+  },
+  {
+   "type": "tree",
+   "pos": [
+    24,
+    46
+   ],
+   "variant": 1
+  },
+  {
+   "type": "tree",
+   "pos": [
+    48,
+    -33
+   ],
+   "variant": 0
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -53.1,
+    -45
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -53.1,
+    -15
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -53.1,
+    15
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -53.1,
+    45
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    6.9,
+    -45
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    6.9,
+    -15
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    6.9,
+    15
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    6.9,
+    45
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    66.9,
+    -45
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    66.9,
+    -15
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    66.9,
+    15
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    66.9,
+    45
+   ],
+   "rot": -90
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -45,
+    -66.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -15,
+    -66.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    15,
+    -66.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    45,
+    -66.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -45,
+    -6.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -15,
+    -6.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    15,
+    -6.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    45,
+    -6.9
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -45,
+    53.1
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    -15,
+    53.1
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    15,
+    53.1
+   ],
+   "rot": 180
+  },
+  {
+   "type": "streetlight",
+   "pos": [
+    45,
+    53.1
+   ],
+   "rot": 180
+  }
+ ],
+ "spots": {
+  "calcada_lucia": {
+   "pos": [
+    -20.0,
+    -10.6
+   ],
+   "rot": 180,
+   "pose": "stand"
+  },
+  "jardim_marcos": {
+   "pos": [
+    -37.5,
+    -49.0
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
+  "ponto_onibus": {
+   "pos": [
+    -30.0,
+    6.2
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
+  "brasa_entrada": {
+   "pos": [
+    19.5,
+    18.5
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
+  "praca_conversa_1": {
+   "pos": [
+    -19.5,
+    28.0
+   ],
+   "rot": -60,
+   "pose": "stand"
+  },
+  "praca_conversa_2": {
+   "pos": [
+    -18.2,
+    28.8
+   ],
+   "rot": 120,
+   "pose": "stand"
+  },
+  "posto_frentista": {
+   "pos": [
+    30.0,
+    -38.5
+   ],
+   "rot": 180,
+   "pose": "stand"
+  },
+  "porta_silva": {
+   "pos": [
+    -20.0,
+    -47.6
+   ],
+   "rot": 180,
+   "pose": "stand"
+  },
+  "portaria_predio": {
+   "pos": [
+    -16.0,
+    50.6
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
+  "oficina_entrega": {
+   "pos": [
+    -36.0,
+    51.0
+   ],
+   "rot": 0,
+   "pose": "stand"
+  },
+  "lixeira_mercadinho_spot": {
+   "pos": [
+    12.8,
+    -10.8
+   ],
+   "rot": -90,
+   "pose": "work"
+  }
+ },
+ "areas": [
+  {
+   "type": "park",
+   "rect": [
+    -51.5,
+    9.5,
+    -9.0,
+    34.5
+   ]
+  },
+  {
+   "type": "plaza",
+   "rect": [
+    -37.0,
+    16.5,
+    -25.0,
+    27.5
+   ]
+  },
+  {
+   "type": "trail",
+   "width": 2.4,
+   "points": [
+    [
+     -51.0,
+     23.5
+    ],
+    [
+     -46.0,
+     21.6
+    ],
+    [
+     -41.0,
+     22.4
+    ],
+    [
+     -37.2,
+     22.0
+    ]
+   ]
+  },
+  {
+   "type": "trail",
+   "width": 2.4,
+   "points": [
+    [
+     -24.8,
+     22.0
+    ],
+    [
+     -20.0,
+     23.2
+    ],
+    [
+     -14.0,
+     21.0
+    ],
+    [
+     -9.5,
+     22.0
+    ]
+   ]
+  },
+  {
+   "type": "trail",
+   "width": 2.2,
+   "points": [
+    [
+     -31.0,
+     9.8
+    ],
+    [
+     -30.2,
+     13.0
+    ],
+    [
+     -31.0,
+     16.6
+    ]
+   ]
+  },
+  {
+   "type": "trail",
+   "width": 2.2,
+   "points": [
+    [
+     -31.0,
+     27.4
+    ],
+    [
+     -32.0,
+     31.0
+    ],
+    [
+     -30.5,
+     34.3
+    ]
+   ]
+  },
+  {
+   "type": "trail",
+   "width": 2.6,
+   "points": [
+    [
+     -68.5,
+     -70.0
+    ],
+    [
+     -74.0,
+     -52.0
+    ],
+    [
+     -71.0,
+     -30.0
+    ],
+    [
+     -76.0,
+     -8.0
+    ],
+    [
+     -72.0,
+     14.0
+    ],
+    [
+     -77.0,
+     36.0
+    ],
+    [
+     -73.0,
+     58.0
+    ],
+    [
+     -68.5,
+     72.0
+    ]
+   ]
+  },
+  {
+   "type": "trail",
+   "width": 2.6,
+   "points": [
+    [
+     -68.5,
+     72.0
+    ],
+    [
+     -50.0,
+     76.5
+    ],
+    [
+     -25.0,
+     73.0
+    ],
+    [
+     0.0,
+     77.0
+    ],
+    [
+     25.0,
+     73.5
+    ],
+    [
+     50.0,
+     77.0
+    ],
+    [
+     68.5,
+     72.0
+    ]
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    -35.0,
+    -21.0,
+    -30.0,
+    -7.5
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    -14.0,
+    -52.5,
+    -9.0,
+    -38.0
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    20.0,
+    -52.5,
+    40.0,
+    -36.0
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    10.0,
+    33.5,
+    33.0,
+    52.5
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    -48.0,
+    49.0,
+    -36.0,
+    52.5
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    -36.0,
+    39.0,
+    -30.0,
+    52.5
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    8.0,
+    -24.0,
+    14.5,
+    -7.5
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    48.5,
+    -32.0,
+    55.5,
+    -28.0
+   ]
+  },
+  {
+   "type": "asphalt",
+   "rect": [
+    -30.5,
+    49.0,
+    -23.5,
+    52.5
+   ]
+  },
+  {
+   "type": "drive_lane",
+   "points": [
+    [
+     42,
+     1.75
+    ],
+    [
+     45.5,
+     6
+    ],
+    [
+     46,
+     12
+    ],
+    [
+     46,
+     33
+    ],
+    [
+     44,
+     37.5
+    ],
+    [
+     39.5,
+     37.5
+    ],
+    [
+     37,
+     34
+    ],
+    [
+     37,
+     27
+    ],
+    [
+     37,
+     18
+    ],
+    [
+     35,
+     15
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     13,
+     12
+    ],
+    [
+     12.5,
+     7
+    ],
+    [
+     14.5,
+     2.5
+    ]
+   ]
+  }
+ ],
+ "vehicles": [
+  {
+   "id": "carro_jogador",
+   "type": "brisa",
+   "pos": [
+    -32.5,
+    -15.5
+   ],
+   "rot": 180,
+   "owner": "player",
+   "fuel": 14,
+   "color": "#2f6db5",
+   "locked": false,
+   "trunk": {
+    "agua": 1
+   }
+  },
+  {
+   "id": "van_rafael",
+   "type": "vanza",
+   "pos": [
+    -33.0,
+    46.0
+   ],
+   "rot": 0,
+   "owner": "rafael",
+   "color": "#e8e4d8"
+  },
+  {
+   "id": "carro_sandra",
+   "type": "sedan",
+   "pos": [
+    14.5,
+    43.0
+   ],
+   "rot": 90,
+   "owner": "sandra",
+   "color": "#7d2b3a"
+  },
+  {
+   "id": "carro_paula",
+   "type": "sedan",
+   "pos": [
+    -11.5,
+    -43.0
+   ],
+   "rot": 0,
+   "owner": "paula",
+   "color": "#3d7a50"
+  },
+  {
+   "id": "carro_usado",
+   "type": "sedan",
+   "pos": [
+    -27.0,
+    50.8
+   ],
+   "rot": 90,
+   "owner": "rafael",
+   "color": "#6d8f6a",
+   "fuel": 8,
+   "damage": 35,
+   "for_sale": {
+    "price": 700,
+    "seller": "rafael"
+   }
+  },
+  {
+   "id": "picape_antonio",
+   "type": "picape",
+   "pos": [
+    11.2,
+    -19.0
+   ],
+   "rot": 180,
+   "owner": "antonio",
+   "color": "#c7b48a"
+  }
+ ],
+ "drivethru": {
+  "path": [
+   [
+    33.5,
+    1.75
+   ],
+   [
+    42,
+    1.75
+   ],
+   [
+    45.5,
+    6
+   ],
+   [
+    46,
+    12
+   ],
+   [
+    46,
+    33
+   ],
+   [
+    44,
+    37.5
+   ],
+   [
+    39.5,
+    37.5
+   ],
+   [
+    37,
+    34
+   ],
+   [
+    37,
+    30
+   ],
+   [
+    37,
+    27
+   ],
+   [
+    37,
+    18
+   ],
+   [
+    35,
+    15
+   ],
+   [
+    16,
+    15
+   ],
+   [
+    13,
+    12
+   ],
+   [
+    12.5,
+    7
+   ],
+   [
+    14.5,
+    2.5
+   ],
+   [
+    18,
+    1.75
+   ]
+  ],
+  "window_index": 9,
+  "join": {
+   "from": [
+    0,
+    0
+   ],
+   "to": [
+    60,
+    0
+   ]
+  },
+  "divert_after_x": 20.0
+ },
+ "notes": {
+  "boas_vindas": {
+   "title": "Bilhete na mesa",
+   "body": "Bem-vindo(a) à Vila Aurora!\n\nA casa é sua enquanto o aluguel estiver em dia: R$ 120 por semana, cobrado todo domingo. A chave do Brisa está no contato — o tanque está quase na reserva, o posto fica na rua de cima.\n\nO Brasa Burger, aqui embaixo, está contratando. A Sandra (gerente) fica lá das 8h30 às 22h.\nO mercadinho do seu Antônio abre às 7h e fecha para o almoço ao meio-dia.\n\nAh — a Dona Lúcia, da casa 10, anda preocupada com alguma coisa. Ela é um amor, dá um oi pra ela.\n\n— Seu Geraldo (senhorio)"
+  }
+ },
+ "jog_route": [
+  [
+   -48.5,
+   11.5
+  ],
+  [
+   -12,
+   11.5
+  ],
+  [
+   -12,
+   33
+  ],
+  [
+   -48.5,
+   33
+  ]
+ ],
+ "wander_spots": [
+  "praca_banco_5",
+  "ponto_onibus",
+  "mercadinho_cliente_2",
+  "praca_conversa_1",
+  "brasa_entrada",
+  "penhores_cliente"
+ ],
+ "start": {
+  "player_pos": [
+   -44.0,
+   -18.6
+  ],
+  "player_rot": 180,
+  "money": 60,
+  "hour": 7,
+  "minute": 30,
+  "player_items": {
+   "agua": 1,
+   "camiseta_azul": 1
+  },
+  "player_equipped": [
+   "camiseta_azul"
+  ]
+ }
+}

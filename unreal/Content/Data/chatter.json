@@ -1,0 +1,24 @@
+{
+	"greet": ["Bom dia!", "Opa, tudo bem?", "E aí, vizinho(a)?", "Olá!"],
+	"greet_night": ["Boa noite.", "Noite tranquila, né?"],
+	"bump": ["Ei, olha por onde anda!", "Opa! Cuidado aí.", "Tá com pressa, é?"],
+	"car_near": ["Ô, vai devagar!", "Quer me atropelar?!", "Calma aí, motorista!"],
+	"knocked": ["Aaai!", "Socorro!", "Meu Deus!"],
+	"witness_hit": ["Ele(a) atropelou alguém!", "Chamem ajuda!", "Eu vi tudo!"],
+	"help_thanks": ["Obrigado(a) por parar...", "Ainda bem que você ajudou."],
+	"rain": ["Que chuva, hein?", "Vou ficar todo(a) molhado(a)!", "Essa chuva não para..."],
+	"trespass": ["O que você está fazendo na minha casa?!", "Sai daqui agora!"],
+	"staff_only": ["Ei, aí é só funcionário!", "Não pode entrar na cozinha, não."],
+	"smell": ["Credo... que cheiro é esse?", "Alguém precisa de um banho."],
+	"horn": ["Sai da frente!", "Anda, pô!"],
+	"chat_pairs": [
+		["Viu o preço do tomate?", "Um absurdo! Tá tudo caro."],
+		["E o Marcos? Continua de mau humor?", "Aquele ali nasceu reclamando."],
+		["Dizem que vão asfaltar a rua de trás.", "Dizem isso desde 2019..."],
+		["O lanche do Brasa tá bom esses dias.", "Contrataram gente nova, né?"],
+		["Choveu ontem à noite?", "Um pouco. Molhou a roupa no varal."]
+	],
+	"gossip_good": ["A Dona Lúcia disse que o pessoal novo da casa 8 é gente boa.", "Ouvi falar bem de você, sabia?"],
+	"gossip_bad": ["Tem gente mexendo nas coisas dos outros por aqui...", "Fica de olho, tem gente estranha no bairro."],
+	"gossip_hit": ["Soube que atropelaram alguém aqui perto.", "Tem motorista maluco na Vila Aurora."]
+}
