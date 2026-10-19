@@ -1,0 +1,1023 @@
+{
+ "hatch": {
+  "parts": {
+   "Body": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Details": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Door_FL": {
+    "location": [
+     86.0,
+     -85.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Handles": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Interior": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Lights": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_L": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_R": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FL": {
+    "location": [
+     125.0,
+     -75.5,
+     30.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FR": {
+    "location": [
+     125.0,
+     75.5,
+     30.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RL": {
+    "location": [
+     -120.0,
+     -75.5,
+     30.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RR": {
+    "location": [
+     -120.0,
+     75.5,
+     30.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wipers": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "slots": {
+   "Body": [
+    "paint",
+    "glass",
+    "trim",
+    "plastic",
+    "gap",
+    "well"
+   ],
+   "Details": [
+    "trim",
+    "chrome",
+    "gap",
+    "plate",
+    "plate_band"
+   ],
+   "Door_FL": [
+    "paint",
+    "glass",
+    "trim"
+   ],
+   "Handles": [
+    "trim"
+   ],
+   "Interior": [
+    "interior",
+    "seat",
+    "trim"
+   ],
+   "Lights": [
+    "headlight",
+    "indicator",
+    "taillight"
+   ],
+   "Mirror_L": [
+    "paint",
+    "mirror"
+   ],
+   "Mirror_R": [
+    "paint",
+    "mirror"
+   ],
+   "Wheel_FL": [
+    "tire",
+    "rim_dark",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_FR": [
+    "tire",
+    "rim_dark",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RL": [
+    "tire",
+    "rim_dark",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RR": [
+    "tire",
+    "rim_dark",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wipers": [
+    "trim"
+   ]
+  },
+  "wheel_radius": 30.77,
+  "length": 396.3,
+  "width": 203.0,
+  "height": 152.12,
+  "bounds_min": [
+   -195.8,
+   -101.5,
+   -1.17
+  ],
+  "bounds_max": [
+   200.5,
+   101.5,
+   150.95
+  ],
+  "nominal_length": 390.0,
+  "nominal_wheel_radius": 30.0
+ },
+ "sedan": {
+  "parts": {
+   "Body": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Details": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Door_FL": {
+    "location": [
+     88.0,
+     -88.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Handles": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Interior": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Lights": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_L": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_R": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FL": {
+    "location": [
+     138.0,
+     -78.0,
+     31.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FR": {
+    "location": [
+     138.0,
+     78.0,
+     31.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RL": {
+    "location": [
+     -132.0,
+     -78.0,
+     31.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RR": {
+    "location": [
+     -132.0,
+     78.0,
+     31.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wipers": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "slots": {
+   "Body": [
+    "paint",
+    "glass",
+    "trim",
+    "plastic",
+    "gap",
+    "well"
+   ],
+   "Details": [
+    "trim",
+    "chrome",
+    "gap",
+    "plate",
+    "plate_band"
+   ],
+   "Door_FL": [
+    "paint",
+    "glass",
+    "trim"
+   ],
+   "Handles": [
+    "trim"
+   ],
+   "Interior": [
+    "interior",
+    "seat",
+    "trim"
+   ],
+   "Lights": [
+    "headlight",
+    "indicator",
+    "taillight"
+   ],
+   "Mirror_L": [
+    "paint",
+    "mirror"
+   ],
+   "Mirror_R": [
+    "paint",
+    "mirror"
+   ],
+   "Wheel_FL": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_FR": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RL": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RR": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wipers": [
+    "trim"
+   ]
+  },
+  "wheel_radius": 31.75,
+  "length": 446.3,
+  "width": 209.0,
+  "height": 148.15,
+  "bounds_min": [
+   -220.8,
+   -104.5,
+   -1.15
+  ],
+  "bounds_max": [
+   225.5,
+   104.5,
+   147.0
+  ],
+  "nominal_length": 440.0,
+  "nominal_wheel_radius": 31.0
+ },
+ "pickup": {
+  "parts": {
+   "BedDetail": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Body": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Details": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Door_FL": {
+    "location": [
+     105.0,
+     -93.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Handles": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Interior": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Lights": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_L": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_R": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FL": {
+    "location": [
+     155.0,
+     -80.5,
+     37.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FR": {
+    "location": [
+     155.0,
+     80.5,
+     37.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RL": {
+    "location": [
+     -150.0,
+     -80.5,
+     37.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RR": {
+    "location": [
+     -150.0,
+     80.5,
+     37.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wipers": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "slots": {
+   "BedDetail": [
+    "bedliner",
+    "trim"
+   ],
+   "Body": [
+    "paint",
+    "glass",
+    "trim",
+    "plastic",
+    "gap",
+    "well",
+    "bedliner"
+   ],
+   "Details": [
+    "trim",
+    "chrome",
+    "gap",
+    "plate",
+    "plate_band"
+   ],
+   "Door_FL": [
+    "paint",
+    "glass",
+    "trim"
+   ],
+   "Handles": [
+    "trim"
+   ],
+   "Interior": [
+    "interior",
+    "seat",
+    "trim"
+   ],
+   "Lights": [
+    "headlight",
+    "indicator",
+    "taillight"
+   ],
+   "Mirror_L": [
+    "paint",
+    "mirror"
+   ],
+   "Mirror_R": [
+    "paint",
+    "mirror"
+   ],
+   "Wheel_FL": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_FR": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RL": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RR": [
+    "tire",
+    "rim",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wipers": [
+    "trim"
+   ]
+  },
+  "wheel_radius": 38.04,
+  "length": 496.3,
+  "width": 219.0,
+  "height": 180.23,
+  "bounds_min": [
+   -245.8,
+   -109.5,
+   -1.36
+  ],
+  "bounds_max": [
+   250.5,
+   109.5,
+   178.87
+  ],
+  "nominal_length": 490.0,
+  "nominal_wheel_radius": 37.0
+ },
+ "van": {
+  "parts": {
+   "Body": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Details": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Door_FL": {
+    "location": [
+     122.0,
+     -95.5,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Handles": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Interior": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Lights": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_L": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Mirror_R": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FL": {
+    "location": [
+     162.0,
+     -85.0,
+     33.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_FR": {
+    "location": [
+     162.0,
+     85.0,
+     33.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RL": {
+    "location": [
+     -145.0,
+     -85.0,
+     33.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wheel_RR": {
+    "location": [
+     -145.0,
+     85.0,
+     33.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "Wipers": {
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rotation": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "slots": {
+   "Body": [
+    "paint",
+    "glass",
+    "trim",
+    "plastic",
+    "gap",
+    "well"
+   ],
+   "Details": [
+    "trim",
+    "chrome",
+    "gap",
+    "plate",
+    "plate_band"
+   ],
+   "Door_FL": [
+    "paint",
+    "glass",
+    "trim"
+   ],
+   "Handles": [
+    "trim"
+   ],
+   "Interior": [
+    "interior",
+    "seat",
+    "trim"
+   ],
+   "Lights": [
+    "headlight",
+    "indicator",
+    "taillight"
+   ],
+   "Mirror_L": [
+    "paint",
+    "mirror"
+   ],
+   "Mirror_R": [
+    "paint",
+    "mirror"
+   ],
+   "Wheel_FL": [
+    "tire",
+    "rim_steel",
+    "gap",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_FR": [
+    "tire",
+    "rim_steel",
+    "gap",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RL": [
+    "tire",
+    "rim_steel",
+    "gap",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wheel_RR": [
+    "tire",
+    "rim_steel",
+    "gap",
+    "chrome",
+    "brake",
+    "caliper"
+   ],
+   "Wipers": [
+    "trim"
+   ]
+  },
+  "wheel_radius": 33.71,
+  "length": 484.3,
+  "width": 224.0,
+  "height": 204.22,
+  "bounds_min": [
+   -243.5,
+   -112.0,
+   -1.11
+  ],
+  "bounds_max": [
+   240.8,
+   112.0,
+   203.11
+  ],
+  "nominal_length": 480.0,
+  "nominal_wheel_radius": 33.0
+ }
+}
