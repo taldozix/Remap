@@ -72,6 +72,7 @@ public:
 	virtual float GetFocusPriority() const override;
 	virtual TArray<FVilaAction> GetActions(AVilaPlayerCharacter* Player) override;
 	virtual void DoAction(AVilaPlayerCharacter* Player, const FString& ActionId) override;
+	virtual void SetFocused(bool bFocused) override;
 
 	virtual void Tick(float DeltaSeconds) override;
 

@@ -3,3 +3,5 @@ export/
 builds/
 *.tmp
 /tests/output/
+__pycache__/
+*.pyc

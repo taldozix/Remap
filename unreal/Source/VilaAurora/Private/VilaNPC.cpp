@@ -656,7 +656,7 @@ float AVilaNPC::GetFocusPriority() const
 FString AVilaNPC::GetInteractTitle() const
 {
 	const std::string Role = vila::jstr(Def, "role");
-	return Role.empty() ? DisplayName() : FString::Printf(TEXT("%s — %s"), *DisplayName(), *Tr(Role));
+	return Role.empty() ? DisplayName() : FString::Printf(TEXT("%s \u2014 %s"), *DisplayName(), *Tr(Role));
 }
 
 FString AVilaNPC::BuildingAtSpot() const

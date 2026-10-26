@@ -881,7 +881,7 @@ void AVilaWorld::OnNPCHit(AVilaNPC* Npc, float Severity)
 	std::vector<std::string> Ws = find_witnesses(FromUE(VilaW::Feet(Npc)), 22.0);
 	const std::string Nid = U(Npc->NpcId);
 	if (std::find(Ws.begin(), Ws.end(), Nid) == Ws.end()) Ws.push_back(Nid);
-	FIncident Inc;
+	FVilaIncident Inc;
 	Inc.Npc = Npc->NpcId;
 	Inc.Severity = Severity;
 	for (const std::string& W : Ws)
@@ -897,7 +897,7 @@ void AVilaWorld::OnNPCHit(AVilaNPC* Npc, float Severity)
 void AVilaWorld::OnNPCHelped(AVilaNPC* Npc)
 {
 	if (!Npc) return;
-	for (FIncident& Inc : Incidents)
+	for (FVilaIncident& Inc : Incidents)
 		if (Inc.Npc == Npc->NpcId)
 		{
 			Inc.bHelped = true;
@@ -907,7 +907,7 @@ void AVilaWorld::OnNPCHelped(AVilaNPC* Npc)
 	vila::game().relations.change_reputation(1);
 }
 
-void AVilaWorld::ResolveIncident(const FIncident& Inc)
+void AVilaWorld::ResolveIncident(const FVilaIncident& Inc)
 {
 	vila::Game& G = vila::game();
 	const std::string Nid = U(Inc.Npc);
@@ -994,7 +994,7 @@ void AVilaWorld::Tick(float DeltaSeconds)
 		CutT = 0.1f;
 		UpdateCutaway();
 	}
-	TArray<FIncident> Due;
+	TArray<FVilaIncident> Due;
 	for (int32 i = Incidents.Num() - 1; i >= 0; --i)
 	{
 		Incidents[i].T -= DeltaSeconds;
@@ -1004,7 +1004,7 @@ void AVilaWorld::Tick(float DeltaSeconds)
 			Incidents.RemoveAt(i);
 		}
 	}
-	for (const FIncident& Inc : Due) ResolveIncident(Inc);
+	for (const FVilaIncident& Inc : Due) ResolveIncident(Inc);
 	CheckTrespass(DeltaSeconds);
 	ProcessEvents(DeltaSeconds);
 }
@@ -1117,21 +1117,21 @@ void AVilaWorld::RefreshDelivery()
 // Cria a situação no mundo. Retorna {} se as condições espaciais não existem agora.
 vila::Json AVilaWorld::start_event(const std::string& Id, const vila::Json& Def)
 {
-	vila::Rng& Rng = vila::game().director.rng;
+	vila::Rng& DRng = vila::game().director.rng;
 	if (Id == "carteira_perdida")
 	{
 		TArray<AVilaNPC*> Owners;
 		for (const auto& KV : NPCs)
 			if (KV.Value && !KV.Value->IsHidden() && !KV.Value->IsSleeping() && KV.Value->State != TEXT("knocked") && KV.Value->Activity != TEXT("leave")) Owners.Add(KV.Value);
 		if (Owners.Num() == 0) return vila::Json::object();
-		AVilaNPC* Owner = Owners[static_cast<int32>(Rng.randi() % static_cast<uint32>(Owners.Num()))];
+		AVilaNPC* Owner = Owners[static_cast<int32>(DRng.randi() % static_cast<uint32>(Owners.Num()))];
 		const vila::Json& Ws = vila::jarr(vila::data().map(), "wander_spots");
 		if (Ws.empty()) return vila::Json::object();
-		const FString Sp = S(vila::to_str(Ws[static_cast<size_t>(Rng.randi() % static_cast<uint32>(Ws.size()))]));
+		const FString Sp = S(vila::to_str(Ws[static_cast<size_t>(DRng.randi() % static_cast<uint32>(Ws.size()))]));
 		const FVilaSpot* Spt = Spot(Sp);
 		if (!Spt) return vila::Json::object();
-		const double DX = Rng.randf_range(-1.5, 1.5);
-		const double DZ = Rng.randf_range(-1.5, 1.5);
+		const double DX = DRng.randf_range(-1.5, 1.5);
+		const double DZ = DRng.randf_range(-1.5, 1.5);
 		const vila::Vec3 Base = FromUE(Spt->Location);
 		const double PX = Base.x + DX, PZ = Base.z + DZ;
 		vila::Json E = {{"id", "carteira_perdida"}, {"qty", 1}, {"age", 0.0}, {"pos", vila::Json::array({PX, 0.0, PZ})}};
@@ -1150,7 +1150,7 @@ vila::Json AVilaWorld::start_event(const std::string& Id, const vila::Json& Def)
 			if (N && N->bIsAmbient && !N->IsHidden() && (N->State == TEXT("moving") || N->State == TEXT("at_spot")) && BuildingAt(VilaW::Feet(N)).IsEmpty()) Cands.Add(N);
 		}
 		if (Cands.Num() == 0) return vila::Json::object();
-		AVilaNPC* N2 = Cands[static_cast<int32>(Rng.randi() % static_cast<uint32>(Cands.Num()))];
+		AVilaNPC* N2 = Cands[static_cast<int32>(DRng.randi() % static_cast<uint32>(Cands.Num()))];
 		N2->KnockDown(FVector::ZeroVector, 0.5f, false, 240.f);
 		for (AVilaNPC* W : NPCsNear(VilaW::Feet(N2), 1500.f))
 			if (W != N2)

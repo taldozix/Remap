@@ -61,6 +61,16 @@ struct FVilaMarker
 	FString Label;
 };
 
+// Atropelamento pendente: resolvido após 30 s (ou ao prestar socorro).
+struct FVilaIncident
+{
+	FString Npc;
+	float T = 30.f;
+	vila::Json Witnesses = vila::Json::array();
+	bool bHelped = false;
+	float Severity = 0.f;
+};
+
 UCLASS()
 class VILAAURORA_API AVilaWorld : public AActor, public vila::IWorld
 {
@@ -138,15 +148,6 @@ public:
 	virtual void end_event(const std::string& Id, const vila::Json& Info) override;
 
 private:
-	struct FIncident
-	{
-		FString Npc;
-		float T = 30.f;
-		vila::Json Witnesses = vila::Json::array();
-		bool bHelped = false;
-		float Severity = 0.f;
-	};
-
 	// criação
 	void SpawnGroundItem(const vila::Json& Entry);
 	void SpawnVehicles();
@@ -160,7 +161,7 @@ private:
 
 	// quadro a quadro
 	void UpdateCutaway();
-	void ResolveIncident(const FIncident& Inc);
+	void ResolveIncident(const FVilaIncident& Inc);
 	void CheckTrespass(float Delta);
 	void ProcessEvents(float Delta);
 	void NotifyNear(const vila::Json& Def, const FVector& P);
@@ -176,7 +177,7 @@ private:
 	bool bWaitingNav = false;
 	float NavWaitT = 0.f;
 	int32 NavWaitFrames = 0;
-	TArray<FIncident> Incidents;
+	TArray<FVilaIncident> Incidents;
 	float TrespassT = 0.f;
 	TSet<FString> TrespassReported;
 	float StaffBarkT = 0.f;
