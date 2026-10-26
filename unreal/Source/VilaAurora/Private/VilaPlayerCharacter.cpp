@@ -24,15 +24,15 @@ using namespace VilaConv;
 
 namespace
 {
-	constexpr float CapsuleRadius = 30.f;      // 0,3 m
-	constexpr float CapsuleHalfHeight = 87.5f;  // altura 1,75 m
+	constexpr float PlayerCapsuleRadius = 30.f;      // 0,3 m
+	constexpr float PlayerCapsuleHalfHeight = 87.5f;  // altura 1,75 m
 
-	float LerpYaw(float From, float To, float Alpha)
+	float PlayerLerpYaw(float From, float To, float Alpha)
 	{
 		return FRotator::NormalizeAxis(From + FMath::FindDeltaAngleDegrees(From, To) * Alpha);
 	}
 
-	void VilaNotify(const FString& Text, const char* Kind)
+	void PlayerNotify(const FString& Text, const char* Kind)
 	{
 		vila::events().notify.emit(U(Text), Kind);
 	}
@@ -45,7 +45,7 @@ AVilaPlayerCharacter::AVilaPlayerCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 
-	GetCapsuleComponent()->InitCapsuleSize(CapsuleRadius, CapsuleHalfHeight);
+	GetCapsuleComponent()->InitCapsuleSize(PlayerCapsuleRadius, PlayerCapsuleHalfHeight);
 
 	UCharacterMovementComponent* Move = GetCharacterMovement();
 	Move->bOrientRotationToMovement = false;
@@ -60,7 +60,7 @@ AVilaPlayerCharacter::AVilaPlayerCharacter()
 
 	Humanoid = CreateDefaultSubobject<UVilaHumanoid>(TEXT("Humanoid"));
 	Humanoid->SetupAttachment(GetCapsuleComponent());
-	Humanoid->SetRelativeLocation(FVector(0.f, 0.f, -CapsuleHalfHeight));
+	Humanoid->SetRelativeLocation(FVector(0.f, 0.f, -PlayerCapsuleHalfHeight));
 }
 
 void AVilaPlayerCharacter::BeginPlay()
@@ -192,7 +192,7 @@ void AVilaPlayerCharacter::StepMovement(float Dt)
 	if (Hv > 0.2f)
 	{
 		if (!Dir.IsNearlyZero())
-			SetActorRotation(FRotator(0.f, LerpYaw(GetActorRotation().Yaw, Dir.Rotation().Yaw, FMath::Min(1.f, Dt * 12.f)), 0.f));
+			SetActorRotation(FRotator(0.f, PlayerLerpYaw(GetActorRotation().Yaw, Dir.Rotation().Yaw, FMath::Min(1.f, Dt * 12.f)), 0.f));
 		Humanoid->SetPose(bRunning ? TEXT("run") : TEXT("walk"));
 		Humanoid->SetSpeed(Hv);
 		StepT -= Dt;
@@ -389,7 +389,7 @@ void AVilaPlayerCharacter::DoFocusAction(int32 Index)
 	}
 	if (!Act || !Act->bEnabled)
 	{
-		if (Act && !Act->Hint.IsEmpty()) VilaNotify(Act->Hint, "bad");
+		if (Act && !Act->Hint.IsEmpty()) PlayerNotify(Act->Hint, "bad");
 		return;
 	}
 	const FString Id = Act->Id;
@@ -461,7 +461,7 @@ void AVilaPlayerCharacter::CancelTimed()
 	bTimed = false;
 	TimedText.Reset();
 	TimedCallback = nullptr;
-	VilaNotify(Tr("Ação cancelada."), "info");
+	PlayerNotify(Tr("Ação cancelada."), "info");
 }
 
 bool AVilaPlayerCharacter::IsTimedActive() const
@@ -531,7 +531,7 @@ void AVilaPlayerCharacter::WaitHour()
 {
 	vila::game().player.activity = "rest";
 	vila::clock().advance(60.0);
-	VilaNotify(Tr("Uma hora se passou."), "info");
+	PlayerNotify(Tr("Uma hora se passou."), "info");
 }
 
 void AVilaPlayerCharacter::BeginSleep()
@@ -566,7 +566,7 @@ void AVilaPlayerCharacter::ExitVehicle()
 	if (!V) return;
 	if (FMath::Abs(V->Speed) > 300.f)
 	{
-		VilaNotify(Tr("Pare o carro antes de sair."), "bad");
+		PlayerNotify(Tr("Pare o carro antes de sair."), "bad");
 		return;
 	}
 	const FVector Spot = V->ExitPosition();

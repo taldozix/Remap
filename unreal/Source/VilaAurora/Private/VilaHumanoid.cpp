@@ -23,7 +23,7 @@ using namespace VilaConv;
 namespace
 {
 	// Velocidade (m/s) para a qual cada ciclo foi animado.
-	float CycleSpeed(const FString& Pose)
+	float HumCycleSpeed(const FString& Pose)
 	{
 		if (Pose == TEXT("walk")) return 1.7f;
 		if (Pose == TEXT("run")) return 4.4f;
@@ -31,7 +31,7 @@ namespace
 	}
 
 	// Bits de região do corpo escondidos por cada peça (ver Anatomy.region no gerador).
-	int32 HideBits(const FString& Piece)
+	int32 HumHideBits(const FString& Piece)
 	{
 		if (Piece == TEXT("Top_tee")) return (1 << 1) | (1 << 3);
 		if (Piece == TEXT("Top_long") || Piece == TEXT("Top_jacket")) return (1 << 1) | (1 << 3) | (1 << 4) | (1 << 5);
@@ -43,7 +43,7 @@ namespace
 	}
 
 	// Color(r, g, b) do Godot (sRGB) -> linear.
-	FLinearColor Srgb(float R, float G, float B)
+	FLinearColor HumSrgb(float R, float G, float B)
 	{
 		return FLinearColor::FromSRGBColor(FColor(
 			static_cast<uint8>(FMath::RoundToInt(FMath::Clamp(R, 0.f, 1.f) * 255.f)),
@@ -51,14 +51,14 @@ namespace
 			static_cast<uint8>(FMath::RoundToInt(FMath::Clamp(B, 0.f, 1.f) * 255.f))));
 	}
 
-	FLinearColor AppColor(const vila::Json& App, const char* Key, const char* Default)
+	FLinearColor HumAppColor(const vila::Json& App, const char* Key, const char* Default)
 	{
 		const std::string V = vila::jstr(App, Key, Default);
 		return Hex(V.empty() ? std::string(Default) : V);
 	}
 
 	// String.hash() do Godot (djb2), usado pelo hash() do GDScript para variar o rosto.
-	uint32 GodotHash(const FString& Str)
+	uint32 HumGodotHash(const FString& Str)
 	{
 		uint32 H = 5381;
 		for (const TCHAR C : Str) H = ((H << 5) + H) + static_cast<uint32>(C);
@@ -66,7 +66,7 @@ namespace
 	}
 
 	// Nome do slot de material normalizado ("M_Skin" / "MI_skin" / "skin" -> "skin").
-	FString SlotKey(FName Slot)
+	FString HumSlotKey(FName Slot)
 	{
 		FString Key = Slot.ToString().ToLower();
 		if (Key.StartsWith(TEXT("mi_"))) Key.RightChopInline(3);
@@ -74,7 +74,7 @@ namespace
 		return Key;
 	}
 
-	struct FPieceOn
+	struct FHumPieceOn
 	{
 		FString Name;
 		bool bHasTint = false;
@@ -150,11 +150,11 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 	if (!Assets || !Assets->CharacterPiece(Sex, TEXT("Body"))) return false;
 
 	// _dress do Godot: escolhe as peças e as cores.
-	const FLinearColor Skin = AppColor(App, "skin", "#d9a98a");
-	const FLinearColor Hair = AppColor(App, "hair", "#2a1d14");
-	const FLinearColor Shirt = AppColor(App, "shirt", "#4477aa");
-	const FLinearColor Pants = AppColor(App, "pants", "#333344");
-	const FLinearColor ShoesC = AppColor(App, "shoes", "#2a2420");
+	const FLinearColor Skin = HumAppColor(App, "skin", "#d9a98a");
+	const FLinearColor Hair = HumAppColor(App, "hair", "#2a1d14");
+	const FLinearColor Shirt = HumAppColor(App, "shirt", "#4477aa");
+	const FLinearColor Pants = HumAppColor(App, "pants", "#333344");
+	const FLinearColor ShoesC = HumAppColor(App, "shoes", "#2a2420");
 	const FString Top = vila::truthy(vila::jget(App, "jacket")) ? TEXT("Top_jacket") : (vila::jstr(App, "top") == "long" ? TEXT("Top_long") : TEXT("Top_tee"));
 	const std::string BottomKey = vila::to_str(vila::jget(App, "bottom"));
 	const FString Bottom = BottomKey == "shorts" ? TEXT("Bottom_shorts") : BottomKey == "skirt" ? TEXT("Bottom_skirt") : TEXT("Bottom_pants");
@@ -169,10 +169,10 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 	else if (Style == "bun") HairMesh = TEXT("Hair_bun");
 	else if (Style == "ponytail") HairMesh = TEXT("Hair_ponytail");
 
-	TArray<FPieceOn> On;
+	TArray<FHumPieceOn> On;
 	auto Add = [&On](const FString& Name, const FLinearColor* Tint)
 	{
-		FPieceOn P;
+		FHumPieceOn P;
 		P.Name = Name;
 		if (Tint)
 		{
@@ -189,13 +189,13 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 	Add(TEXT("Shoes"), &ShoesC);
 	if (vila::has(App, "cap"))
 	{
-		const FLinearColor C = AppColor(App, "cap", "#ffffff");
+		const FLinearColor C = HumAppColor(App, "cap", "#ffffff");
 		Add(TEXT("Cap"), &C);
 		if (HairMesh == TEXT("Hair_messy") || HairMesh == TEXT("Hair_curly")) HairMesh = TEXT("Hair_short");
 	}
 	if (vila::has(App, "beanie"))
 	{
-		const FLinearColor C = AppColor(App, "beanie", "#ffffff");
+		const FLinearColor C = HumAppColor(App, "beanie", "#ffffff");
 		Add(TEXT("Beanie"), &C);
 		if (HairMesh == TEXT("Hair_short") || HairMesh == TEXT("Hair_slick") || HairMesh == TEXT("Hair_messy") || HairMesh == TEXT("Hair_curly")) HairMesh = FString();
 	}
@@ -208,24 +208,24 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 	}
 	if (vila::has(App, "backpack"))
 	{
-		const FLinearColor C = AppColor(App, "backpack", "#ffffff");
+		const FLinearColor C = HumAppColor(App, "backpack", "#ffffff");
 		Add(TEXT("Backpack"), &C);
 	}
 	if (vila::has(App, "apron"))
 	{
-		const FLinearColor C = AppColor(App, "apron", "#ffffff");
+		const FLinearColor C = HumAppColor(App, "apron", "#ffffff");
 		Add(TEXT("Apron"), &C);
 	}
 	if (vila::truthy(vila::jget(App, "overalls"))) Add(TEXT("Overalls"), &Pants);
 
 	int32 Hide = 0;
-	for (const FPieceOn& P : On) Hide |= HideBits(P.Name);
+	for (const FHumPieceOn& P : On) Hide |= HumHideBits(P.Name);
 
 	// Morphs (_apply_shape): peso, idade e variação estável do rosto.
 	const double BuildAmt = vila::jnum(App, "build", 1.0);
 	const FColor SkinSrgb = FColor::FromHex(S(vila::jstr(App, "skin", "#d9a98a")));
 	const float SkinV = FMath::Max3(SkinSrgb.R, SkinSrgb.G, SkinSrgb.B) / 255.f;
-	const uint32 H = GodotHash(S(vila::jstr(App, "skin")) + S(vila::jstr(App, "hair")) + S(vila::jstr(App, "shirt")));
+	const uint32 H = HumGodotHash(S(vila::jstr(App, "skin")) + S(vila::jstr(App, "hair")) + S(vila::jstr(App, "shirt")));
 	TArray<TPair<FName, float>> Morphs;
 	Morphs.Emplace(FName(TEXT("heavy")), static_cast<float>(FMath::Clamp((BuildAmt - 1.0) / 0.2, 0.0, 1.0)));
 	Morphs.Emplace(FName(TEXT("thin")), static_cast<float>(FMath::Clamp((1.0 - BuildAmt) / 0.15, 0.0, 1.0)));
@@ -234,7 +234,7 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 	Morphs.Emplace(FName(TEXT("face_b")), static_cast<float>(static_cast<int64>(static_cast<double>(H) / 7.0) % 5) * 0.12f);
 
 	AActor* Owner = GetOwner();
-	for (const FPieceOn& P : On)
+	for (const FHumPieceOn& P : On)
 	{
 		USkeletalMesh* Mesh = Assets->CharacterPiece(Sex, P.Name);
 		if (!Mesh) continue;
@@ -252,7 +252,7 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 		const TArray<FSkeletalMaterial>& Mats = Mesh->GetMaterials();
 		for (int32 i = 0; i < Mats.Num(); ++i)
 		{
-			const FString Slot = SlotKey(Mats[i].MaterialSlotName);
+			const FString Slot = HumSlotKey(Mats[i].MaterialSlotName);
 			UMaterialInstanceDynamic* MID = Comp->CreateDynamicMaterialInstance(i);
 			if (!MID) continue;
 			FLinearColor C = P.bHasTint ? P.Tint : FLinearColor::White;
@@ -264,10 +264,10 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 				MID->SetScalarParameterValue(TEXT("HideBits"), static_cast<float>(Hide));
 			}
 			else if (Slot == TEXT("eye")) C = FLinearColor::White;
-			else if (Slot == TEXT("lash")) C = Srgb(0.03f, 0.025f, 0.02f);
-			else if (Slot == TEXT("metal")) C = Srgb(0.75f, 0.75f, 0.78f);
-			else if (Slot == TEXT("sole")) C = Srgb(0.86f, 0.84f, 0.8f);
-			else if (Slot == TEXT("strap")) C = Srgb(0.13f, 0.13f, 0.14f);
+			else if (Slot == TEXT("lash")) C = HumSrgb(0.03f, 0.025f, 0.02f);
+			else if (Slot == TEXT("metal")) C = HumSrgb(0.75f, 0.75f, 0.78f);
+			else if (Slot == TEXT("sole")) C = HumSrgb(0.86f, 0.84f, 0.8f);
+			else if (Slot == TEXT("strap")) C = HumSrgb(0.13f, 0.13f, 0.14f);
 			MID->SetVectorParameterValue(TEXT("Color"), C);
 		}
 		for (const TPair<FName, float>& Morph : Morphs) Comp->SetMorphTarget(Morph.Key, Morph.Value);
@@ -293,7 +293,7 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 float UVilaHumanoid::AnimRate() const
 {
 	float R = bElderly ? 0.8f : 1.f;
-	const float Cycle = CycleSpeed(Pose);
+	const float Cycle = HumCycleSpeed(Pose);
 	if (Cycle > 0.f) R = FMath::Clamp(FMath::Max(SpeedMs, 0.6f) / Cycle, 0.5f, 1.9f);
 	return R;
 }
@@ -359,7 +359,7 @@ void UVilaHumanoid::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		TickFallback(DeltaTime);
 		return;
 	}
-	if (CycleSpeed(Pose) > 0.f)
+	if (HumCycleSpeed(Pose) > 0.f)
 	{
 #if VILA_ANIM_PROXY
 		if (Anim) Anim->SetRate(AnimRate());
@@ -405,11 +405,11 @@ void UVilaHumanoid::BuildFallback(const vila::Json& App)
 	UStaticMesh* Cyl = Assets->Cylinder();
 	UStaticMesh* Sph = Assets->Sphere();
 
-	const FLinearColor Skin = AppColor(App, "skin", "#d9a98a");
-	const FLinearColor Hair = AppColor(App, "hair", "#2a1d14");
-	const FLinearColor Shirt = AppColor(App, "shirt", "#4477aa");
-	const FLinearColor Pants = AppColor(App, "pants", "#333344");
-	const FLinearColor ShoesC = AppColor(App, "shoes", "#2a2420");
+	const FLinearColor Skin = HumAppColor(App, "skin", "#d9a98a");
+	const FLinearColor Hair = HumAppColor(App, "hair", "#2a1d14");
+	const FLinearColor Shirt = HumAppColor(App, "shirt", "#4477aa");
+	const FLinearColor Pants = HumAppColor(App, "pants", "#333344");
+	const FLinearColor ShoesC = HumAppColor(App, "shoes", "#2a2420");
 	const bool bLongSleeve = vila::truthy(vila::jget(App, "jacket")) || vila::jstr(App, "top") == "long";
 	const std::string Bottom = vila::to_str(vila::jget(App, "bottom"));
 	const bool bBareShins = Bottom == "shorts" || Bottom == "skirt";
@@ -426,8 +426,8 @@ void UVilaHumanoid::BuildFallback(const vila::Json& App)
 	FbTorso = AddPivot(FbPelvis, FVector(0, 0, 4));
 	AddPart(FbTorso, Cube, FVector(0, 0, 26), FVector(22 * Wide, (bFem ? 33.f : 36.f) * Wide, 46), Shirt);
 	if (vila::truthy(vila::jget(App, "overalls"))) AddPart(FbTorso, Cube, FVector(11.5f * Wide, 0, 12), FVector(1.2f, 24, 26), Pants);
-	if (vila::has(App, "apron")) AddPart(FbTorso, Cube, FVector(11.8f * Wide, 0, 6), FVector(1.5f, 30, 48), AppColor(App, "apron", "#ffffff"));
-	if (vila::has(App, "backpack")) AddPart(FbTorso, Cube, FVector(-17.f * Wide, 0, 28), FVector(12, 28, 36), AppColor(App, "backpack", "#ffffff"));
+	if (vila::has(App, "apron")) AddPart(FbTorso, Cube, FVector(11.8f * Wide, 0, 6), FVector(1.5f, 30, 48), HumAppColor(App, "apron", "#ffffff"));
+	if (vila::has(App, "backpack")) AddPart(FbTorso, Cube, FVector(-17.f * Wide, 0, 28), FVector(12, 28, 36), HumAppColor(App, "backpack", "#ffffff"));
 	AddPart(FbTorso, Cyl, FVector(0, 0, 54), FVector(10, 10, 10), Skin, 0.6f);
 
 	FbHead = AddPivot(FbTorso, FVector(0, 0, 58));
@@ -448,11 +448,11 @@ void UVilaHumanoid::BuildFallback(const vila::Json& App)
 	}
 	if (bCap)
 	{
-		const FLinearColor C = AppColor(App, "cap", "#ffffff");
+		const FLinearColor C = HumAppColor(App, "cap", "#ffffff");
 		AddPart(FbHead, Cyl, FVector(-1, 0, 21), FVector(22, 22, 7), C);
 		AddPart(FbHead, Cube, FVector(11, 0, 18.5f), FVector(12, 18, 1.5f), C);
 	}
-	if (bBeanie) AddPart(FbHead, Sph, FVector(-1, 0, 18), FVector(23, 22, 17), AppColor(App, "beanie", "#ffffff"));
+	if (bBeanie) AddPart(FbHead, Sph, FVector(-1, 0, 18), FVector(23, 22, 17), HumAppColor(App, "beanie", "#ffffff"));
 	if (vila::truthy(vila::jget(App, "beard"))) AddPart(FbHead, Cube, FVector(8, 0, 2), FVector(6, 15, 8), Hair, 0.7f);
 	if (vila::truthy(vila::jget(App, "mustache"))) AddPart(FbHead, Cube, FVector(10.5f, 0, 7.5f), FVector(2, 7, 1.5f), bElderly ? Hex("#6a6a6a") : Hair, 0.7f);
 

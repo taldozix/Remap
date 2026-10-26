@@ -30,7 +30,6 @@ class UVilaAssets;
 class UVilaMeshBatch;
 class UVilaNature;
 class UVilaWorldBuilder;
-namespace VilaWB { struct FVilaWorldBuild; }
 
 USTRUCT()
 struct VILAAURORA_API FVilaSpot
@@ -112,8 +111,8 @@ public:
 	// Sombras só nos `Count` postes acesos mais perto de `ViewPoint` (economia com Lumen/VSM).
 	void UpdateStreetlightShadows(const FVector& ViewPoint, int32 Count = 4);
 
-private:
-	friend struct VilaWB::FVilaWorldBuild;
+	// Estado interno da montagem (usado por VilaWB::FVilaWorldBuild em VilaWorldBuilder.cpp).
+	// Público em vez de `friend` para o cabeçalho refletido não ter namespaces (UHT).
 
 	UPROPERTY() TObjectPtr<AVilaWorld> VilaWorld;
 	UPROPERTY() TObjectPtr<UVilaAssets> Assets;

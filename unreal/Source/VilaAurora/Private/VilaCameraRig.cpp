@@ -12,9 +12,9 @@
 
 namespace
 {
-	constexpr float VerticalFov = 34.f;  // Camera3D.fov do Godot (vertical)
+	constexpr float CamVerticalFov = 34.f;  // Camera3D.fov do Godot (vertical)
 
-	float LerpYaw(float From, float To, float Alpha)
+	float CamLerpYaw(float From, float To, float Alpha)
 	{
 		return FRotator::NormalizeAxis(From + FMath::FindDeltaAngleDegrees(From, To) * Alpha);
 	}
@@ -153,7 +153,7 @@ void AVilaCameraRig::UpdateView(float Dt)
 	{
 		FVector Focus;
 		if (!ResolveFocus(Focus)) return;
-		Yaw = LerpYaw(Yaw, YawGoal, FMath::Min(1.f, Dt * 6.f * Sensitivity));
+		Yaw = CamLerpYaw(Yaw, YawGoal, FMath::Min(1.f, Dt * 6.f * Sensitivity));
 		Distance = FMath::Lerp(Distance, DistGoal, FMath::Min(1.f, Dt * 6.f));
 		const FVector Cur = GetActorLocation();
 		SetActorLocation(FVector::Dist(Cur, Focus) < 3000.f ? FMath::Lerp(Cur, Focus, FMath::Min(1.f, Dt * 7.f)) : Focus);
@@ -169,7 +169,7 @@ void AVilaCameraRig::UpdateView(float Dt)
 		GEngine->GameViewport->GetViewportSize(ViewSize);
 		if (ViewSize.Y > 1.0) Aspect = static_cast<float>(ViewSize.X / ViewSize.Y);
 	}
-	const float HFov = FMath::RadiansToDegrees(2.f * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(VerticalFov * 0.5f)) * Aspect));
+	const float HFov = FMath::RadiansToDegrees(2.f * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(CamVerticalFov * 0.5f)) * Aspect));
 	Camera->SetFieldOfView(FMath::Clamp(HFov, 20.f, 120.f));
 
 	if (TiltShift > 0) Camera->PostProcessSettings.DepthOfFieldFocalDistance = Distance;

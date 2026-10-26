@@ -56,7 +56,7 @@ namespace
 		}
 	};
 
-	float Wrap(float T, const UAnimSequence* Seq)
+	float AnimWrapTime(float T, const UAnimSequence* Seq)
 	{
 		const float Len = Seq ? Seq->GetPlayLength() : 0.f;
 		if (Len <= UE_KINDA_SMALL_NUMBER) return 0.f;
@@ -101,18 +101,18 @@ void UVilaAnimInstance::PlayPose(UAnimSequence* Seq, float BlendTime, float Star
 		BlendElapsed = 0.f;
 	}
 	Current = Seq;
-	CurTime = Wrap(StartTime, Seq);
+	CurTime = AnimWrapTime(StartTime, Seq);
 }
 
 void UVilaAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 	const float Dt = DeltaSeconds * Rate;
-	if (Current) CurTime = Wrap(CurTime + Dt, Current);
+	if (Current) CurTime = AnimWrapTime(CurTime + Dt, Current);
 	float Alpha = 1.f;
 	if (Previous)
 	{
-		PrevTime = Wrap(PrevTime + Dt, Previous);
+		PrevTime = AnimWrapTime(PrevTime + Dt, Previous);
 		// O crossfade corre em tempo real (mesmo com a animação congelada pelo LOD).
 		BlendElapsed += DeltaSeconds;
 		Alpha = BlendDuration > 0.f ? FMath::Clamp(BlendElapsed / BlendDuration, 0.f, 1.f) : 1.f;

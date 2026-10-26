@@ -25,28 +25,28 @@ using namespace VilaConv;
 
 namespace
 {
-	constexpr float NpcRadius = 28.f;       // 0,28 m
-	constexpr float NpcHalfHeight = 85.f;   // altura 1,7 m
+	constexpr float NpcCapsuleRadius = 28.f;       // 0,28 m
+	constexpr float NpcCapsuleHalfHeight = 85.f;   // altura 1,7 m
 
 	// e.get("k", "") do GDScript para valores que podem ser números ou textos.
-	std::string Str(const vila::Json& J, const char* Key)
+	std::string NpcStr(const vila::Json& J, const char* Key)
 	{
 		const vila::Json& V = vila::jget(J, Key);
 		return V.is_null() ? std::string() : vila::to_str(V);
 	}
 
-	float LerpYaw(float From, float To, float Alpha)
+	float NpcLerpYaw(float From, float To, float Alpha)
 	{
 		return FRotator::NormalizeAxis(From + FMath::FindDeltaAngleDegrees(From, To) * Alpha);
 	}
 
-	bool IsRaining()
+	bool NpcIsRaining()
 	{
 		return vila::jstr(vila::game().world_state.weather, "state") == "chuva";
 	}
 
 	// tr("... %s ...") % [x]
-	FString Trf(const char* Key, const std::string& Arg)
+	FString NpcTrf(const char* Key, const std::string& Arg)
 	{
 		return S(vila::fmt(vila::tr(Key), {Arg}));
 	}
@@ -61,7 +61,7 @@ AVilaNPC::AVilaNPC()
 	AutoPossessAI = EAutoPossessAI::Spawned;
 	AIControllerClass = AAIController::StaticClass();
 
-	GetCapsuleComponent()->InitCapsuleSize(NpcRadius, NpcHalfHeight);
+	GetCapsuleComponent()->InitCapsuleSize(NpcCapsuleRadius, NpcCapsuleHalfHeight);
 
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
 	MoveComp->bOrientRotationToMovement = false;
@@ -76,7 +76,7 @@ AVilaNPC::AVilaNPC()
 
 	Humanoid = CreateDefaultSubobject<UVilaHumanoid>(TEXT("Humanoid"));
 	Humanoid->SetupAttachment(GetCapsuleComponent());
-	Humanoid->SetRelativeLocation(FVector(0.f, 0.f, -NpcHalfHeight));
+	Humanoid->SetRelativeLocation(FVector(0.f, 0.f, -NpcCapsuleHalfHeight));
 }
 
 void AVilaNPC::Setup(const FString& InNpcId, const vila::Json& InDef, AVilaWorld* InWorld)
@@ -151,7 +151,7 @@ void AVilaNPC::SetBodyEnabled(bool bEnabled)
 
 void AVilaNPC::FaceYaw(float Yaw, float Alpha)
 {
-	SetActorRotation(FRotator(0.f, LerpYaw(GetActorRotation().Yaw, Yaw, Alpha), 0.f));
+	SetActorRotation(FRotator(0.f, NpcLerpYaw(GetActorRotation().Yaw, Yaw, Alpha), 0.f));
 }
 
 // ------------------------------------------------------------------ agenda
@@ -166,19 +166,19 @@ vila::Json AVilaNPC::ScheduleEntry() const
 FString AVilaNPC::HomeSpot() const
 {
 	for (const vila::Json& E : vila::jarr(Def, "schedule"))
-		if (Str(E, "activity").rfind("sleep", 0) == 0) return S(Str(E, "place"));
+		if (NpcStr(E, "activity").rfind("sleep", 0) == 0) return S(NpcStr(E, "place"));
 	return FString();
 }
 
 vila::Json AVilaNPC::EffectiveEntry() const
 {
 	vila::Json E = ScheduleEntry();
-	if (IsRaining() && NpcId != TEXT("tiao"))
+	if (NpcIsRaining() && NpcId != TEXT("tiao"))
 	{
-		const std::string Act = Str(E, "activity");
+		const std::string Act = NpcStr(E, "activity");
 		const bool bOutdoorAct = Act == "sit" || Act == "stand" || Act == "chat" || Act == "jog" || Act == "wander";
 		const AVilaWorld* W = GetVilaWorld();
-		const FVilaSpot* Sp = W ? W->Spot(S(Str(E, "place"))) : nullptr;
+		const FVilaSpot* Sp = W ? W->Spot(S(NpcStr(E, "place"))) : nullptr;
 		const FString Home = HomeSpot();
 		if (bOutdoorAct && Sp && Sp->BuildingId.IsEmpty() && !Home.IsEmpty())
 		{
@@ -198,26 +198,26 @@ void AVilaNPC::Decide()
 	if (State == TEXT("talking") || State == TEXT("knocked")) return;
 	const vila::Json E = EffectiveEntry();
 	if (!E.is_object() || E.empty()) return;
-	const bool bChanged = Str(E, "place") != Str(Entry, "place") || Str(E, "activity") != Str(Entry, "activity");
+	const bool bChanged = NpcStr(E, "place") != NpcStr(Entry, "place") || NpcStr(E, "activity") != NpcStr(Entry, "activity");
 	if (bSnapPending)
 	{
 		bSnapPending = false;
 		Entry = E;
-		Activity = S(Str(E, "activity"));
+		Activity = S(NpcStr(E, "activity"));
 		SnapTo(PlaceFor(E));
 		return;
 	}
 	if (bChanged)
 	{
-		if (Str(Entry, "activity") == "shelter" && !IsRaining())
+		if (NpcStr(Entry, "activity") == "shelter" && !NpcIsRaining())
 		{
 		}
-		else if (Str(E, "activity") == "shelter")
+		else if (NpcStr(E, "activity") == "shelter")
 		{
 			Bark(Pick("rain"));
 		}
 		Entry = E;
-		Activity = S(Str(E, "activity"));
+		Activity = S(NpcStr(E, "activity"));
 		Sub.Reset();
 		ActivityT = 0.f;
 		GoTo(PlaceFor(E));
@@ -226,14 +226,14 @@ void AVilaNPC::Decide()
 
 FString AVilaNPC::PlaceFor(const vila::Json& E) const
 {
-	const std::string Act = Str(E, "activity");
+	const std::string Act = NpcStr(E, "activity");
 	if (Act == "jog") return TEXT("__jog");
 	if (Act == "wander")
 	{
 		const vila::Json& Ws = vila::jarr(vila::data().map(), "wander_spots");
 		return Ws.empty() ? FString() : S(vila::to_str(Ws[static_cast<size_t>(FMath::RandRange(0, static_cast<int32>(Ws.size()) - 1))]));
 	}
-	return S(Str(E, "place"));
+	return S(NpcStr(E, "place"));
 }
 
 bool AVilaNPC::SpotData(const FString& Id, FVilaSpot& Out) const
@@ -502,7 +502,7 @@ void AVilaNPC::StepMove(float Dt)
 		return;
 	}
 	float Spd = WalkSpeed * (SpotId == TEXT("__jog") ? 2.f : 1.f);
-	if (IsRaining()) Spd *= 1.25f;
+	if (NpcIsRaining()) Spd *= 1.25f;
 	const vila::Json& St = vila::jobj(vila::game().world_state.npcs, U(NpcId));
 	if (vila::jnum(St, "injured_until", 0.0) > vila::clock().total_minutes) Spd *= 0.6f;
 	const FVector Dir = To.GetSafeNormal();
@@ -560,7 +560,7 @@ void AVilaNPC::ProcessActivity(float Dt)
 	if (!W) return;
 	if (Activity == TEXT("shop"))
 	{
-		const FString ShopId = S(Str(Entry, "shop"));
+		const FString ShopId = S(NpcStr(Entry, "shop"));
 		if (Sub.IsEmpty() && ActivityT > FMath::FRandRange(4.f, 9.f))
 		{
 			const FString Queue = (W->Spot(TEXT("mercadinho_fila")) && ShopId == TEXT("mercadinho")) ? FString(TEXT("mercadinho_fila")) : SpotId;
@@ -584,7 +584,7 @@ void AVilaNPC::ProcessActivity(float Dt)
 				if (UVilaAudio* Audio = UVilaAudio::Get(this)) Audio->PlayAt(TEXT("cash"), FeetLocation(), -10.f);
 			}
 			Sub = TEXT("done");
-			GoTo(vila::has(Entry, "place") ? S(Str(Entry, "place")) : SpotId);
+			GoTo(vila::has(Entry, "place") ? S(NpcStr(Entry, "place")) : SpotId);
 		}
 	}
 	else if (Activity == TEXT("leave"))
@@ -709,7 +709,7 @@ TArray<FVilaAction> AVilaNPC::GetActions(AVilaPlayerCharacter* Player)
 	if (State == TEXT("knocked"))
 	{
 		vila::PlayerState& PS = vila::game().player;
-		Acts.Emplace(TEXT("help"), Trf("Ajudar %s a levantar", U(Name)));
+		Acts.Emplace(TEXT("help"), NpcTrf("Ajudar %s a levantar", U(Name)));
 		Acts.Emplace(TEXT("first_aid"),
 			S(vila::fmt(vila::tr("Prestar primeiros socorros (kit) — Primeiros socorros %d"), {PS.skills.level("primeiros_socorros")})),
 			PS.inventory.has("kit_curativo"), Tr("Precisa de um kit de primeiros socorros"));
@@ -717,7 +717,7 @@ TArray<FVilaAction> AVilaNPC::GetActions(AVilaPlayerCharacter* Player)
 	}
 	if (IsSleeping())
 	{
-		Acts.Emplace(TEXT("none"), Trf("%s está dormindo", U(Name)), false);
+		Acts.Emplace(TEXT("none"), NpcTrf("%s está dormindo", U(Name)), false);
 		return Acts;
 	}
 	AVilaWorld* W = GetVilaWorld();
@@ -726,7 +726,7 @@ TArray<FVilaAction> AVilaNPC::GetActions(AVilaPlayerCharacter* Player)
 		if (IVilaInteractable* CI = Cast<IVilaInteractable>(Counter))
 			for (const FVilaAction& A : CI->GetActions(Player))
 				if (A.Id != TEXT("talk_staff")) Acts.Add(A);
-	Acts.Emplace(TEXT("talk"), Trf("Conversar com %s", U(Name)));
+	Acts.Emplace(TEXT("talk"), NpcTrf("Conversar com %s", U(Name)));
 	Acts.Emplace(TEXT("greet"), Tr("Cumprimentar"));
 	return Acts;
 }
