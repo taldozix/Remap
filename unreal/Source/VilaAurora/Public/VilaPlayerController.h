@@ -18,6 +18,14 @@ class AVilaPlayerCharacter;
 class AVilaWorld;
 struct FInputActionInstance;
 
+// Metade de um eixo do gamepad ligada a uma ação ("Gamepad_LeftY+" -> move_up).
+struct FVilaAxisBinding
+{
+	FString Action;
+	TWeakObjectPtr<UInputAction> InputAction;
+	bool bPrevDown = false;
+};
+
 UCLASS()
 class VILAAURORA_API AVilaPlayerController : public APlayerController
 {
@@ -43,13 +51,6 @@ protected:
 	virtual void PlayerTick(float DeltaTime) override;
 
 private:
-	struct FAxisBinding
-	{
-		FString Action;
-		TWeakObjectPtr<UInputAction> InputAction;
-		bool bPrevDown = false;
-	};
-
 	void CreateActions();
 	bool ApplyMappings();
 	void OnActionStarted(const FInputActionInstance& Instance);
@@ -61,7 +62,7 @@ private:
 	UPROPERTY() TMap<FString, TObjectPtr<UInputAction>> Actions;
 	UPROPERTY() TArray<TObjectPtr<UInputAction>> AxisActions;   // ações internas dos eixos com sinal
 	UPROPERTY() TObjectPtr<UInputMappingContext> Context;
-	TArray<FAxisBinding> AxisBindings;
+	TArray<FVilaAxisBinding> AxisBindings;
 
 	bool bUIModal = false;
 	bool bMappingDirty = true;

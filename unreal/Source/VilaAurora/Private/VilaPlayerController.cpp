@@ -124,7 +124,7 @@ bool AVilaPlayerController::ApplyMappings()
 				Dz->LowerThreshold = 0.2f;
 				Mapping.Modifiers.Add(Dz);
 				if (bNeg) Mapping.Modifiers.Add(NewObject<UInputModifierNegate>(Ctx));
-				FAxisBinding B;
+				FVilaAxisBinding B;
 				B.Action = ActionName;
 				B.InputAction = AA;
 				AxisBindings.Add(B);
@@ -151,7 +151,7 @@ float AVilaPlayerController::RawStrength(const FString& Action) const
 	float V = 0.f;
 	if (const TObjectPtr<UInputAction>* A = Actions.Find(Action))
 		if (*A) V = EPI->GetActionValue(A->Get()).GetMagnitude() > 0.f ? 1.f : 0.f;
-	for (const FAxisBinding& B : AxisBindings)
+	for (const FVilaAxisBinding& B : AxisBindings)
 		if (B.Action == Action && B.InputAction.IsValid())
 			V = FMath::Max(V, FMath::Clamp(EPI->GetActionValue(B.InputAction.Get()).Get<float>(), 0.f, 1.f));
 	return V;

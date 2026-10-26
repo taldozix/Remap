@@ -495,7 +495,7 @@ void UVilaHumanoid::TickFallback(float Dt)
 	const float Sn = FMath::Sin(P);
 	const float Cs = FMath::Cos(P);
 
-	FJoints Tg;
+	FVilaHumanoidJoints Tg;
 	if (Pose == TEXT("walk"))
 	{
 		Tg.ThighL = 25 * Sn; Tg.ThighR = -25 * Sn;

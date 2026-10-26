@@ -4,7 +4,6 @@
 #include "UI/VilaUIStyle.h"
 #include "VilaBuilding.h"
 #include "VilaConv.h"
-#include "VilaHUD.h"
 #include "VilaPlayerCharacter.h"
 #include "VilaVehicle.h"
 #include "VilaWorld.h"
@@ -22,19 +21,15 @@ class SVilaMapCanvas : public SLeafWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SVilaMapCanvas) {}
-		SLATE_ARGUMENT(TWeakObjectPtr<AVilaHUD>, HUD)
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs) { HUD = InArgs._HUD; }
+	void Construct(const FArguments& InArgs) {}
 	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(600.0, 600.0); }
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
 protected:
 	virtual bool ComputeVolatility() const override { return true; }
-
-private:
-	TWeakObjectPtr<AVilaHUD> HUD;
 };
 
 namespace
@@ -108,8 +103,9 @@ int32 SVilaMapCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 		Box(OutDrawElements, L, G, X.W2M(vila::to_num(R[0]), vila::to_num(R[1])), X.W2M(vila::to_num(R[2]), vila::to_num(R[3])), Col);
 	}
 	++L;
-	AVilaHUD* H = HUD.Get();
-	AVilaWorld* World = H ? H->GetVilaWorld() : nullptr;
+	// O painel ainda não conhece o HUD quando a tela é criada: usa o contexto da interface.
+	UObject* Ctx = VilaUI::Context();
+	AVilaWorld* World = Ctx ? AVilaWorld::Get(Ctx) : nullptr;
 	if (World && World->Builder)
 	{
 		for (const FBox2D& R : World->Builder->SidewalkRects)
@@ -207,7 +203,7 @@ void SVilaMapPanel::Construct(const FArguments& InArgs)
 			[
 				SNew(SBox).WidthOverride(600.f).HeightOverride(600.f)
 				[
-					SNew(SVilaMapCanvas).HUD(HUD)
+					SNew(SVilaMapCanvas)
 				]
 			]
 			+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 6.f, 0.f, 0.f))

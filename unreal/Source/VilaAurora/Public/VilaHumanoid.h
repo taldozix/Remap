@@ -18,6 +18,16 @@ class UStaticMeshComponent;
 class UStaticMesh;
 class UVilaAnimInstance;
 
+// Juntas do boneco procedural (graus / cm).
+struct FVilaHumanoidJoints
+{
+	float ThighL = 0, ThighR = 0, ShinL = 0, ShinR = 0;
+	float ArmL = 0, ArmR = 0, ForeL = 0, ForeR = 0, ArmRoll = 6;
+	float Torso = 0, Head = 0;
+	float PelvisZ = 92;
+	float RootPitch = 0, RootX = 0, RootZ = 0;
+};
+
 UCLASS(ClassGroup = (Vila))
 class VILAAURORA_API UVilaHumanoid : public USceneComponent
 {
@@ -90,16 +100,8 @@ private:
 	UPROPERTY() TObjectPtr<USceneComponent> FbShinL;
 	UPROPERTY() TObjectPtr<USceneComponent> FbShinR;
 
-	// Estado atual das juntas (graus / cm), suavizado em direção ao alvo de cada pose.
-	struct FJoints
-	{
-		float ThighL = 0, ThighR = 0, ShinL = 0, ShinR = 0;
-		float ArmL = 0, ArmR = 0, ForeL = 0, ForeR = 0, ArmRoll = 6;
-		float Torso = 0, Head = 0;
-		float PelvisZ = 92;
-		float RootPitch = 0, RootX = 0, RootZ = 0;
-	};
-	FJoints Joints;
+	// Estado atual das juntas, suavizado em direção ao alvo de cada pose.
+	FVilaHumanoidJoints Joints;
 	float Phase = 0.f;
 	bool bSnapPose = true;
 };
