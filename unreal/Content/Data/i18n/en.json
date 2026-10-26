@@ -124,5 +124,21 @@
 	"Detalhe dos modelos": "Model detail",
 	"Baixo": "Low",
 	"Médio": "Medium",
-	"Alto": "High"
+	"Alto": "High",
+	"Antisserrilhamento": "Anti-aliasing",
+	"Conteúdo 3D não importado: rode Scripts/build_content.py no editor.": "3D content not imported: run Scripts/build_content.py in the editor.",
+	"Desfoque de movimento": "Motion blur",
+	"Desligada": "Off",
+	"Espaço de tela (SSR)": "Screen space (SSR)",
+	"FXAA": "FXAA",
+	"Iluminação global": "Global illumination",
+	"Lumen": "Lumen",
+	"Lumen + RT por hardware": "Lumen + hardware RT",
+	"Máxima": "Maximum",
+	"Nenhum": "None",
+	"Nuvens volumétricas": "Volumetric clouds",
+	"Qualidade geral": "Overall quality",
+	"Reflexos": "Reflections",
+	"TSR": "TSR",
+	"Vila Aurora — protótipo do Open World Life RPG.\n\nDesign, código, mapa, personagens, diálogos e sons: originais, criados para este projeto (sons e modelos gerados proceduralmente).\nMotor: Unreal Engine 5.\n\nInspirações declaradas: a profundidade sistêmica de Project Zomboid, a liberdade urbana de GTA e a imersão de Red Dead Redemption 2 — sem uso de qualquer ativo, nome ou personagem desses jogos.": "Vila Aurora — Open World Life RPG prototype.\n\nDesign, code, map, characters, dialogue and sounds: original, created for this project (sounds and models generated procedurally).\nEngine: Unreal Engine 5.\n\nStated inspirations: the systemic depth of Project Zomboid, the urban freedom of GTA and the immersion of Red Dead Redemption 2 — without using any asset, name or character from those games."
 }

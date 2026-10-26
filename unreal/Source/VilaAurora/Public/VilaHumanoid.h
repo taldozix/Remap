@@ -52,7 +52,8 @@ public:
 	static FString InferSex(const vila::Json& App);
 
 	// Correção de yaw das malhas importadas (graus) para a frente ficar em +X.
-	// O export do Blender deixa a frente em -Y do UE (convenção usual de personagens importados).
+	// O export para o Unreal (tools/art/blender/export_unreal.py) deixa a frente do personagem em
+	// +Y (convenção do manequim do UE); -90 de yaw alinha com o +X do ator.
 	UPROPERTY(EditAnywhere, Category = "Vila")
 	float MeshYawOffset = -90.f;
 

@@ -13,5 +13,6 @@ if [[ "${1:-}" == "--check" ]]; then
 	echo "unreal/Content/Data em dia com data/"
 	exit 0
 fi
-rsync -a --delete --exclude art/ data/ unreal/Content/Data/
+find unreal/Content/Data -mindepth 1 -maxdepth 1 ! -name art -exec rm -rf {} +
+cp -a data/. unreal/Content/Data/
 echo "data/ copiado para unreal/Content/Data"
