@@ -28,7 +28,10 @@ Peças dos carros: cada malha é gravada com o vértice relativo ao seu pivô (n
 e a posição do pivô vai para o layout. Porta do motorista: malha door_FL_mesh, pivô no nó
 pai Door_FL (dobradiça). Rodas: malhas Wheel_XX_spin, pivô no nó pai Wheel_XX (centro do cubo).
 
-Personagens: frente +X e raiz nos pés também no Unreal (o ator não precisa girar a malha).
+Personagens: seguem a convenção de malha esquelética do Unreal (a do manequim): frente +Y,
+direita -X, raiz nos pés. Para isso o giro no Blender é de 180° em Z, b' = (-bx, -by, bz), e no
+Unreal chega UE = (-bx, by, bz) * 100. O componente usa yaw -90 para olhar para +X do ator
+(UVilaHumanoid::MeshYawOffset).
 """
 import json
 import math
@@ -54,8 +57,10 @@ SHAPES = ["heavy", "thin", "old", "face_a", "face_b"]
 MODEL_LENGTH = {"hatch": 3.9, "sedan": 4.4, "pickup": 4.9, "van": 4.8}
 WHEEL_RADIUS = {"hatch": 0.3, "sedan": 0.31, "pickup": 0.37, "van": 0.33}
 
-# Blender (frente +Y) -> Blender girado (frente +X), que o Unreal lê como frente +X.
+# Carros: Blender (frente +Y) -> Blender girado (frente +X), que o Unreal lê como frente +X.
 R = Matrix.Rotation(-math.pi / 2, 4, "Z")
+# Personagens: giro de 180° -> o Unreal lê a frente como +Y (convenção do manequim).
+R_CHAR = Matrix.Rotation(math.pi, 4, "Z")
 CM = 100.0
 
 
@@ -244,15 +249,15 @@ def bone_world(arm, bone, action, frame):
 
 
 def rotate_character(arm, meshes):
-    """Gira esqueleto (pose de descanso) e malhas (com shape keys) -90° em Z, sem mexer nas
+    """Gira esqueleto (pose de descanso) e malhas (com shape keys) 180° em Z, sem mexer nas
     animações (que são locais aos ossos)."""
     select_only([arm])
     bpy.ops.object.mode_set(mode="EDIT")
     for eb in arm.data.edit_bones:
-        eb.transform(R, scale=False, roll=True)
+        eb.transform(R_CHAR, scale=False, roll=True)
     bpy.ops.object.mode_set(mode="OBJECT")
     for ob in meshes:
-        ob.data.transform(R, shape_keys=True)
+        ob.data.transform(R_CHAR, shape_keys=True)
         ob.data.update()
 
 
@@ -275,7 +280,7 @@ def export_character(sex):
     rotate_character(arm, meshes)
     if probe:
         after = bone_world(arm, probe[0], actions[probe[1]], probe[2])
-        expect = R @ before
+        expect = R_CHAR @ before
         err = (after - expect).length
         print(f"  conferência da rotação ({probe[0]} em {probe[1]}:{probe[2]}): erro {err * 1000:.3f} mm")
         if err > 1e-3:

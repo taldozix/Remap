@@ -67,10 +67,32 @@ def members(body: str):
 
 
 classes, bases, problems, manual = {}, {}, [], []
+member_types = {}
+SMART_PTR = {"Get", "Pin", "Reset", "IsValid", "ToSharedRef", "ToSharedPtr", "IsStale"}
+# Métodos do motor muito comuns (AActor/UActorComponent/UPrimitiveComponent...): não listar.
+ENGINE_COMMON = set("""GetActorLocation SetActorLocation GetActorRotation SetActorRotation GetActorTransform SetActorTransform
+GetActorForwardVector GetActorRightVector GetActorUpVector GetWorld Destroy IsHidden SetActorHiddenInGame SetActorTickEnabled
+SetActorEnableCollision GetRootComponent AddInstanceComponent FinishSpawning DispatchBeginPlay HasActorBegunPlay IsActorBeingDestroyed
+GetCapsuleComponent GetCharacterMovement GetMesh GetController GetLevel GetTimerManager SetupAttachment RegisterComponent
+SetRelativeLocation SetRelativeRotation SetRelativeTransform SetRelativeScale3D SetWorldLocation SetWorldRotation SetVisibility
+SetHiddenInGame SetCollisionEnabled SetCollisionProfileName SetCollisionResponseToAllChannels SetCollisionResponseToChannel
+SetStaticMesh SetMaterial SetCanEverAffectNavigation SetMobility SetCastShadow GetComponentLocation GetComponentRotation
+GetComponentTransform DestroyComponent AttachToComponent DetachFromComponent SetRenderCustomDepth SetCustomDepthStencilValue
+GetName GetClass IsA Implements GetOwner SetIntensity SetLightColor SetText SetTextRenderColor SetWorldSize
+SetHorizontalAlignment SetVerticalAlignment AddMovementInput Possess UnPossess SetViewTargetWithBlend SetComponentTickEnabled
+MarkRenderStateDirty GetForwardVector GetRightVector GetUpVector K2_DestroyActor SetActorScale3D SetActorRelativeLocation
+SetActorRelativeRotation AttachToActor DetachFromActor SetOwner GetGameInstance GetFirstPlayerController OverlapAnyTestByObjectType
+LineTraceSingleByChannel SweepSingleByChannel SpawnActor SpawnActorDeferred IsValid IsValidLowLevel MoveIgnoreActorAdd
+IgnoreActorWhenMoving SetBoxExtent SetCapsuleSize SetSphereRadius AddInstance AddInstances ClearInstances SetCustomDataValue
+GetInstanceCount UpdateInstanceTransform BatchUpdateInstancesTransforms SetCullDistances SetNumCustomDataFloats""".split())
 for h in HEADERS:
     t = strip_comments(h.read_text(encoding="utf-8"))
     for name, b, body in class_bodies(t):
         classes.setdefault(name, set()).update(members(body))
+        mt = member_types.setdefault(name, {})
+        body = re.sub(r"\b(TArray|TMap|TSet|TFunction|TOptional|TArrayView)\s*<[^;(){}]*?>", "Container", body)
+        for mm in re.finditer(r"(?:TObjectPtr<|TWeakObjectPtr<|TSharedPtr<|TSharedRef<)?\b([AUSIF]Vila\w+)\b>?\s*\*?\s*(\w+)\s*(?:=[^;]*)?;", body):
+            mt[mm.group(2)] = mm.group(1)
         bases.setdefault(name, []).extend(b)
     # 2. generated.h
     if re.search(r"\b(UCLASS|USTRUCT|UENUM|UINTERFACE)\s*\(", t):
@@ -78,6 +100,11 @@ for h in HEADERS:
         want = h.stem + ".generated.h"
         if not incs or incs[-1] != want:
             problems.append(f"{h.relative_to(ROOT)}: o último include deve ser \"{want}\"")
+
+for c in SOURCES:
+    for name, b, body in class_bodies(strip_comments(c.read_text(encoding="utf-8"))):
+        classes.setdefault(name, set()).update(members(body))
+        bases.setdefault(name, []).extend(b)
 
 local = {p.name for p in HEADERS} | {str(p.relative_to(MOD / "Public")) for p in HEADERS if (MOD / "Public") in p.parents}
 local |= {str(p.relative_to(MOD / "Private")) for p in MOD.rglob("*.h") if (MOD / "Private") in p.parents}
@@ -115,19 +142,33 @@ for f in HEADERS + SOURCES:
         elif re.match(r"(UI/)?[AUSIF]?Vila\w*\.h$", inc) and inc not in local and Path(inc).name not in local:
             problems.append(f"{rel}: include local inexistente \"{inc}\"")
     used_classes |= set(OWN.findall(t))
-    # tipos de variáveis declaradas no arquivo
-    vars_ = {}
-    for m in re.finditer(r"(?:TObjectPtr<|TWeakObjectPtr<|TSharedPtr<|TSharedRef<|const\s+)?\b([AUSIF]Vila\w+)\b>?\s*\*?\s*&?\s*(\w+)\s*[=;,)\[{]", t):
-        vars_[m.group(2)] = m.group(1)
-    # 3. chamadas
-    for m in re.finditer(r"\b(\w+)\s*(?:->|\.)\s*(\w+)\s*\(", t):
-        var, meth = m.groups()
-        cls = vars_.get(var)
-        if not cls or cls not in classes:
-            continue
-        ms, engine = all_members(cls)
-        if meth not in ms:
-            (manual if engine else problems).append(f"{rel}: {cls}::{meth} não declarado" + (" (pode ser do motor)" if engine else ""))
+    # 3. chamadas: tipos inferidos por função (parâmetros, locais e membros da classe)
+    DECL = re.compile(r"(?:TObjectPtr<|TWeakObjectPtr<|TSharedPtr<|TSharedRef<|TStrongObjectPtr<)?\b([AUSIF]Vila\w+)\b>?\s*(?:const\s*)?[*&]?\s*(\w+)\s*(?=[=;,)\[{:])")
+    CAST = re.compile(r"\b(?:auto|const auto)\s*\*?\s*(\w+)\s*=\s*(?:Cast|CastChecked|NewObject|SpawnActor\w*)\s*<\s*([AUSIF]Vila\w+)\s*>")
+    for fm in re.finditer(r"\b(\w+)::(~?\w+)\s*\(([^)]*)\)[^;{]*\{", t):
+        owner, start = fm.group(1), fm.end()
+        depth, i = 1, start
+        while i < len(t) and depth:
+            depth += {"{": 1, "}": -1}.get(t[i], 0)
+            i += 1
+        body = fm.group(3) + ";" + t[start:i]
+        # contêineres (TArray<FVilaX> Arr) não são o tipo do elemento
+        body = re.sub(r"\b(TArray|TMap|TSet|TFunction|TOptional|TInlineComponentArray|TArrayView)\s*<[^;(){}]*?>", "Container", body)
+        vars_ = dict(member_types.get(owner, {}))
+        for m in DECL.finditer(body):
+            vars_[m.group(2)] = m.group(1)
+        for m in CAST.finditer(body):
+            vars_[m.group(1)] = m.group(2)
+        for m in re.finditer(r"\b(\w+)\s*(?:->|\.)\s*(\w+)\s*\(", body):
+            var, meth = m.groups()
+            cls = vars_.get(var)
+            if not cls or cls not in classes:
+                continue
+            ms, engine = all_members(cls)
+            if meth in SMART_PTR or meth not in ms and engine and meth in ENGINE_COMMON:
+                continue
+            if meth not in ms:
+                (manual if engine else problems).append(f"{rel}: {cls}::{meth} não declarado" + (" (pode ser do motor)" if engine else ""))
     for m in re.finditer(r"\b([AUS]Vila\w+)::Get\([^()]*\)\s*->\s*(\w+)", t):
         cls, meth = m.groups()
         if cls in classes:
@@ -135,7 +176,10 @@ for f in HEADERS + SOURCES:
             if meth not in ms:
                 (manual if engine else problems).append(f"{rel}: {cls}::{meth} não declarado" + (" (pode ser do motor)" if engine else ""))
 
-# 4. classes usadas e não declaradas (ignora gerados/macros)
+# 4. classes usadas e não declaradas (ignora gerados/macros e aliases `using X = ...`)
+for f in HEADERS + SOURCES:
+    for a in re.findall(r"\busing\s+([AUSIF]Vila\w+)\s*=", f.read_text(encoding="utf-8")):
+        classes.setdefault(a, set())
 for c in sorted(used_classes - set(classes)):
     if c.endswith("_API") or c.startswith("FVilaCore"):
         continue
