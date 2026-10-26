@@ -11,7 +11,7 @@
 #include "VilaAssets.h"
 #include "VilaProcMesh.h"
 
-namespace
+namespace VilaMeshBatchPriv
 {
 	// Cor sRGB (como o albedo do Godot) -> linear.
 	float ToLin(float C) { return C <= 0.04045f ? C / 12.92f : FMath::Pow((C + 0.055f) / 1.055f, 2.4f); }
@@ -45,11 +45,11 @@ UMaterialInterface* UVilaMeshBatch::ResolveMaterial(UVilaAssets* InAssets, const
 	bOutTinted = false;
 	if (!InAssets) return nullptr;
 	const bool bTint = bAllowInstanceTint && InAssets->HasContent();
-	if (MatKey == TEXT("glass")) return InAssets->Glass(SRGB(0.55f, 0.68f, 0.76f), 0.4f);
+	if (MatKey == TEXT("glass")) return InAssets->Glass(VilaMeshBatchPriv::SRGB(0.55f, 0.68f, 0.76f), 0.4f);
 	if (MatKey == TEXT("water"))
 	{
 		if (UMaterialInterface* W = InAssets->Master(TEXT("M_Water"))) return W;
-		return InAssets->Glass(SRGB(0.16f, 0.26f, 0.3f), 0.85f);
+		return InAssets->Glass(VilaMeshBatchPriv::SRGB(0.16f, 0.26f, 0.3f), 0.85f);
 	}
 	if (MatKey.IsEmpty())
 	{

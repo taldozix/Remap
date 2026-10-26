@@ -486,8 +486,7 @@ void AVilaPlayerCharacter::SitOn(AVilaFurniture* F)
 	Seat = F;
 	State = TEXT("sitting");
 	SetBodyEnabled(false);
-	const FTransform T = F->SeatTransform();
-	const FVector Loc = T.GetLocation();
+	const FVector Loc = F->SeatTransform().GetLocation();
 	SetFeetLocation(FVector(Loc.X, Loc.Y, F->GetActorLocation().Z));
 	SetActorRotation(FRotator(0.f, F->Forward().Rotation().Yaw, 0.f));
 	Humanoid->SetPose(TEXT("sit"));

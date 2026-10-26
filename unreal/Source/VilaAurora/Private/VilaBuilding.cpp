@@ -5,7 +5,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "VilaConv.h"
 
-namespace
+namespace VilaBuildingPriv
 {
 	float ToLin(float C) { return C <= 0.04045f ? C / 12.92f : FMath::Pow((C + 0.055f) / 1.055f, 2.4f); }
 	FLinearColor SRGB(float R, float G, float B) { return FLinearColor(ToLin(R), ToLin(G), ToLin(B), 1.f); }
@@ -60,7 +60,7 @@ void AVilaBuilding::SetCut(bool bOn, const FVector& ViewDir)
 	if (bOn)
 	{
 		const FVector V = FVector(ViewDir.X, ViewDir.Y, 0.0).GetSafeNormal();
-		for (const TCHAR* S : SideNames)
+		for (const TCHAR* S : VilaBuildingPriv::SideNames)
 			if (FVector::DotProduct(VilaConv::SideNormal(VilaConv::U(S)), -V) > 0.15) Sides.Add(S);
 	}
 	if (bOn == bCut && Sides == CutSides) return;
@@ -83,8 +83,8 @@ void AVilaBuilding::SetNight(float Amount)
 	if (Lamp) Lamp->SetVisibility(Amount > 0.3f);
 	if (!WindowMID) return;
 	// Mat.windows(): vidro azulado de dia; emissão quente (1.0, 0.78, 0.45) x noite x 1,4.
-	const FLinearColor Day = SRGB(0.42f, 0.55f, 0.66f);
-	const FLinearColor Warm = SRGB(1.f, 0.78f, 0.45f);
+	const FLinearColor Day = VilaBuildingPriv::SRGB(0.42f, 0.55f, 0.66f);
+	const FLinearColor Warm = VilaBuildingPriv::SRGB(1.f, 0.78f, 0.45f);
 	switch (WindowMode)
 	{
 	case 1:

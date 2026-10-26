@@ -14,7 +14,7 @@
 #include "VilaProcMesh.h"
 #include "VilaWorldBuilder.h"
 
-namespace
+namespace VilaGrassPriv
 {
 	const float DENSITY[4] = {0.f, 2.5f, 5.f, 8.f};  // tufos por m² (desligado, baixa, média, alta)
 
@@ -82,16 +82,16 @@ void AVilaGrass::Rebuild(int32 InLevel)
 	bool bTinted = false;
 	UMaterialInterface* Mat = UVilaNature::GrassMaterial(Assets, bTinted);
 
-	const float Density = DENSITY[Level];
+	const float Density = VilaGrassPriv::DENSITY[Level];
 	const float Spacing = 1.f / FMath::Sqrt(Density);
 	vila::Rng Rng(4242);
 	const float Cull = 7000.f * UVilaMeshBatch::ViewDistanceScale();
 	const vila::Json& Map = Builder->GetMap();
 	const vila::Json& B = vila::jget(Map, "bounds");
-	const float X0 = static_cast<float>(Num(B, 0, -85)) + 1.f;
-	const float Z0 = static_cast<float>(Num(B, 1, -85)) + 1.f;
-	const float X1 = static_cast<float>(Num(B, 2, 85)) - 1.f;
-	const float Z1 = static_cast<float>(Num(B, 3, 85)) - 1.f;
+	const float X0 = static_cast<float>(VilaGrassPriv::Num(B, 0, -85)) + 1.f;
+	const float Z0 = static_cast<float>(VilaGrassPriv::Num(B, 1, -85)) + 1.f;
+	const float X1 = static_cast<float>(VilaGrassPriv::Num(B, 2, 85)) - 1.f;
+	const float Z1 = static_cast<float>(VilaGrassPriv::Num(B, 3, 85)) - 1.f;
 
 	TArray<FTransform> Xf;
 	TArray<FLinearColor> Cols;
@@ -204,9 +204,9 @@ void AVilaGrass::Rasterize()
 {
 	const vila::Json& Map = Builder->GetMap();
 	const vila::Json& B = vila::jget(Map, "bounds");
-	Origin = FVector2D(Num(B, 0, -85), Num(B, 1, -85));
-	GW = static_cast<int32>((Num(B, 2, 85) - Num(B, 0, -85)) / CELL) + 1;
-	GH = static_cast<int32>((Num(B, 3, 85) - Num(B, 1, -85)) / CELL) + 1;
+	Origin = FVector2D(VilaGrassPriv::Num(B, 0, -85), VilaGrassPriv::Num(B, 1, -85));
+	GW = static_cast<int32>((VilaGrassPriv::Num(B, 2, 85) - VilaGrassPriv::Num(B, 0, -85)) / CELL) + 1;
+	GH = static_cast<int32>((VilaGrassPriv::Num(B, 3, 85) - VilaGrassPriv::Num(B, 1, -85)) / CELL) + 1;
 	Grid.Init(0, GW * GH);
 
 	const vila::Json& Roads = vila::jobj(Map, "roads");
@@ -236,21 +236,21 @@ void AVilaGrass::Rasterize()
 		if (vila::has(A, "rect") && Type != "park")
 		{
 			const vila::Json& RR = A["rect"];
-			MarkRect(Num(RR, 0), Num(RR, 1), Num(RR, 2), Num(RR, 3), 0.2f);
+			MarkRect(VilaGrassPriv::Num(RR, 0), VilaGrassPriv::Num(RR, 1), VilaGrassPriv::Num(RR, 2), VilaGrassPriv::Num(RR, 3), 0.2f);
 		}
 		if (vila::has(A, "points"))
 		{
 			const float HWid = Type == "drive_lane" ? 2.3f : static_cast<float>(vila::jnum(A, "width", 2.0) * 0.5 - 0.15);
 			const vila::Json& Pts = A["points"];
 			for (size_t I = 0; I + 1 < Pts.size(); ++I)
-				MarkSegment(FVector2D(Num(Pts[I], 0), Num(Pts[I], 1)), FVector2D(Num(Pts[I + 1], 0), Num(Pts[I + 1], 1)), HWid);
+				MarkSegment(FVector2D(VilaGrassPriv::Num(Pts[I], 0), VilaGrassPriv::Num(Pts[I], 1)), FVector2D(VilaGrassPriv::Num(Pts[I + 1], 0), VilaGrassPriv::Num(Pts[I + 1], 1)), HWid);
 		}
 	}
 	for (const vila::Json& P : vila::jarr(Map, "props"))
 	{
 		const std::string Type = vila::jstr(P, "type");
 		if (!vila::has(P, "pos")) continue;
-		const FVector2D Pos(Num(P["pos"], 0), Num(P["pos"], 1));
+		const FVector2D Pos(VilaGrassPriv::Num(P["pos"], 0), VilaGrassPriv::Num(P["pos"], 1));
 		if (Type == "fountain")
 			MarkSegment(Pos, Pos, 2.9f);
 		else if (Type == "canopy" || Type == "bus_stop" || Type == "kiosk" || Type == "pump")

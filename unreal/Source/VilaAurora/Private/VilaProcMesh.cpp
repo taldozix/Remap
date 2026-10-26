@@ -10,7 +10,7 @@
 #include "Vila/Core.h"
 #include "VilaAurora.h"
 
-namespace
+namespace VilaProcMeshPriv
 {
 	// Godot (metros, Y para cima) -> UE (cm, Z para cima).
 	FVector G2U(const FVector& G) { return FVector(G.X * 100.0, G.Z * 100.0, G.Y * 100.0); }
@@ -51,7 +51,7 @@ void FVilaProcBuilder::AddTri(const FVector& A, const FVector& B, const FVector&
 	FVector P[3] = {A, B, C};
 	FVector2f U[3] = {UA, UB, UC};
 	FLinearColor Cl[3] = {CA, CB, CC};
-	PushTri(*this, P, U, Cl, N, N);
+	VilaProcMeshPriv::PushTri(*this, P, U, Cl, N, N);
 }
 
 void FVilaProcBuilder::AddTriTwoSided(const FVector& A, const FVector& B, const FVector& C, const FVector& N,
@@ -128,7 +128,7 @@ UStaticMesh* UVilaProcMesh::BuildMesh(const FString& Key, const FVilaProcBuilder
 			const FVertexInstanceID VI = Desc.CreateVertexInstance(V);
 			const FVector3f Nr = B.Nrm.IsValidIndex(I) ? B.Nrm[I] : FVector3f(0, 0, 1);
 			Normals[VI] = Nr;
-			Tangents[VI] = AnyTangent(Nr);
+			Tangents[VI] = VilaProcMeshPriv::AnyTangent(Nr);
 			Signs[VI] = 1.f;
 			const FLinearColor C = B.Col.IsValidIndex(I) ? B.Col[I] : FLinearColor::White;
 			Colors[VI] = FVector4f(C.R, C.G, C.B, C.A);
@@ -185,13 +185,13 @@ UStaticMesh* UVilaProcMesh::GrassTuft()
 			const FVector V[5] = {Base - Side * W, Base + Side * W, Mid + Side * W * 0.65, Mid - Side * W * 0.65, Tip};
 			const FVector2f UV[5] = {FVector2f(0, 0), FVector2f(1, 0), FVector2f(1, 0.55f), FVector2f(0, 0.55f), FVector2f(0.5f, 1)};
 			const int32 Tris[3][3] = {{0, 1, 2}, {0, 2, 3}, {3, 2, 4}};
-			const FVector N = G2UDir(Nrm);
+			const FVector N = VilaProcMeshPriv::G2UDir(Nrm);
 			for (const auto& T : Tris)
 			{
-				FVector P[3] = {G2U(V[T[0]]), G2U(V[T[1]]), G2U(V[T[2]])};
+				FVector P[3] = {VilaProcMeshPriv::G2U(V[T[0]]), VilaProcMeshPriv::G2U(V[T[1]]), VilaProcMeshPriv::G2U(V[T[2]])};
 				FVector2f U[3] = {UV[T[0]], UV[T[1]], UV[T[2]]};
 				FLinearColor C[3] = {FLinearColor(1, 1, 1, UV[T[0]].Y), FLinearColor(1, 1, 1, UV[T[1]].Y), FLinearColor(1, 1, 1, UV[T[2]].Y)};
-				PushTri(B, P, U, C, N, N);
+				VilaProcMeshPriv::PushTri(B, P, U, C, N, N);
 			}
 		}
 	});
@@ -226,10 +226,10 @@ UStaticMesh* UVilaProcMesh::LeafCluster(int32 Variant, int32 Cards, float CardRa
 			const int32 Tris[2][3] = {{0, 2, 1}, {0, 3, 2}};
 			for (const auto& Tr : Tris)
 			{
-				FVector Pp[3] = {G2U(Corner[Tr[0]]), G2U(Corner[Tr[1]]), G2U(Corner[Tr[2]])};
+				FVector Pp[3] = {VilaProcMeshPriv::G2U(Corner[Tr[0]]), VilaProcMeshPriv::G2U(Corner[Tr[1]]), VilaProcMeshPriv::G2U(Corner[Tr[2]])};
 				FVector2f U[3] = {CUV[Tr[0]], CUV[Tr[1]], CUV[Tr[2]]};
 				FLinearColor C[3] = {Col, Col, Col};
-				PushTri(B, Pp, U, C, G2UDir(N), G2UDir(Shade));
+				VilaProcMeshPriv::PushTri(B, Pp, U, C, VilaProcMeshPriv::G2UDir(N), VilaProcMeshPriv::G2UDir(Shade));
 			}
 		}
 	});

@@ -8,7 +8,7 @@
 #include "VilaMeshBatch.h"
 #include "VilaProcMesh.h"
 
-namespace
+namespace VilaNaturePriv
 {
 	float ToLin(float C) { return C <= 0.04045f ? C / 12.92f : FMath::Pow((C + 0.055f) / 1.055f, 2.4f); }
 	FLinearColor SRGB(float R, float G, float B) { return FLinearColor(ToLin(R), ToLin(G), ToLin(B), 1.f); }
@@ -29,7 +29,7 @@ void UVilaNature::AddCanopy(const FVector& TrunkTopG, const TArray<TPair<FVector
 		const FVector R = C.Value;
 		const double AvgR = FMath::Max((R.X + R.Y + R.Z) / 3.0, 0.05);
 		FCluster Cl;
-		Cl.Center = G2U(C.Key);
+		Cl.Center = VilaNaturePriv::G2U(C.Key);
 		Cl.Radii = FVector(R.X, R.Z, R.Y) * 100.0;
 		Cl.Tint = Tint;
 		Cl.Cards = CardsPerCluster;
@@ -84,7 +84,7 @@ UMaterialInterface* UVilaNature::GrassMaterial(UVilaAssets* InAssets, bool& bOut
 		return G;
 	}
 	// Meio-termo entre root_color e tip_color do shader de grama do Godot.
-	const FLinearColor Mid = SRGB(0.17f, 0.225f, 0.09f);
+	const FLinearColor Mid = VilaNaturePriv::SRGB(0.17f, 0.225f, 0.09f);
 	if (InAssets->HasContent())
 	{
 		bOutTinted = true;

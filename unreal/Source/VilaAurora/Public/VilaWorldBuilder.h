@@ -30,6 +30,7 @@ class UVilaAssets;
 class UVilaMeshBatch;
 class UVilaNature;
 class UVilaWorldBuilder;
+namespace VilaWB { struct FVilaWorldBuild; }
 
 USTRUCT()
 struct VILAAURORA_API FVilaSpot
@@ -112,7 +113,7 @@ public:
 	void UpdateStreetlightShadows(const FVector& ViewPoint, int32 Count = 4);
 
 private:
-	friend struct FVilaWorldBuild;
+	friend struct VilaWB::FVilaWorldBuild;
 
 	UPROPERTY() TObjectPtr<AVilaWorld> VilaWorld;
 	UPROPERTY() TObjectPtr<UVilaAssets> Assets;

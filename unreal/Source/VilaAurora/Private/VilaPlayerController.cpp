@@ -119,11 +119,11 @@ bool AVilaPlayerController::ApplyMappings()
 				UInputAction* AA = NewObject<UInputAction>(this);
 				AA->ValueType = EInputActionValueType::Axis1D;
 				AxisActions.Add(AA);
-				FEnhancedActionKeyMapping& M = Ctx->MapKey(AA, Base);
+				FEnhancedActionKeyMapping& Mapping = Ctx->MapKey(AA, Base);
 				UInputModifierDeadZone* Dz = NewObject<UInputModifierDeadZone>(Ctx);
 				Dz->LowerThreshold = 0.2f;
-				M.Modifiers.Add(Dz);
-				if (bNeg) M.Modifiers.Add(NewObject<UInputModifierNegate>(Ctx));
+				Mapping.Modifiers.Add(Dz);
+				if (bNeg) Mapping.Modifiers.Add(NewObject<UInputModifierNegate>(Ctx));
 				FAxisBinding B;
 				B.Action = ActionName;
 				B.InputAction = AA;

@@ -728,9 +728,9 @@ void AVilaNPC::DoAction(AVilaPlayerCharacter* Player, const FString& ActionId)
 	if (ActionId == TEXT("first_aid"))
 	{
 		if (!Player) return;
-		const float T = 4.f * (1.f - 0.06f * vila::game().player.skills.level("primeiros_socorros"));
+		const float Secs = 4.f * (1.f - 0.06f * vila::game().player.skills.level("primeiros_socorros"));
 		TWeakObjectPtr<AVilaNPC> Weak(this);
-		Player->StartTimed(Tr("Prestando primeiros socorros..."), T, [Weak]()
+		Player->StartTimed(Tr("Prestando primeiros socorros..."), Secs, [Weak]()
 		{
 			if (AVilaNPC* Self = Weak.Get()) Self->FirstAid();
 		});

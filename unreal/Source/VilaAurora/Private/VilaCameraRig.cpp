@@ -165,9 +165,9 @@ void AVilaCameraRig::UpdateView(float Dt)
 	float Aspect = 16.f / 9.f;
 	if (GEngine && GEngine->GameViewport)
 	{
-		FVector2D Size;
-		GEngine->GameViewport->GetViewportSize(Size);
-		if (Size.Y > 1.0) Aspect = static_cast<float>(Size.X / Size.Y);
+		FVector2D ViewSize;
+		GEngine->GameViewport->GetViewportSize(ViewSize);
+		if (ViewSize.Y > 1.0) Aspect = static_cast<float>(ViewSize.X / ViewSize.Y);
 	}
 	const float HFov = FMath::RadiansToDegrees(2.f * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(VerticalFov * 0.5f)) * Aspect));
 	Camera->SetFieldOfView(FMath::Clamp(HFov, 20.f, 120.f));

@@ -68,10 +68,10 @@ namespace
 	// Nome do slot de material normalizado ("M_Skin" / "MI_skin" / "skin" -> "skin").
 	FString SlotKey(FName Slot)
 	{
-		FString S = Slot.ToString().ToLower();
-		if (S.StartsWith(TEXT("mi_"))) S.RightChopInline(3);
-		else if (S.StartsWith(TEXT("m_"))) S.RightChopInline(2);
-		return S;
+		FString Key = Slot.ToString().ToLower();
+		if (Key.StartsWith(TEXT("mi_"))) Key.RightChopInline(3);
+		else if (Key.StartsWith(TEXT("m_"))) Key.RightChopInline(2);
+		return Key;
 	}
 
 	struct FPieceOn
@@ -270,7 +270,7 @@ bool UVilaHumanoid::BuildSkeletal(const vila::Json& App)
 			else if (Slot == TEXT("strap")) C = Srgb(0.13f, 0.13f, 0.14f);
 			MID->SetVectorParameterValue(TEXT("Color"), C);
 		}
-		for (const TPair<FName, float>& M : Morphs) Comp->SetMorphTarget(M.Key, M.Value);
+		for (const TPair<FName, float>& Morph : Morphs) Comp->SetMorphTarget(Morph.Key, Morph.Value);
 
 		if (P.Name == TEXT("Body")) Body = Comp;
 		else Pieces.Add(Comp);
@@ -495,81 +495,81 @@ void UVilaHumanoid::TickFallback(float Dt)
 	const float Sn = FMath::Sin(P);
 	const float Cs = FMath::Cos(P);
 
-	FJoints T;
+	FJoints Tg;
 	if (Pose == TEXT("walk"))
 	{
-		T.ThighL = 25 * Sn; T.ThighR = -25 * Sn;
-		T.ShinL = -40 * FMath::Max(0.f, Cs); T.ShinR = -40 * FMath::Max(0.f, -Cs);
-		T.ArmL = -20 * Sn; T.ArmR = 20 * Sn;
-		T.ForeL = T.ForeR = 15;
-		T.PelvisZ = 92 + 1.5f * (FMath::Abs(Cs) - 0.5f);
+		Tg.ThighL = 25 * Sn; Tg.ThighR = -25 * Sn;
+		Tg.ShinL = -40 * FMath::Max(0.f, Cs); Tg.ShinR = -40 * FMath::Max(0.f, -Cs);
+		Tg.ArmL = -20 * Sn; Tg.ArmR = 20 * Sn;
+		Tg.ForeL = Tg.ForeR = 15;
+		Tg.PelvisZ = 92 + 1.5f * (FMath::Abs(Cs) - 0.5f);
 	}
 	else if (Pose == TEXT("run"))
 	{
-		T.ThighL = 45 * Sn; T.ThighR = -45 * Sn;
-		T.ShinL = -80 * FMath::Max(0.f, Cs); T.ShinR = -80 * FMath::Max(0.f, -Cs);
-		T.ArmL = -40 * Sn; T.ArmR = 40 * Sn;
-		T.ForeL = T.ForeR = 80;
-		T.Torso = -10;
-		T.PelvisZ = 89 + 3 * FMath::Abs(Cs);
+		Tg.ThighL = 45 * Sn; Tg.ThighR = -45 * Sn;
+		Tg.ShinL = -80 * FMath::Max(0.f, Cs); Tg.ShinR = -80 * FMath::Max(0.f, -Cs);
+		Tg.ArmL = -40 * Sn; Tg.ArmR = 40 * Sn;
+		Tg.ForeL = Tg.ForeR = 80;
+		Tg.Torso = -10;
+		Tg.PelvisZ = 89 + 3 * FMath::Abs(Cs);
 	}
 	else if (Pose == TEXT("talk"))
 	{
-		T.ArmR = 20 + 8 * FMath::Sin(P * 7); T.ForeR = 55 + 15 * FMath::Sin(P * 5);
-		T.ArmL = 4; T.ForeL = 12;
-		T.Head = 4 * FMath::Sin(P * 4);
+		Tg.ArmR = 20 + 8 * FMath::Sin(P * 7); Tg.ForeR = 55 + 15 * FMath::Sin(P * 5);
+		Tg.ArmL = 4; Tg.ForeL = 12;
+		Tg.Head = 4 * FMath::Sin(P * 4);
 	}
 	else if (Pose == TEXT("work"))
 	{
-		T.ArmL = T.ArmR = 45;
-		T.ForeL = 40 + 15 * FMath::Sin(P * 9); T.ForeR = 40 + 15 * FMath::Sin(P * 9 + PI);
-		T.Torso = -8;
+		Tg.ArmL = Tg.ArmR = 45;
+		Tg.ForeL = 40 + 15 * FMath::Sin(P * 9); Tg.ForeR = 40 + 15 * FMath::Sin(P * 9 + PI);
+		Tg.Torso = -8;
 	}
 	else if (Pose == TEXT("eat"))
 	{
-		T.ArmR = 30; T.ForeR = 115 + 8 * FMath::Sin(P * 4);
-		T.ArmL = 8; T.ForeL = 35;
+		Tg.ArmR = 30; Tg.ForeR = 115 + 8 * FMath::Sin(P * 4);
+		Tg.ArmL = 8; Tg.ForeL = 35;
 	}
 	else if (Pose == TEXT("search"))
 	{
-		T.Torso = -35; T.Head = -10;
-		T.ArmL = T.ArmR = 50;
-		T.ForeL = 20 + 10 * FMath::Sin(P * 6); T.ForeR = 20 + 10 * FMath::Sin(P * 6 + 2);
+		Tg.Torso = -35; Tg.Head = -10;
+		Tg.ArmL = Tg.ArmR = 50;
+		Tg.ForeL = 20 + 10 * FMath::Sin(P * 6); Tg.ForeR = 20 + 10 * FMath::Sin(P * 6 + 2);
 	}
 	else if (Pose == TEXT("sit"))
 	{
 		// Coxas a 0,47 m (mesma referência do Godot: visual.y = altura do assento - 0,47).
-		T.PelvisZ = 58;
-		T.ThighL = T.ThighR = 90; T.ShinL = T.ShinR = -90;
-		T.ArmL = T.ArmR = 20; T.ForeL = T.ForeR = 45;
+		Tg.PelvisZ = 58;
+		Tg.ThighL = Tg.ThighR = 90; Tg.ShinL = Tg.ShinR = -90;
+		Tg.ArmL = Tg.ArmR = 20; Tg.ForeL = Tg.ForeR = 45;
 	}
 	else if (Pose == TEXT("lie"))
 	{
 		// Deitado de costas, centrado no ator.
-		T.RootPitch = 90; T.RootX = 88; T.RootZ = 11;
-		T.ArmRoll = 10; T.ForeL = T.ForeR = 5;
+		Tg.RootPitch = 90; Tg.RootX = 88; Tg.RootZ = 11;
+		Tg.ArmRoll = 10; Tg.ForeL = Tg.ForeR = 5;
 	}
 	else if (Pose == TEXT("knocked"))
 	{
 		// Caído de bruços.
-		T.RootPitch = -90; T.RootX = -88; T.RootZ = 11;
-		T.ArmRoll = 35; T.ArmL = T.ArmR = -10;
-		T.ThighL = 15; T.ShinL = -35;
+		Tg.RootPitch = -90; Tg.RootX = -88; Tg.RootZ = 11;
+		Tg.ArmRoll = 35; Tg.ArmL = Tg.ArmR = -10;
+		Tg.ThighL = 15; Tg.ShinL = -35;
 	}
 	else  // idle e poses desconhecidas
 	{
-		T.ArmL = T.ArmR = 2 * Sn; T.ForeL = T.ForeR = 8;
-		T.Torso = 1.5f * Sn;
+		Tg.ArmL = Tg.ArmR = 2 * Sn; Tg.ForeL = Tg.ForeR = 8;
+		Tg.Torso = 1.5f * Sn;
 	}
-	if (bElderly && T.RootPitch == 0.f && Pose != TEXT("sit")) T.Torso -= 6;
+	if (bElderly && Tg.RootPitch == 0.f && Pose != TEXT("sit")) Tg.Torso -= 6;
 
 	const float A = bSnapPose ? 1.f : 1.f - FMath::Exp(-Dt * 14.f);
 	bSnapPose = false;
 	auto L = [A](float& Cur, float Tgt) { Cur += (Tgt - Cur) * A; };
-	L(Joints.ThighL, T.ThighL); L(Joints.ThighR, T.ThighR); L(Joints.ShinL, T.ShinL); L(Joints.ShinR, T.ShinR);
-	L(Joints.ArmL, T.ArmL); L(Joints.ArmR, T.ArmR); L(Joints.ForeL, T.ForeL); L(Joints.ForeR, T.ForeR); L(Joints.ArmRoll, T.ArmRoll);
-	L(Joints.Torso, T.Torso); L(Joints.Head, T.Head); L(Joints.PelvisZ, T.PelvisZ);
-	L(Joints.RootPitch, T.RootPitch); L(Joints.RootX, T.RootX); L(Joints.RootZ, T.RootZ);
+	L(Joints.ThighL, Tg.ThighL); L(Joints.ThighR, Tg.ThighR); L(Joints.ShinL, Tg.ShinL); L(Joints.ShinR, Tg.ShinR);
+	L(Joints.ArmL, Tg.ArmL); L(Joints.ArmR, Tg.ArmR); L(Joints.ForeL, Tg.ForeL); L(Joints.ForeR, Tg.ForeR); L(Joints.ArmRoll, Tg.ArmRoll);
+	L(Joints.Torso, Tg.Torso); L(Joints.Head, Tg.Head); L(Joints.PelvisZ, Tg.PelvisZ);
+	L(Joints.RootPitch, Tg.RootPitch); L(Joints.RootX, Tg.RootX); L(Joints.RootZ, Tg.RootZ);
 
 	// Pitch positivo num membro que aponta para baixo = balanço para a frente (+X).
 	FbRoot->SetRelativeLocationAndRotation(FVector(Joints.RootX, 0, Joints.RootZ), FRotator(Joints.RootPitch, 0, 0));

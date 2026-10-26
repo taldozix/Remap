@@ -31,7 +31,7 @@
 // O port mantém a geometria no espaço do Godot (metros, Y para cima, z para "baixo" do mapa)
 // para ficar verificável linha a linha com WorldBuilder.gd; a conversão para o UE acontece
 // só na entrada dos lotes (G2U / GQuat).
-namespace
+namespace VilaWB
 {
 	using vila::Json;
 
@@ -203,7 +203,6 @@ namespace
 	}
 
 	const FLinearColor LEAF_TINTS[3] = {FLinearColor(0.30f, 0.44f, 0.17f), FLinearColor(0.62f, 0.62f, 0.22f), FLinearColor(0.88f, 0.68f, 0.24f)};
-}
 
 // ======================================================================== construção
 struct FVilaWorldBuild
@@ -1766,6 +1765,8 @@ struct FVilaWorldBuild
 	}
 };
 
+}  // namespace VilaWB
+
 // ======================================================================== UVilaWorldBuilder
 void UVilaWorldBuilder::Build(AVilaWorld* World, const vila::Json& InMap)
 {
@@ -1779,7 +1780,7 @@ void UVilaWorldBuilder::Build(AVilaWorld* World, const vila::Json& InMap)
 		return;
 	}
 	const double T0 = FPlatformTime::Seconds();
-	FVilaWorldBuild B(*this, Map);
+	VilaWB::FVilaWorldBuild B(*this, Map);
 	B.UW = UW;
 	B.Assets = Assets;
 	B.Run();
