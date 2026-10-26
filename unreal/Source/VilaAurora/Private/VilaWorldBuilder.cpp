@@ -7,8 +7,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine/StaticMesh.h"
-#include "Engine/TextRenderActor.h"
 #include "Engine/World.h"
+#include "HAL/PlatformTime.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -113,11 +113,13 @@ namespace VilaWB
 	FLinearColor FromHSV(double H, double S, double V) { return FLinearColor(static_cast<float>(H * 360.0), static_cast<float>(S), static_cast<float>(V)).HSVToLinearRGB(); }
 	const FLinearColor WHITE_C = FLinearColor(1, 1, 1, 1);
 
-	const FLinearColor WOOD = HexRaw("e6cba8");       // tintas sobre a textura de madeira
-	const FLinearColor WOOD_DARK = HexRaw("a98663");
-	const FLinearColor WHITE = HexRaw("eeeeea");
-	const FLinearColor STEEL = HexRaw("b8bcc2");
-	const FLinearColor DARK = HexRaw("2a2a2e");
+	// Color("rrggbb") cru (sem FString na inicialização estática).
+	FLinearColor RGB8(int32 R, int32 G, int32 B) { return FLinearColor(R / 255.f, G / 255.f, B / 255.f, 1.f); }
+	const FLinearColor WOOD = RGB8(0xe6, 0xcb, 0xa8);       // tintas sobre a textura de madeira
+	const FLinearColor WOOD_DARK = RGB8(0xa9, 0x86, 0x63);
+	const FLinearColor WHITE = RGB8(0xee, 0xee, 0xea);
+	const FLinearColor STEEL = RGB8(0xb8, 0xbc, 0xc2);
+	const FLinearColor DARK = RGB8(0x2a, 0x2a, 0x2e);
 
 	// ---------------------------------------------------------------- json
 	double Num(const Json& A, size_t I, double Def = 0.0) { return (A.is_array() && A.size() > I) ? vila::to_num(A[I], Def) : Def; }
@@ -335,6 +337,11 @@ struct FVilaWorldBuild
 	{
 		Rng.seed(1337);
 		Static = UW->SpawnActor<AVilaWorldStatic>(AVilaWorldStatic::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams());
+		if (!Static)
+		{
+			UE_LOG(LogVila, Error, TEXT("WorldBuilder: falha ao criar o AVilaWorldStatic."));
+			return;
+		}
 		Static->Builder = &W;
 		W.StaticActor = Static;
 		USceneComponent* Root = Static->Root;
@@ -766,10 +773,10 @@ struct FVilaWorldBuild
 			const std::string T = vila::jstr(B, "type");
 			F = T == "shop" || T == "apartment" ? "brick" : (T == "garage" ? "concrete" : "plaster");
 		}
-		if (F == "brick") return {TEXT("brick"), Mix(WallCol, WHITE_C, 0.72)};
-		if (F == "concrete") return {TEXT("concrete"), Mix(WallCol, WHITE_C, 0.35)};
-		if (F == "siding") return {TEXT("siding"), WallCol};
-		return {TEXT("plaster"), WallCol};
+		if (F == "brick") return TPair<FString, FLinearColor>(TEXT("brick"), Mix(WallCol, WHITE_C, 0.72));
+		if (F == "concrete") return TPair<FString, FLinearColor>(TEXT("concrete"), Mix(WallCol, WHITE_C, 0.35));
+		if (F == "siding") return TPair<FString, FLinearColor>(TEXT("siding"), WallCol);
+		return TPair<FString, FLinearColor>(TEXT("plaster"), WallCol);
 	}
 
 	struct FOpening
@@ -822,7 +829,7 @@ struct FVilaWorldBuild
 
 		// Paredes
 		TMap<FString, TArray<FOpening>> Openings;
-		for (const TCHAR* S : {TEXT("n"), TEXT("s"), TEXT("e"), TEXT("w")}) Openings.Add(S);
+		for (const TCHAR* S : {TEXT("n"), TEXT("s"), TEXT("e"), TEXT("w")}) Openings.Add(FString(S));
 		for (const Json& Door : vila::jarr(B, "doors"))
 		{
 			const FString Side = FS(vila::jstr(Door, "side", "s"));
@@ -913,10 +920,10 @@ struct FVilaWorldBuild
 		double Cur = -Half;
 		for (const FCut& Cut : Cuts)
 		{
-			if (Cut.A > Cur) Segs.Add({Cur, Cut.A});
+			if (Cut.A > Cur) Segs.Emplace(Cur, Cut.A);
 			Cur = Cut.E;
 		}
-		if (Cur < Half) Segs.Add({Cur, Half});
+		if (Cur < Half) Segs.Emplace(Cur, Half);
 		for (int32 I = 0; I < Segs.Num(); ++I)
 		{
 			const double Mid = (Segs[I].Key + Segs[I].Value) * 0.5;
@@ -1354,7 +1361,7 @@ struct FVilaWorldBuild
 			vila::Rng PR(static_cast<uint64_t>(static_cast<int64>(Xf.O.X * 13.0 + Xf.O.Z * 7.0)));
 			const FVector WPos = CurrentBuildingOrigin + Xf * V3(0, 0.75, 0);
 			TArray<TPair<FVector, FVector>> Cl;
-			Cl.Add({WPos, V3(0.32, 0.4, 0.32)});
+			Cl.Emplace(WPos, V3(0.32, 0.4, 0.32));
 			W.Foliage->AddCanopy(WPos - V3(0, 0.4, 0), Cl, GC(0.28, 0.42, 0.18), PR, 26, 0.45f);
 			return FVector::ZeroVector;
 		}
@@ -1709,7 +1716,7 @@ struct FVilaWorldBuild
 			{
 				const FVector C = FMath::Lerp(A, E, (I + 0.5) / static_cast<double>(N + 1)) + V3(0, 0.75, 0);
 				TArray<TPair<FVector, FVector>> Cl;
-				Cl.Add({C, V3(0.55, 0.5, 0.45) * HR.randf_range(0.9, 1.15)});
+				Cl.Emplace(C, V3(0.55, 0.5, 0.45) * HR.randf_range(0.9, 1.15));
 				W.Foliage->AddCanopy(C - V3(0, 0.5, 0), Cl, Mix(GC(0.26, 0.36, 0.17), GC(0.33, 0.42, 0.2), HR.randf()), HR, 26, 0.55f);
 			}
 			add_collider((A + E) * 0.5 + V3(0, 0.55, 0), V3(Len, 1.1, 0.8), R2);
@@ -1734,14 +1741,14 @@ struct FVilaWorldBuild
 			Deco.add_tube(Pos + V3(0, 0.25, 0), Pos + V3(FMath::Cos(RA), -0.05, FMath::Sin(RA)) * 0.55 * Sc, 0.07 * Sc, Bark, 6, WoodOut);
 		}
 		TArray<TPair<FVector, FVector>> Clusters;
-		Clusters.Add({Top + V3(0, 1.4, 0) * Sc, V3(1.55, 1.2, 1.55) * Sc});
+		Clusters.Emplace(Top + V3(0, 1.4, 0) * Sc, V3(1.55, 1.2, 1.55) * Sc);
 		const int32 N = 5 + static_cast<int32>(TR.randi() % 3);
 		for (int32 I = 0; I < N; ++I)
 		{
 			const double A = TR.randf() * 0.5 + I * vila::TAU / N;
 			const FVector Off = V3(FMath::Cos(A), 0, FMath::Sin(A)) * TR.randf_range(1.0, 1.7) * Sc;
 			const FVector CPos = Top + Off + V3(0, TR.randf_range(0.2, 1.6) * Sc, 0);
-			Clusters.Add({CPos, V3(1.0, 0.8, 1.0) * Sc * TR.randf_range(0.8, 1.15)});
+			Clusters.Emplace(CPos, V3(1.0, 0.8, 1.0) * Sc * TR.randf_range(0.8, 1.15));
 			const FVector Mid = FMath::Lerp(Top, CPos, 0.55) + V3(0, 0.2, 0);
 			Deco.add_tube(Top - V3(0, 0.3, 0), Mid, 0.08 * Sc, Bark, 6, WoodOut);
 			Deco.add_tube(Mid, CPos, 0.045 * Sc, Bark, 5, WoodOut);
@@ -1850,7 +1857,7 @@ void UVilaWorldBuilder::UpdateStreetlightShadows(const FVector& ViewPoint, int32
 	TArray<TPair<double, int32>> Order;
 	for (int32 I = 0; I < Streetlights.Num(); ++I)
 		if (Streetlights[I] && Streetlights[I]->IsVisible())
-			Order.Add({FVector::DistSquared2D(Streetlights[I]->GetComponentLocation(), ViewPoint), I});
+			Order.Emplace(FVector::DistSquared2D(Streetlights[I]->GetComponentLocation(), ViewPoint), I);
 	Order.Sort([](const TPair<double, int32>& A, const TPair<double, int32>& B) { return A.Key < B.Key; });
 	TArray<bool> Want;
 	Want.Init(false, Streetlights.Num());

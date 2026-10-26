@@ -73,9 +73,6 @@ AVilaNPC::AVilaNPC()
 	MoveComp->GroundFriction = 8.f;
 	MoveComp->MaxWalkSpeed = 130.f;
 	MoveComp->MaxStepHeight = 35.f;
-	// Desvio local entre pedestres (o Godot deixava uns atravessarem os outros).
-	MoveComp->bUseRVOAvoidance = true;
-	MoveComp->AvoidanceConsiderationRadius = 150.f;
 
 	Humanoid = CreateDefaultSubobject<UVilaHumanoid>(TEXT("Humanoid"));
 	Humanoid->SetupAttachment(GetCapsuleComponent());
@@ -115,6 +112,11 @@ void AVilaNPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	vila::clock().time_advanced.disconnect(ClockConn);
 	if (UWorld* W = GetWorld()) W->GetTimerManager().ClearAllTimersForObject(this);
 	Super::EndPlay(EndPlayReason);
+}
+
+AVilaWorld* AVilaNPC::GetVilaWorld() const
+{
+	return VilaWorld.Get();
 }
 
 FString AVilaNPC::DisplayName() const
@@ -257,7 +259,7 @@ bool AVilaNPC::SpotData(const FString& Id, FVilaSpot& Out) const
 	// Pedestres passeando se espalham em volta do ponto em vez de empilhar no mesmo lugar.
 	if (Activity == TEXT("wander") && Out.BuildingId.IsEmpty() && !Out.bHidden)
 	{
-		const float A = FMath::FRand() * 2.f * PI;
+		const float A = FMath::FRand() * 2.f * UE_PI;
 		Out.Location += FVector(FMath::Cos(A), FMath::Sin(A), 0.f) * FMath::FRandRange(120.f, 260.f);
 		Out.Yaw = FMath::FRandRange(-180.f, 180.f);
 	}
@@ -422,6 +424,7 @@ void AVilaNPC::Tick(float DeltaSeconds)
 	if (DecideT <= 0.f)
 	{
 		DecideT = 0.5f;
+		RefreshMoveIgnores();
 		Decide();
 		UpdateLod();
 		if (State == TEXT("at_spot")) ProcessActivity(0.5f);
@@ -444,6 +447,27 @@ void AVilaNPC::Tick(float DeltaSeconds)
 			const FVector To = W->Player->FeetLocation() - FeetLocation();
 			if (!To.IsNearlyZero()) FaceYaw(To.Rotation().Yaw, FMath::Min(1.f, DeltaSeconds * 6.f));
 		}
+	}
+}
+
+// Godot: máscara de colisão do NPC = só o cenário (camada 1). Ele atravessa o jogador e os
+// outros NPCs, mas o jogador continua batendo nele (esbarrões). Os sweeps do NPC ignoram esses atores.
+void AVilaNPC::RefreshMoveIgnores()
+{
+	AVilaWorld* W = GetVilaWorld();
+	if (!W) return;
+	UCapsuleComponent* Cap = GetCapsuleComponent();
+	if (W->NPCs.Num() != IgnoredNpcCount)
+	{
+		IgnoredNpcCount = W->NPCs.Num();
+		for (const TPair<FString, TObjectPtr<AVilaNPC>>& KV : W->NPCs)
+			if (KV.Value && KV.Value.Get() != this) Cap->IgnoreActorWhenMoving(KV.Value.Get(), true);
+	}
+	AActor* P = W->Player.Get();
+	if (P && IgnoredPlayer.Get() != P)
+	{
+		Cap->IgnoreActorWhenMoving(P, true);
+		IgnoredPlayer = P;
 	}
 }
 

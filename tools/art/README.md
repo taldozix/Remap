@@ -24,6 +24,7 @@ cd mpfb2 && git sparse-checkout set --no-cone '/LICENSE*' '/src/mpfb/data/3dobjs
 | Texturas PBR | `blendenv/bin/python tools/art/make_textures.py [nome ...]` | `assets/textures/*_{albedo,normal,orm}.png`, `textures.json` |
 | Carros | `blendenv/bin/python tools/art/blender/make_cars.py [hatch sedan pickup van] [--preview]` | `assets/vehicles/car_*.glb` |
 | Personagens | `MPFB_DATA=mpfb2/src/mpfb/data blendenv/bin/python tools/art/blender/make_characters.py m f --skin --export` | `assets/characters/human_{m,f}.glb`, `skin_detail.png`, `skin_mask.png`, `eye.png` |
+| Exportação para o Unreal | `blendenv/bin/python tools/art/blender/export_unreal.py` | `unreal/ArtSource/{vehicles,characters}/…/*.glb`, `unreal/Content/Data/art/vehicles_layout.json` (depois rode `unreal/Scripts/build_content.py` no editor; ver `unreal/Scripts/README.md`) |
 | Opções de importação | `godot --headless --import` e depois `python3 tools/art/fix_imports.py` e `--import` de novo | `.import` com VRAM e mipmaps |
 
 Pré-visualização dos personagens:

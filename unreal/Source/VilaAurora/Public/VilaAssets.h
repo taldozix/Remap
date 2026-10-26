@@ -99,6 +99,7 @@ private:
 	T* LoadCached(const FString& Path);
 
 	UMaterialInterface* Fallback(const FLinearColor& Color);
+	float SetTileMeters(const FString& Set);
 
 	UPROPERTY() TObjectPtr<UStaticMesh> CubeMesh;
 	UPROPERTY() TObjectPtr<UStaticMesh> CylinderMesh;
@@ -113,6 +114,7 @@ private:
 	UPROPERTY() TMap<FString, TObjectPtr<UMaterialInterface>> Materials;
 
 	TMap<FName, float> Globals;
+	TMap<FString, float> TileCache;
 	vila::Json Layout;
 	bool bLayoutLoaded = false;
 	bool bHasContent = false;

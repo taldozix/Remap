@@ -486,11 +486,11 @@ void UVilaHumanoid::TickFallback(float Dt)
 {
 	if (!FbRoot || !FbPelvis || !FbTorso || !FbHead || !FbArmL || !FbArmR || !FbForeL || !FbForeR || !FbThighL || !FbThighR || !FbShinL || !FbShinR) return;
 	const float Rate = bElderly ? 0.8f : 1.f;
-	const float Two = 2.f * PI;
+	const float Two = 2.f * UE_PI;
 	if (Pose == TEXT("walk")) Phase += Dt * Two * FMath::Max(SpeedMs, 0.6f) / 1.4f;
 	else if (Pose == TEXT("run")) Phase += Dt * Two * FMath::Max(SpeedMs, 1.5f) / 2.4f;
 	else Phase += Dt * Two * 0.3f * Rate;
-	Phase = FMath::Fmod(Phase, 2000.f * PI);
+	Phase = FMath::Fmod(Phase, 2000.f * UE_PI);
 	const float P = Phase;
 	const float Sn = FMath::Sin(P);
 	const float Cs = FMath::Cos(P);
@@ -522,7 +522,7 @@ void UVilaHumanoid::TickFallback(float Dt)
 	else if (Pose == TEXT("work"))
 	{
 		Tg.ArmL = Tg.ArmR = 45;
-		Tg.ForeL = 40 + 15 * FMath::Sin(P * 9); Tg.ForeR = 40 + 15 * FMath::Sin(P * 9 + PI);
+		Tg.ForeL = 40 + 15 * FMath::Sin(P * 9); Tg.ForeR = 40 + 15 * FMath::Sin(P * 9 + UE_PI);
 		Tg.Torso = -8;
 	}
 	else if (Pose == TEXT("eat"))

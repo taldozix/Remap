@@ -15,6 +15,7 @@ namespace
 	const TCHAR* const CVPartNames[] = {
 		TEXT("Body"), TEXT("Details"), TEXT("Door_FL"), TEXT("Handles"), TEXT("Interior"), TEXT("Lights"),
 		TEXT("Mirror_L"), TEXT("Mirror_R"), TEXT("Wheel_FL"), TEXT("Wheel_FR"), TEXT("Wheel_RL"), TEXT("Wheel_RR"), TEXT("Wipers"),
+		TEXT("BedDetail"),  // só a picape tem; nos outros modelos o asset não existe e é pulado
 	};
 
 	// CarVisual.MODEL_LENGTH / WHEEL_RADIUS (m): usados se o layout não trouxer os valores.
@@ -171,11 +172,12 @@ bool UVilaCarVisual::BuildImported(UVilaAssets* Assets)
 
 	const vila::Json& Layout = vila::jobj(Assets->VehicleLayout(), VilaConv::U(Kind));
 	const vila::Json& PartsJ = vila::jobj(Layout, "parts");
-	const float LayoutLen = static_cast<float>(vila::jnum(Layout, "length", CVModelLengthM(Kind) * 100.0));
-	// Ajusta o modelo ao comprimento dos dados (como model.scale no Godot).
+	// Ajusta o modelo ao comprimento dos dados como o Godot (model.scale = size.z / MODEL_LENGTH):
+	// usa o comprimento nominal do modelo (nominal_length) e só cai no medido se faltar.
+	const float LayoutLen = static_cast<float>(vila::jnum(Layout, "nominal_length", vila::jnum(Layout, "length", CVModelLengthM(Kind) * 100.0)));
 	const float S = LayoutLen > 1.f ? LengthCm / LayoutLen : 1.f;
 	Model->SetRelativeScale3D(FVector(S));
-	WheelRadius = static_cast<float>(vila::jnum(Layout, "wheel_radius", CVModelWheelRadiusM(Kind) * 100.0)) * S;
+	WheelRadius = static_cast<float>(vila::jnum(Layout, "nominal_wheel_radius", vila::jnum(Layout, "wheel_radius", CVModelWheelRadiusM(Kind) * 100.0))) * S;
 	bRealEmissive = true;
 
 	for (const TCHAR* Part : CVPartNames)

@@ -391,6 +391,8 @@ void SVilaTabs::Construct(const FArguments& InArgs)
 void SVilaTabs::AddTab(const FString& Title, TSharedRef<SWidget> Content)
 {
 	const int32 Index = Count++;
+	const FSlateBrush* Sel = VilaUI::PanelBrush(VilaUI::BgLight(), 6.f);
+	const FSlateBrush* Unsel = VilaUI::PanelBrush(VilaUI::SRGB(0.1f, 0.11f, 0.13f, 0.9f), 6.f);
 	Header->AddSlot().AutoWidth().Padding(FMargin(0.f, 0.f, 4.f, 0.f))
 	[
 		SNew(SButton)
@@ -404,10 +406,7 @@ void SVilaTabs::AddTab(const FString& Title, TSharedRef<SWidget> Content)
 		})
 		[
 			SNew(SBorder)
-			.BorderImage_Lambda([this, Index]()
-			{
-				return Index == Current ? VilaUI::PanelBrush(VilaUI::BgLight(), 6.f) : VilaUI::PanelBrush(VilaUI::SRGB(0.1f, 0.11f, 0.13f, 0.9f), 6.f);
-			})
+			.BorderImage_Lambda([this, Index, Sel, Unsel]() { return Index == Current ? Sel : Unsel; })
 			.Padding(VilaUI::PanelMargin(10.f))
 			[
 				SNew(STextBlock)

@@ -146,7 +146,8 @@ UMaterialInterface* UVilaAssets::Surface(const FString& Key, const FLinearColor&
 	const FSurfaceDef Direct = {*Key, -1, 0.1f, false, false, 1, 0, FLinearColor::White};
 	if (!Def) Def = &Direct;
 	const FString Set = Def->Set;
-	const FLinearColor FinalTint = Def->Tint * Tint;
+	// As tintas da tabela são Color() do Godot (sRGB, uniform source_color): converte para linear.
+	const FLinearColor FinalTint = FLinearColor::FromSRGBColor(Def->Tint.ToFColor(false)) * Tint;
 
 	UMaterialInterface* Parent = Master(TEXT("M_Surface"));
 	UTexture2D* Albedo = Texture(FString::Printf(TEXT("/Game/Vila/Textures/T_%s_A"), *Set));
@@ -160,7 +161,7 @@ UMaterialInterface* UVilaAssets::Surface(const FString& Key, const FLinearColor&
 	MID->SetTextureParameterValue(TEXT("Albedo"), Albedo);
 	if (UTexture2D* N = Texture(FString::Printf(TEXT("/Game/Vila/Textures/T_%s_N"), *Set))) MID->SetTextureParameterValue(TEXT("Normal"), N);
 	if (UTexture2D* O = Texture(FString::Printf(TEXT("/Game/Vila/Textures/T_%s_ORM"), *Set))) MID->SetTextureParameterValue(TEXT("ORM"), O);
-	if (Def->Tile > 0.f) MID->SetScalarParameterValue(TEXT("TileMeters"), Def->Tile);  // senão o MI_<set> já traz o tile_m
+	MID->SetScalarParameterValue(TEXT("TileMeters"), Def->Tile > 0.f ? Def->Tile : SetTileMeters(Set));
 	MID->SetVectorParameterValue(TEXT("Tint"), FinalTint);
 	MID->SetScalarParameterValue(TEXT("Macro"), Def->Macro);
 	MID->SetScalarParameterValue(TEXT("Detile"), Def->bDetile ? 1.f : 0.f);
@@ -168,16 +169,19 @@ UMaterialInterface* UVilaAssets::Surface(const FString& Key, const FLinearColor&
 	MID->SetScalarParameterValue(TEXT("Outdoor"), Def->Outdoor);
 	MID->SetScalarParameterValue(TEXT("RoughBias"), Def->Rough);
 	MID->SetScalarParameterValue(TEXT("UseCustomTint"), bInstanceTint ? 1.f : 0.f);
-	// O tile_m de cada conjunto vem do MI_<set> criado pelo build_content.py; aqui só
-	// sobrescrevemos quando a definição pede um tile próprio.
-	if (Def->Tile <= 0.f)
-		if (UMaterialInterface* SetMI = LoadCached<UMaterialInterface>(FString::Printf(TEXT("/Game/Vila/Materials/Surfaces/MI_%s.MI_%s"), *Set, *Set)))
-		{
-			float Tile = 1.f;
-			if (SetMI->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("TileMeters")), Tile)) MID->SetScalarParameterValue(TEXT("TileMeters"), Tile);
-		}
 	Materials.Add(CacheKey, MID);
 	return MID;
+}
+
+float UVilaAssets::SetTileMeters(const FString& Set)
+{
+	// tile_m de assets/textures/textures.json, gravado pelo build_content.py no MI_<set>.
+	if (const float* Cached = TileCache.Find(Set)) return *Cached;
+	float Tile = 1.f;
+	if (UMaterialInterface* SetMI = LoadCached<UMaterialInterface>(FString::Printf(TEXT("/Game/Vila/Materials/Surfaces/MI_%s.MI_%s"), *Set, *Set)))
+		SetMI->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("TileMeters")), Tile);
+	TileCache.Add(Set, Tile);
+	return Tile;
 }
 
 UMaterialInterface* UVilaAssets::SurfaceLocal(const FString& Set, const FLinearColor& Tint, float Scale)
@@ -197,6 +201,7 @@ UMaterialInterface* UVilaAssets::SurfaceLocal(const FString& Set, const FLinearC
 	if (UTexture2D* N = Texture(FString::Printf(TEXT("/Game/Vila/Textures/T_%s_N"), *Set))) MID->SetTextureParameterValue(TEXT("Normal"), N);
 	if (UTexture2D* O = Texture(FString::Printf(TEXT("/Game/Vila/Textures/T_%s_ORM"), *Set))) MID->SetTextureParameterValue(TEXT("ORM"), O);
 	MID->SetVectorParameterValue(TEXT("Tint"), Tint);
+	MID->SetScalarParameterValue(TEXT("TileMeters"), SetTileMeters(Set));
 	MID->SetScalarParameterValue(TEXT("Scale"), Scale);
 	Materials.Add(CacheKey, MID);
 	return MID;

@@ -59,7 +59,7 @@ namespace
 	float Wrap(float T, const UAnimSequence* Seq)
 	{
 		const float Len = Seq ? Seq->GetPlayLength() : 0.f;
-		if (Len <= KINDA_SMALL_NUMBER) return 0.f;
+		if (Len <= UE_KINDA_SMALL_NUMBER) return 0.f;
 		T = FMath::Fmod(T, Len);
 		return T < 0.f ? T + Len : T;
 	}

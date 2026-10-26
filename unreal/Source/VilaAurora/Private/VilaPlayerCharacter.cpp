@@ -257,7 +257,7 @@ void AVilaPlayerCharacter::ScanInteractables()
 	{
 		if (State == TEXT("driving") && Vehicle)
 		{
-			SetFocusTarget(Vehicle, false);
+			SetFocusTarget(Vehicle.Get(), false);
 			FocusActions = Vehicle->GetDriverActions(this);
 		}
 		else
@@ -268,7 +268,7 @@ void AVilaPlayerCharacter::ScanInteractables()
 	}
 	if (State == TEXT("sitting") || State == TEXT("lying"))
 	{
-		SetFocusTarget(Seat, false);
+		SetFocusTarget(Seat.Get(), false);
 		FocusActions = SeatedActions();
 		return;
 	}

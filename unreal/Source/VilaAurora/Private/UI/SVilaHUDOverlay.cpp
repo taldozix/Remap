@@ -181,7 +181,7 @@ private:
 
 namespace
 {
-	void DrawText(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& Pos, const FString& Text,
+	void PaintText(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& Pos, const FString& Text,
 		const FSlateFontInfo& Font, const FLinearColor& Color, bool bShadow = true)
 	{
 		if (bShadow)
@@ -324,7 +324,7 @@ void SVilaWorldLayer::PaintBubbles(AVilaWorld* World, APlayerController* PC, con
 		for (const FString& L : B.Lines)
 		{
 			const auto Sz = Measure->Measure(L, Font);
-			DrawText(Out, Layer + 1, G, FVector2D(P.X - Sz.X * 0.5, Y), L, Font, FLinearColor(1.f, 1.f, 1.f, Alpha), false);
+			PaintText(Out, Layer + 1, G, FVector2D(P.X - Sz.X * 0.5, Y), L, Font, FLinearColor(1.f, 1.f, 1.f, Alpha), false);
 			Y += Sz.Y;
 		}
 	}
@@ -357,7 +357,7 @@ void SVilaWorldLayer::PaintMarkers(AVilaWorld* World, APlayerController* PC, con
 			const FVector2D C = Sp + FVector2D(0.0, Bob);
 			FillConvex(Out, Layer, G, {C + FVector2D(0, -12), C + FVector2D(9, 0), C + FVector2D(0, 12), C + FVector2D(-9, 0)}, Col);
 			const FString Txt = Labels[i].IsEmpty() ? FString::Printf(TEXT("%dm"), Dist) : FString::Printf(TEXT("%s · %dm"), *Labels[i], Dist);
-			DrawText(Out, Layer + 1, G, C + FVector2D(14.0, -10.0), Txt, VilaUI::Font(15), Col);
+			PaintText(Out, Layer + 1, G, C + FVector2D(14.0, -10.0), Txt, VilaUI::Font(15), Col);
 		}
 		else
 		{
@@ -380,7 +380,7 @@ void SVilaWorldLayer::PaintMarkers(AVilaWorld* World, APlayerController* PC, con
 			const auto Rot = [Ang](const FVector2D& V) { return FVector2D(V.X * FMath::Cos(Ang) - V.Y * FMath::Sin(Ang), V.X * FMath::Sin(Ang) + V.Y * FMath::Cos(Ang)); };
 			FillConvex(Out, Layer, G, {Edge + Rot(FVector2D(16, 0)), Edge + Rot(FVector2D(-8, 9)), Edge + Rot(FVector2D(-8, -9))}, Col);
 			const FString Txt = Labels[i].IsEmpty() ? FString::Printf(TEXT("%dm"), Dist) : FString::Printf(TEXT("%s %dm"), *Labels[i], Dist);
-			DrawText(Out, Layer + 1, G, Edge + FVector2D(-30.0, 12.0), Txt, VilaUI::Font(14), Col);
+			PaintText(Out, Layer + 1, G, Edge + FVector2D(-30.0, 12.0), Txt, VilaUI::Font(14), Col);
 		}
 	}
 }
@@ -566,7 +566,7 @@ void SVilaHUDOverlay::RebuildHUD()
 					+ SVerticalBox::Slot().AutoHeight()[SAssignNew(VehicleText, STextBlock).Font(Font(17)).ColorAndOpacity(FSlateColor(TextColor()))]
 					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 4.f, 0.f, 0.f))
 					[
-						Bar(TAttribute<TOptional<float>>::CreateLambda([this]() { return TOptional<float>(FuelValue); }), FSlateColor(Hex("#e0b050")), 220.f)
+						Bar(TAttribute<TOptional<float>>::CreateLambda([this]() { return TOptional<float>(FuelValue); }), FSlateColor(VilaUI::Hex("#e0b050")), 220.f)
 					])
 			]
 		];
@@ -700,15 +700,15 @@ void SVilaHUDOverlay::RefreshHUD()
 	// Moodles
 	{
 		TArray<TPair<FString, FLinearColor>> Chips;
-		const FLinearColor Orange = Hex("#f08a3a");
+		const FLinearColor Orange = VilaUI::Hex("#f08a3a");
 		for (const vila::Json& M : P.needs.moodles())
 		{
 			const int32 Lvl = FMath::Clamp(vila::jint(M, "level") - 1, 0, 2);
 			const FLinearColor Col = Lvl == 0 ? Warn() : Lvl == 1 ? Orange : Bad();
-			Chips.Add({Tr(vila::jstr(M, "label")), Col});
+			Chips.Emplace(Tr(vila::jstr(M, "label")), Col);
 		}
-		if (P.is_overloaded()) Chips.Add({T("Sobrecarregado"), Orange});
-		if (G.property.total_debt() > 0) Chips.Add({F("Aluguel atrasado: R$ %d", {G.property.total_debt()}), Bad()});
+		if (P.is_overloaded()) Chips.Emplace(T("Sobrecarregado"), Orange);
+		if (G.property.total_debt() > 0) Chips.Emplace(F("Aluguel atrasado: R$ %d", {G.property.total_debt()}), Bad());
 		FString Key;
 		for (const auto& C : Chips) Key += C.Key + C.Value.ToString();
 		if (Key != LastMoodleKey)
@@ -751,11 +751,10 @@ void SVilaHUDOverlay::RefreshHUD()
 	VehicleBox->SetVisibility(bDriving ? EVisibility::HitTestInvisible : EVisibility::Collapsed);
 	if (bDriving)
 	{
-		const vila::Json& VS = vila::jobj(G.world_state.vehicles, U(Veh->VehicleId));
 		const int32 Kmh = static_cast<int32>(FMath::Abs(Veh->Speed) / 100.f * 3.6f);
-		VehicleText->SetText(FText::FromString(FString::Printf(TEXT("%s\n%d km/h · %s %d%%"), *Veh->DisplayName(), Kmh, *T("Dano"), vila::jint(VS, "damage"))));
+		VehicleText->SetText(FText::FromString(FString::Printf(TEXT("%s\n%d km/h · %s %d%%"), *Veh->DisplayName(), Kmh, *T("Dano"), static_cast<int32>(Veh->Damage))));
 		const float Cap = Veh->FuelCapacity();
-		FuelValue = Cap > 0.f ? FMath::Clamp(static_cast<float>(vila::jnum(VS, "fuel")) / Cap, 0.f, 1.f) : 0.f;
+		FuelValue = Cap > 0.f ? FMath::Clamp(Veh->Fuel / Cap, 0.f, 1.f) : 0.f;
 	}
 
 	// Diagnóstico
@@ -789,12 +788,12 @@ void SVilaHUDOverlay::RefreshJob()
 	Lines.Add({FSeg(T("TURNO NO BRASA"), Accent()), FSeg(TEXT(" — ") + S(G.job.rank_title()), Tx)});
 	Lines.Add({FSeg(F("Trabalhado: %d min · Pedidos: %d · Gorjetas: R$ %d",
 		{static_cast<int>(vila::jnum(G.job.shift, "minutes")), vila::jint(G.job.shift, "ok"), vila::jint(G.job.shift, "tips")}), Tx)});
-	if (G.job.orders.empty()) Lines.Add({FSeg(T("Aguardando clientes..."), Hex("#9a9a9a"))});
+	if (G.job.orders.empty()) Lines.Add({FSeg(T("Aguardando clientes..."), VilaUI::Hex("#9a9a9a"))});
 	for (const vila::Json& O : G.job.orders)
 	{
 		const double Max = vila::jnum(O, "max_patience", 1.0);
 		const double Frac = Max > 0.0 ? vila::jnum(O, "patience") / Max : 0.0;
-		const FLinearColor Col = Frac > 0.5 ? Hex("#7fd17f") : Frac > 0.25 ? Hex("#f2c14e") : Hex("#ef6b5b");
+		const FLinearColor Col = Frac > 0.5 ? VilaUI::Hex("#7fd17f") : Frac > 0.25 ? VilaUI::Hex("#f2c14e") : VilaUI::Hex("#ef6b5b");
 		Lines.Add({FSeg(FString::Printf(TEXT("#%d"), vila::jint(O, "id")), Col),
 			FSeg(TEXT(" ") + S(vila::DriveThruJob::order_text(vila::jobj(O, "remaining"))), Tx),
 			FSeg(FString::Printf(TEXT("  (%d%%)"), static_cast<int>(Frac * 100.0)), Col)});
@@ -808,9 +807,9 @@ void SVilaHUDOverlay::RefreshJob()
 		if (St == "cooking")
 			StationLine.Add(FSeg(FString::Printf(TEXT("%s: %d%%  "), *Lbl, static_cast<int>(G.job.station_progress(It.key()) * 100.0)), Tx));
 		else if (St == "ready")
-			StationLine.Add(FSeg(FString::Printf(TEXT("%s: %s  "), *Lbl, *T("PRONTO")), Hex("#7fd17f")));
+			StationLine.Add(FSeg(FString::Printf(TEXT("%s: %s  "), *Lbl, *T("PRONTO")), VilaUI::Hex("#7fd17f")));
 		else if (St == "burnt")
-			StationLine.Add(FSeg(FString::Printf(TEXT("%s: %s  "), *Lbl, *T("QUEIMOU")), Hex("#ef6b5b")));
+			StationLine.Add(FSeg(FString::Printf(TEXT("%s: %s  "), *Lbl, *T("QUEIMOU")), VilaUI::Hex("#ef6b5b")));
 	}
 	if (StationLine.Num() > 0) Lines.Add(StationLine);
 	TArray<FString> Hands;

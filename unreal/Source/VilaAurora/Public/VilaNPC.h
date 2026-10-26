@@ -81,7 +81,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	AVilaWorld* GetVilaWorld() const { return VilaWorld.Get(); }
+	AVilaWorld* GetVilaWorld() const;
 	vila::Json ScheduleEntry() const;
 	vila::Json EffectiveEntry() const;
 	FString PlaceFor(const vila::Json& E) const;
@@ -93,6 +93,7 @@ private:
 	void LieAtSpot();
 	void SetNpcHidden(bool bHide);
 	void UpdateLod();
+	void RefreshMoveIgnores();
 	void StepMove(float Dt);
 	void ProcessActivity(float Dt);
 	void ReactToWorld();
@@ -130,4 +131,6 @@ private:
 	float BarkT = 0.f;
 	bool bSetupDone = false;
 	int32 ClockConn = 0;
+	int32 IgnoredNpcCount = -1;
+	TWeakObjectPtr<AActor> IgnoredPlayer;
 };

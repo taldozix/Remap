@@ -414,6 +414,12 @@ void AVilaHUD::Fade(bool bToBlack) { FadeTarget = bToBlack ? 1.f : 0.f; }
 void AVilaHUD::ShowMainMenu()
 {
 	if (!Overlay.IsValid()) return;
+	// O AVilaWorld (fluxo Menu) e o BeginPlay deste HUD pedem o menu; só o primeiro cria.
+	if (IsMenuShown())
+	{
+		SetUIMode(true);
+		return;
+	}
 	CloseAll();
 	TSharedRef<SVilaMainMenu> Menu = SNew(SVilaMainMenu).HUD(TWeakObjectPtr<AVilaHUD>(this));
 	Overlay->SetMenu(Menu);

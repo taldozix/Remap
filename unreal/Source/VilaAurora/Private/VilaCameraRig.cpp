@@ -100,11 +100,11 @@ void AVilaCameraRig::SetMenuOrbit(const FVector& Center, float RadiusCm)
 
 AActor* AVilaCameraRig::ResolveFocus(FVector& OutFocus) const
 {
-	AActor* T = Target;
+	AActor* T = Target.Get();
 	if (!IsValid(T)) return nullptr;
 	// O jogador dirigindo: segue o veículo (com antecipação na direção do movimento).
 	if (const AVilaPlayerCharacter* P = Cast<AVilaPlayerCharacter>(T))
-		if (P->State == TEXT("driving") && IsValid(P->Vehicle)) T = P->Vehicle;
+		if (P->State == TEXT("driving") && IsValid(P->Vehicle.Get())) T = P->Vehicle.Get();
 
 	if (const AVilaVehicle* V = Cast<AVilaVehicle>(T))
 	{

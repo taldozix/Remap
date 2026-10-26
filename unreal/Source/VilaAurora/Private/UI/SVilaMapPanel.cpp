@@ -87,8 +87,8 @@ int32 SVilaMapCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	const FGeometry& G = AllottedGeometry;
 	FMapXf X;
 	X.Size = G.GetLocalSize();
-	const vila::Json& M = vila::data().map();
-	const vila::Json& B = vila::jarr(M, "bounds");
+	const vila::Json& Map = vila::data().map();
+	const vila::Json& B = vila::jarr(Map, "bounds");
 	if (B.size() >= 4)
 	{
 		X.B0 = vila::to_num(B[0]);
@@ -99,7 +99,7 @@ int32 SVilaMapCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	int32 L = LayerId;
 	Box(OutDrawElements, L, G, FVector2D::ZeroVector, X.Size, VilaUI::SRGB(0.22f, 0.32f, 0.18f));
 	++L;
-	for (const vila::Json& A : vila::jarr(M, "areas"))
+	for (const vila::Json& A : vila::jarr(Map, "areas"))
 	{
 		const vila::Json& R = vila::jarr(A, "rect");
 		if (R.size() < 4) continue;
@@ -113,10 +113,10 @@ int32 SVilaMapCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	if (World && World->Builder)
 	{
 		for (const FBox2D& R : World->Builder->SidewalkRects)
-			Box(OutDrawElements, L, G, X.W2M(R.Min.X / M_UE(), R.Min.Y / M_UE()), X.W2M(R.Max.X / M_UE(), R.Max.Y / M_UE()), VilaUI::SRGB(0.62f, 0.6f, 0.56f));
+			Box(OutDrawElements, L, G, X.W2M(R.Min.X / VilaConv::M, R.Min.Y / VilaConv::M), X.W2M(R.Max.X / VilaConv::M, R.Max.Y / VilaConv::M), VilaUI::SRGB(0.62f, 0.6f, 0.56f));
 	}
 	++L;
-	const vila::Json& Roads = vila::jobj(M, "roads");
+	const vila::Json& Roads = vila::jobj(Map, "roads");
 	const vila::Json& Xs = vila::jarr(Roads, "xs");
 	const vila::Json& Zs = vila::jarr(Roads, "zs");
 	const double Hw = vila::jnum(Roads, "width", 9.0) * 0.5;
@@ -141,7 +141,7 @@ int32 SVilaMapCanvas::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 	}
 	else
 	{
-		for (const vila::Json& Bd : vila::jarr(M, "buildings")) Defs.Add(&Bd);
+		for (const vila::Json& Bd : vila::jarr(Map, "buildings")) Defs.Add(&Bd);
 	}
 	const FSlateFontInfo NameFont = VilaUI::Font(11);
 	for (const vila::Json* D : Defs)
