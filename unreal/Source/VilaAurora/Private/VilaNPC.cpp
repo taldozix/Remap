@@ -58,7 +58,9 @@ AVilaNPC::AVilaNPC()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
-	AutoPossessAI = EAutoPossessAI::Spawned;
+	// O APawn cria o AAIController no PostInitializeComponents (FinishSpawning). "Spawned" sozinho
+	// falha se o NPC nascer enquanto UWorld::bStartup ainda é verdadeiro; este cobre os dois casos.
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AAIController::StaticClass();
 
 	GetCapsuleComponent()->InitCapsuleSize(NpcCapsuleRadius, NpcCapsuleHalfHeight);

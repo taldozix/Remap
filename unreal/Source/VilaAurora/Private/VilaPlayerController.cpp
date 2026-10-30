@@ -81,8 +81,14 @@ void AVilaPlayerController::SetupInputComponent()
 		UE_LOG(LogVila, Error, TEXT("InputComponent não é UEnhancedInputComponent (ver Config/DefaultInput.ini)."));
 		return;
 	}
-	for (const TPair<FString, TObjectPtr<UInputAction>>& KV : Actions)
-		EIC->BindAction(KV.Value.Get(), ETriggerEvent::Started, this, &AVilaPlayerController::OnActionStarted);
+	// O InputComponent do controller é criado uma vez só: não duplica as ligações (cada tecla
+	// dispararia HandlePressed duas vezes) se o SetupInputComponent rodar de novo.
+	if (!bBound)
+	{
+		for (const TPair<FString, TObjectPtr<UInputAction>>& KV : Actions)
+			EIC->BindAction(KV.Value.Get(), ETriggerEvent::Started, this, &AVilaPlayerController::OnActionStarted);
+		bBound = true;
+	}
 	bMappingDirty = true;
 }
 

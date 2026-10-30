@@ -5,6 +5,7 @@
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/Scene.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "VilaPlayerCharacter.h"
 #include "VilaVehicle.h"

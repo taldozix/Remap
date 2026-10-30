@@ -9,6 +9,15 @@
 
 #include "VilaAnimInstance.generated.h"
 
+// 1: crossfade pelo proxy nativo (FVilaAnimProxy, API de FAnimInstanceProxy::Evaluate,
+//    UAnimSequence::GetAnimationPose e FAnimationRuntime::BlendTwoPosesTogether, como o
+//    FAnimNode_TwoWayBlend do motor). 0: o UVilaHumanoid usa PlayAnimation (nó único, troca
+//    seca de pose) e o proxy nem é compilado. Fonte única do valor (VilaAnimInstance.cpp e
+//    VilaHumanoid.cpp leem daqui); pode ser forçado no Build.cs: PublicDefinitions.Add("VILA_ANIM_PROXY=0").
+#ifndef VILA_ANIM_PROXY
+#define VILA_ANIM_PROXY 1
+#endif
+
 class UAnimSequence;
 struct FAnimInstanceProxy;
 

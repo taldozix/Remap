@@ -13,9 +13,10 @@
 #include "VilaAurora.h"
 #include "VilaConv.h"
 
+// VILA_ANIM_PROXY (definido em VilaAnimInstance.h, fonte única do valor):
 // 1: crossfade pelo UVilaAnimInstance (proxy nativo). 0: PlayAnimation por pose, sem blend.
 #ifndef VILA_ANIM_PROXY
-#define VILA_ANIM_PROXY 1
+#error "VILA_ANIM_PROXY deve vir de VilaAnimInstance.h"
 #endif
 
 using namespace VilaConv;

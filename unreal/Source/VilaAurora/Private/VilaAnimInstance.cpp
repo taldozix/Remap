@@ -1,15 +1,17 @@
 #include "VilaAnimInstance.h"
 
-#include "Animation/AnimInstanceProxy.h"
-#include "Animation/AnimNodeBase.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimationAsset.h"
-#include "Animation/AnimationPoseData.h"
 #include "Animation/Skeleton.h"
-#include "AnimationRuntime.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "VilaAurora.h"
+
+#if VILA_ANIM_PROXY
+#include "Animation/AnimInstanceProxy.h"
+#include "Animation/AnimNodeBase.h"
+#include "Animation/AnimationPoseData.h"
+#include "AnimationRuntime.h"
 
 namespace
 {
@@ -44,6 +46,7 @@ namespace
 				Sample(Cur, CurTime, Output);
 				return true;
 			}
+			// Mesmo padrão do FAnimNode_TwoWayBlend: poses novas a partir do contexto de saída.
 			FPoseContext PoseA(Output);
 			FPoseContext PoseB(Output);
 			Sample(Cur, CurTime, PoseA);
@@ -55,10 +58,14 @@ namespace
 			return true;
 		}
 	};
+}
+#endif  // VILA_ANIM_PROXY
 
+namespace
+{
 	float AnimWrapTime(float T, const UAnimSequence* Seq)
 	{
-		const float Len = Seq ? Seq->GetPlayLength() : 0.f;
+		const float Len = Seq ? static_cast<float>(Seq->GetPlayLength()) : 0.f;
 		if (Len <= UE_KINDA_SMALL_NUMBER) return 0.f;
 		T = FMath::Fmod(T, Len);
 		return T < 0.f ? T + Len : T;
@@ -67,12 +74,20 @@ namespace
 
 FAnimInstanceProxy* UVilaAnimInstance::CreateAnimInstanceProxy()
 {
+#if VILA_ANIM_PROXY
 	return new FVilaAnimProxy(this);
+#else
+	return Super::CreateAnimInstanceProxy();
+#endif
 }
 
 void UVilaAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy)
 {
+#if VILA_ANIM_PROXY
 	delete static_cast<FVilaAnimProxy*>(InProxy);
+#else
+	Super::DestroyAnimInstanceProxy(InProxy);
+#endif
 }
 
 void UVilaAnimInstance::PlayPose(UAnimSequence* Seq, float BlendTime, float StartTime)
@@ -119,10 +134,12 @@ void UVilaAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		if (Alpha >= 1.f) Previous = nullptr;
 	}
 
+#if VILA_ANIM_PROXY
 	FVilaAnimProxy& Proxy = GetProxyOnGameThread<FVilaAnimProxy>();
 	Proxy.Cur = Current;
 	Proxy.Prev = Previous;
 	Proxy.CurTime = CurTime;
 	Proxy.PrevTime = PrevTime;
 	Proxy.Alpha = Alpha;
+#endif
 }
