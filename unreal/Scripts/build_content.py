@@ -7,8 +7,14 @@ Uso (ver Scripts/README.md):
   Etapas: textures, mpc, materials, surfaces, vehicles, characters, level (padrão: todas, nessa ordem).
   --force refaz o que já existe (materiais e instâncias são reaproveitados e reescritos, para não
   quebrar referências; malhas e personagens são reimportados).
+  --import-task usa só o AssetImportTask para os .glb (sem o InterchangeManager; ver import_file).
 
 Idempotente: sem --force, cada asset que já existe é pulado.
+
+Linha de comando (-run=pythonscript): o editor sobe sem viewport. O registro de assets é
+esperado no início (wait_for_completion), a compilação de shaders continua assíncrona (os
+materiais são salvos antes de compilar; erros de HLSL só aparecem ao abrir o editor) e a etapa
+level depende do LevelEditorSubsystem, que pode falhar sem a interface: rode-a pelo editor.
 
 Entradas (relativas ao repositório):
   assets/textures/<set>_{albedo,normal,orm}.png + textures.json (tile_m)
@@ -59,12 +65,18 @@ MATERIAL_PARAMS = {
     "M_Eye": {"t": {"Albedo": "sRGB (eye.png)"}, "s": {"Roughness": 0.15}, "v": {"Color": (1, 1, 1, 1)}},
     "M_Leaf": {"t": {"LeafTex": "sRGB + alfa (ArtSource/textures/leaf.png)"}, "s": {"WindStrength": 0.07},
                "v": {"Color": (1, 1, 1, 1)},
-               "notes": "Vento = MPC Wind; afinamento da copa entre câmera e MPC Focus (w=1 liga)."},
+               "notes": "Vento = MPC Wind; afinamento da copa entre câmera e MPC Focus (w=1 liga). Cor * "
+                        "PerInstanceCustomData 0..2 (padrão 1): UVilaNature passa o tom da copa por instância."},
     "M_Grass": {"s": {"WindStrength": 0.18, "FadeStart": 6200.0, "FadeEnd": 7000.0},
                 "v": {"RootColor": (0.0068, 0.0116, 0.0035, 1), "TipColor": (0.06, 0.095, 0.018, 1), "Color": (1, 1, 1, 1)},
-                "notes": "UV0.y = 0 na raiz e 1 na ponta (como no Godot)."},
+                "notes": "UV0.y = 0 na raiz e 1 na ponta (como no Godot). Cor * PerInstanceCustomData 0..2 "
+                         "(padrão 1): UVilaGrass grava tom/secura de cada tufo (o COLOR de instância do Godot)."},
     "M_Water": {"s": {"Opacity": 0.85, "Roughness": 0.05, "Metallic": 0.3, "Ripple": 0.15}, "v": {"Color": (0.022, 0.055, 0.073, 1)}},
-    "M_Windows": {"s": {"Intensity": 1.4, "NightDriven": 1.0, "Roughness": 0.1, "Metallic": 0.3},
+    # Intensity começa em 0 (emission_energy_multiplier do Mat.windows()) e NightDriven em 0: o
+    # AVilaBuilding::SetNight já grava Intensity = noite * 1,4 no MID; com NightDriven = 1 a noite
+    # entraria duas vezes (noite²). NightDriven = 1 + Intensity = 1,4 serve para uma MI estática
+    # que acende sozinha pelo MPC. O escalar "Night" que o C++ também grava não existe aqui (no-op).
+    "M_Windows": {"s": {"Intensity": 0.0, "NightDriven": 0.0, "Roughness": 0.1, "Metallic": 0.3},
                   "v": {"Color": (0.15, 0.27, 0.39, 1), "EmissiveColor": (1.0, 0.57, 0.17, 1)},
                   "notes": "Emissivo = EmissiveColor * Intensity * (NightDriven ? MPC Night : 1)."},
     "M_Rain": {"s": {"Opacity": 0.35, "Speed": 2.5, "Tiling": 30.0}, "v": {"Color": (0.7, 0.75, 0.85, 1)}},
@@ -74,6 +86,24 @@ MATERIAL_PARAMS = {
 # MPC_Vila: escalares globais (UVilaAssets::SetGlobal) + vetor Focus (opcional, M_Leaf).
 MPC_SCALARS = {"Wetness": 0.0, "Night": 0.0, "Wind": 0.5, "Snow": 0.0}
 MPC_VECTORS = {"Focus": (0.0, 0.0, -100000.0, 0.0)}
+
+# O que o C++ grava por nome (Set*ParameterValue em MIDs; grep em Source/VilaAurora). Conferido
+# contra MATERIAL_PARAMS antes de tudo (check_contract) e contra os materiais compilados no fim
+# da etapa materials (validate_materials). Gravações que o C++ faz e que ficam sem efeito, de
+# propósito: "Color" no MID de M_Skin (UVilaHumanoid) e "Night" no de M_Windows (AVilaBuilding).
+CPP_PARAMS = {
+    "M_Surface": {"t": ["Albedo", "Normal", "ORM"], "v": ["Tint"],
+                  "s": ["TileMeters", "Macro", "Detile", "SwapTop", "Outdoor", "RoughBias", "UseCustomTint"]},
+    "M_SurfaceLocal": {"t": ["Albedo", "Normal", "ORM"], "v": ["Tint"], "s": ["TileMeters", "Scale"]},
+    "M_Color": {"v": ["Color"], "s": ["Roughness", "Metallic", "UseCustomTint"]},
+    "M_Emissive": {"v": ["Color"], "s": ["Intensity"]},       # UVilaCarVisual, semáforos, postes
+    "M_Glass": {"v": ["Tint"], "s": ["Opacity"]},
+    "M_CarPaint": {"v": ["Color"]},                            # UVilaCarVisual (slot "paint")
+    "M_Skin": {"v": ["SkinTone", "HairColor"], "s": ["HideBits"]},
+    "M_Cloth": {"v": ["Color"]}, "M_Hair": {"v": ["Color"]}, "M_Eye": {"v": ["Color"]},
+    "M_Windows": {"s": ["Intensity"]},
+}
+CPP_MPC = ["Wetness", "Night", "Wind"]                         # UVilaAssets::SetGlobal
 
 ANIMS = ["idle", "walk", "run", "talk", "work", "eat", "search", "sit", "lie", "knocked"]
 MODELS = ["hatch", "sedan", "pickup", "van"]
@@ -113,6 +143,8 @@ def _args():
 
 ARGS = _args()
 FORCE = "--force" in ARGS
+IMPORT_TASK_ONLY = "--import-task" in ARGS
+STEPS = ["textures", "mpc", "materials", "surfaces", "vehicles", "characters", "level"]
 ONLY = None
 for _a in ARGS:
     if _a.startswith("--only="):
@@ -195,10 +227,103 @@ def enum(owner, *names):
     raise AttributeError(f"{owner}: nenhum de {names}")
 
 
+def check_contract():
+    """Os nomes que o C++ grava precisam existir em MATERIAL_PARAMS / MPC (Python puro)."""
+    ok = True
+    for mat, kinds in CPP_PARAMS.items():
+        spec = MATERIAL_PARAMS.get(mat)
+        if spec is None:
+            error(f"contrato: {mat} usado pelo C++ e ausente de MATERIAL_PARAMS")
+            ok = False
+            continue
+        for kind, names in kinds.items():
+            missing = [n for n in names if n not in spec.get(kind, {})]
+            if missing:
+                error(f"contrato: {mat} sem {kind}:{missing}, que o C++ grava")
+                ok = False
+    missing = [n for n in CPP_MPC if n not in MPC_SCALARS]
+    if missing:
+        error(f"contrato: MPC_Vila sem {missing}")
+        ok = False
+    return ok
+
+
 # ============================================================================ importação
-def import_file(filename, dest_dir, dest_name=None, options=None, replace=True):
-    """Importa um arquivo com AssetImportTask (vai pelo Interchange no 5.5) e devolve a lista
-    de caminhos de assets criados."""
+def _list_dir(d):
+    if not EAL.does_directory_exist(d):
+        return []
+    return [str(p) for p in EAL.list_assets(d, recursive=True, include_folder=False)]
+
+
+_INTERCHANGE_STATE = {"ok": None}  # None = não testado; False = API ausente nesta versão
+
+
+def _import_interchange(filename, dest_dir, pipeline):
+    """Caminho documentado do Interchange: InterchangeManager.import_asset com o pipeline em
+    ImportAssetParameters.override_pipelines (SoftObjectPath do objeto transitório). O import_asset
+    do 5.1+ espera terminar (ImportAssetAsync é o assíncrono). Devolve True se rodou."""
+    if _INTERCHANGE_STATE["ok"] is False:
+        return False
+    try:
+        mgr = unreal.InterchangeManager.get_interchange_manager_scripted()
+        source = unreal.InterchangeManager.create_source_data(filename)
+        params = unreal.ImportAssetParameters()
+    except Exception as e:
+        _INTERCHANGE_STATE["ok"] = False
+        warn(f"InterchangeManager indisponível ({e}); usando AssetImportTask")
+        return False
+    setp(params, "is_automated", True, True)
+    setp(params, "replace_existing", True, True)
+    attached = False
+    # override_pipelines é Array[SoftObjectPath] no 5.1-5.5; aceita o objeto se mudar de tipo
+    for value in (lambda: unreal.SoftObjectPath(pipeline.get_path_name()), lambda: pipeline):
+        try:
+            params.set_editor_property("override_pipelines", [value()])
+            if len(params.get_editor_property("override_pipelines")) == 1:
+                attached = True
+                break
+        except Exception:
+            continue
+    if not attached:
+        _INTERCHANGE_STATE["ok"] = False
+        warn("ImportAssetParameters.override_pipelines não aceitou o pipeline; usando AssetImportTask")
+        return False
+    try:
+        ok = mgr.import_asset(dest_dir, source, params)
+    except Exception as e:
+        warn(f"InterchangeManager.import_asset falhou em {os.path.basename(filename)} ({e}); usando AssetImportTask")
+        return False
+    _INTERCHANGE_STATE["ok"] = True
+    if not ok:
+        warn(f"InterchangeManager.import_asset devolveu False para {os.path.basename(filename)}")
+    return True
+
+
+def _task_options(pipeline):
+    """AssetImportTask.options com Interchange: o AssetTools do 5.3+ aceita um
+    InterchangePipelineStackOverride (ou o próprio pipeline). Sem garantia de que versões
+    anteriores repassem: por isso o InterchangeManager é o caminho principal."""
+    try:
+        stack = unreal.InterchangePipelineStackOverride()
+        stack.add_pipeline(pipeline)
+        return stack
+    except Exception:
+        return pipeline
+
+
+def import_file(filename, dest_dir, dest_name=None, pipeline=None, replace=True, scan=False):
+    """Importa um arquivo e devolve os caminhos dos assets criados.
+
+    Sem pipeline (texturas): AssetImportTask, que no 5.5 passa pelo Interchange.
+    Com pipeline (.glb): InterchangeManager com o pipeline sobreposto; se a API faltar ou nada
+    aparecer em dest_dir, cai no AssetImportTask com options. scan=True lista dest_dir inteiro
+    (só para pastas temporárias e vazias, criadas para uma importação)."""
+    if pipeline is not None and not IMPORT_TASK_ONLY:
+        if _import_interchange(filename, dest_dir, pipeline):
+            found = _list_dir(dest_dir)
+            if found:
+                return found
+            warn(f"{os.path.basename(filename)}: Interchange não criou nada em {dest_dir}; tentando AssetImportTask")
     task = unreal.AssetImportTask()
     task.set_editor_property("filename", filename)
     task.set_editor_property("destination_path", dest_dir)
@@ -207,14 +332,23 @@ def import_file(filename, dest_dir, dest_name=None, options=None, replace=True):
     task.set_editor_property("automated", True)
     task.set_editor_property("replace_existing", replace)
     task.set_editor_property("save", False)
-    if options is not None:
-        task.set_editor_property("options", options)
+    setp(task, "async_", False, True)   # 5.1+: síncrono é o padrão; garante
+    if pipeline is not None:
+        task.set_editor_property("options", _task_options(pipeline))
     AT.import_asset_tasks([task])
-    paths = [str(p) for p in (task.get_editor_property("imported_object_paths") or [])]
-    if EAL.does_directory_exist(dest_dir):
-        for p in EAL.list_assets(dest_dir, recursive=True, include_folder=False):
-            p = str(p)
-            if p not in paths:
+    paths = []
+    try:
+        paths = [str(p) for p in (task.get_editor_property("imported_object_paths") or [])]
+    except Exception:
+        pass
+    if not paths:
+        try:
+            paths = [o.get_path_name() for o in (task.get_objects() or [])]
+        except Exception:
+            pass
+    if scan:
+        for p in _list_dir(dest_dir):
+            if p not in paths and pkg(p) not in [pkg(q) for q in paths]:
                 paths.append(p)
     return paths
 
@@ -247,37 +381,64 @@ def clean_tmp(path=TMP):
         EAL.delete_directory(path)
 
 
+def _enum_or_none(owner_name, *names):
+    try:
+        return enum(getattr(unreal, owner_name), *names)
+    except Exception:
+        return None
+
+
 def interchange_pipeline(skeletal=False, skeleton=None, animations=False):
-    """Pipeline genérico do Interchange para AssetImportTask.options. Propriedades ajustadas
-    com tolerância: se algum nome não existir na versão, o padrão do motor vale."""
+    """InterchangeGenericAssetsPipeline transitório (padrões do CDO, não os do asset
+    /Interchange/Pipelines/DefaultAssetsPipeline). Subobjetos: common_meshes_properties,
+    common_skeletal_meshes_and_animations_properties, mesh_pipeline, animation_pipeline,
+    material_pipeline. Cada ajuste é tolerante: se o nome não existir na versão, vale o padrão e
+    fica um aviso. Os materiais do glTF continuam importados (a pasta temporária é apagada
+    depois): os slots precisam do nome do material, que o C++ usa."""
     try:
         p = unreal.InterchangeGenericAssetsPipeline()
     except Exception as e:
         warn(f"InterchangeGenericAssetsPipeline indisponível ({e}); usando a importação padrão")
         return None
-    try:
-        common = p.get_editor_property("common_meshes_properties")
-        skel = p.get_editor_property("common_skeletal_meshes_and_animations_properties")
-        mesh = p.get_editor_property("mesh_pipeline")
-        anim = p.get_editor_property("animation_pipeline")
-    except Exception as e:
-        warn(f"pipeline do Interchange com outra estrutura ({e}); usando os padrões dele")
-        return p
+    subs = {}
+    for name in ("common_meshes_properties", "common_skeletal_meshes_and_animations_properties",
+                 "mesh_pipeline", "animation_pipeline"):
+        try:
+            subs[name] = p.get_editor_property(name)
+        except Exception as e:
+            warn(f"pipeline do Interchange sem {name} ({e}); fica o padrão")
+    common = subs.get("common_meshes_properties")
+    skel = subs.get("common_skeletal_meshes_and_animations_properties")
+    mesh = subs.get("mesh_pipeline")
+    anim = subs.get("animation_pipeline")
+
+    def put(obj, prop, value, required=False):
+        if obj is None or value is None:
+            if required:
+                warn(f"pipeline: não deu para definir {prop}")
+            return
+        setp(obj, prop, value, quiet=not required)
+
     if skeletal:
-        setp(common, "force_all_mesh_as_type", enum(unreal.InterchangeForceMeshType, "IFMT_SKELETAL_MESH", "IFMT_SkeletalMesh"), True)
-        setp(mesh, "import_skeletal_meshes", True, True)
-        setp(mesh, "import_morph_targets", True, True)
-        setp(mesh, "create_physics_asset", False, True)
-        setp(skel, "import_only_animations", False, True)
+        put(common, "force_all_mesh_as_type", _enum_or_none("InterchangeForceMeshType", "IFMT_SKELETAL_MESH", "IFMT_SkeletalMesh"))
+        put(mesh, "import_skeletal_meshes", True)
+        put(mesh, "import_static_meshes", False)
+        put(mesh, "combine_skeletal_meshes", True)
+        put(mesh, "import_morph_targets", True)
+        put(mesh, "create_physics_asset", False)
+        put(skel, "import_only_animations", False)
         if skeleton is not None:
-            setp(skel, "skeleton", skeleton)
-        setp(anim, "import_animations", animations, True)
+            put(skel, "skeleton", skeleton, required=True)
+        put(anim, "import_animations", animations, required=animations)
     else:
-        setp(common, "force_all_mesh_as_type", enum(unreal.InterchangeForceMeshType, "IFMT_STATIC_MESH", "IFMT_StaticMesh"), True)
-        setp(mesh, "import_static_meshes", True, True)
-        setp(mesh, "combine_static_meshes", True, True)
-        setp(mesh, "build_nanite", False, True)
-        setp(anim, "import_animations", False, True)
+        put(common, "force_all_mesh_as_type", _enum_or_none("InterchangeForceMeshType", "IFMT_STATIC_MESH", "IFMT_StaticMesh"))
+        # cor de vértice = AO assada dos carros (M_Color/M_CarPaint multiplicam por ela)
+        put(common, "vertex_color_import_option", _enum_or_none("InterchangeVertexColorImportOption", "IVCIO_REPLACE", "IVCIO_Replace"))
+        put(mesh, "import_static_meshes", True)
+        put(mesh, "import_skeletal_meshes", False)
+        put(mesh, "combine_static_meshes", True, required=True)
+        put(mesh, "build_nanite", False)
+        put(anim, "import_animations", False)
     return p
 
 
@@ -307,6 +468,10 @@ def configure_texture(t, kind):
         setp(t, "compression_settings", unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
         setp(t, "mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
         setp(t, "filter", unreal.TextureFilter.TF_NEAREST)
+        setp(t, "never_stream", True, True)
+
+
+_STRAY_WARNED = []
 
 
 def import_texture(filename, name, kind):
@@ -318,12 +483,20 @@ def import_texture(filename, name, kind):
         error(f"arquivo ausente: {filename}")
         return None
     paths = import_file(filename, TEX, name)
-    if not exists(path):
-        # o Interchange ignorou destination_name: procura o recém-importado e renomeia
-        base = os.path.splitext(os.path.basename(filename))[0]
-        cand = [p for p in paths if split(pkg(p))[1] == base]
-        if cand:
-            move(cand[0], path)
+    # Se o Interchange ignorou destination_name, o asset sai com o nome do arquivo.
+    base = os.path.splitext(os.path.basename(filename))[0]
+    stray = [p for p in paths if split(pkg(p))[1] == base]
+    if not stray and exists(f"{TEX}/{base}"):
+        stray = [f"{TEX}/{base}"]
+    if stray:
+        if exists(path):
+            # --force com o nome ignorado: substituir apaga o antigo e zera as referências a ele
+            if not _STRAY_WARNED:
+                warn("o importador ignorou destination_name na reimportação: texturas substituídas (rode "
+                     "'materials' e 'surfaces' com --force para religar as texturas aos materiais)")
+                _STRAY_WARNED.append(True)
+            log(f"{path}: substituída")
+        move(stray[0], path)
     t = load(path)
     if not t:
         error(f"textura não importada: {path}")
@@ -355,28 +528,38 @@ def build_mpc():
     path = f"{MAT}/MPC_Vila"
     mpc = load(path)
     if mpc and not FORCE:
-        STATS["pulados"].append(path)
-        return mpc
+        have = set(str(p.get_editor_property("parameter_name")) for p in mpc.get_editor_property("scalar_parameters"))
+        have |= set(str(p.get_editor_property("parameter_name")) for p in mpc.get_editor_property("vector_parameters"))
+        if set(MPC_SCALARS) | set(MPC_VECTORS) <= have:
+            STATS["pulados"].append(path)
+            return mpc
+        log("MPC_Vila sem parâmetros novos: completando (Ids existentes preservados)")
     if not mpc:
         mpc = create(path, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
-    scalars = []
-    for n, v in MPC_SCALARS.items():
-        p = unreal.CollectionScalarParameter()
-        p.set_editor_property("parameter_name", n)
-        p.set_editor_property("default_value", v)
-        scalars.append(p)
-    vectors = []
-    for n, v in MPC_VECTORS.items():
-        p = unreal.CollectionVectorParameter()
-        p.set_editor_property("parameter_name", n)
-        p.set_editor_property("default_value", lc(v))
-        vectors.append(p)
-    # só reescreve se faltar algum parâmetro (trocar a lista recria os Ids e quebra os materiais)
-    have = set(str(p.get_editor_property("parameter_name")) for p in mpc.get_editor_property("scalar_parameters"))
-    have |= set(str(p.get_editor_property("parameter_name")) for p in mpc.get_editor_property("vector_parameters"))
-    if not set(MPC_SCALARS) | set(MPC_VECTORS) <= have:
-        mpc.set_editor_property("scalar_parameters", scalars)
-        mpc.set_editor_property("vector_parameters", vectors)
+    if not mpc:
+        error(f"não consegui criar {path}")
+        return None
+
+    # Mescla no lugar: as entradas existentes são cópias que mantêm o Id (FGuid não exposto ao
+    # Python), e os materiais ligam CollectionParameter pelo Id. Structs novos ganham um Id novo
+    # no construtor C++. Trocar a lista inteira por structs novos quebraria os materiais.
+    def merge(prop, cls, wanted, conv):
+        cur = list(mpc.get_editor_property(prop))
+        by_name = {str(p.get_editor_property("parameter_name")): i for i, p in enumerate(cur)}
+        for n, v in wanted.items():
+            if n in by_name:
+                p = cur[by_name[n]]
+            else:
+                p = cls()
+                p.set_editor_property("parameter_name", n)
+                cur.append(p)
+                by_name[n] = len(cur) - 1
+            p.set_editor_property("default_value", conv(v))
+            cur[by_name[n]] = p
+        mpc.set_editor_property(prop, cur)
+
+    merge("scalar_parameters", unreal.CollectionScalarParameter, MPC_SCALARS, float)
+    merge("vector_parameters", unreal.CollectionVectorParameter, MPC_VECTORS, lc)
     save(mpc)
     STATS["criados"].append(path)
     return mpc
@@ -532,8 +715,10 @@ class Graph:
         return self.node(unreal.MaterialExpressionCameraPositionWS)
 
     def custom_data(self, i):
+        # Sem dados na instância (ou fora de ISM/HISM) vale ConstDefaultValue: 1 = sem tinta.
+        # No UE5 o nó funciona no vertex e no pixel shader (GPU Scene).
         e = self.node(unreal.MaterialExpressionPerInstanceCustomData, data_index=i)
-        setp(e, "const_default_value", 1.0, True)
+        setp(e, "const_default_value", 1.0)
         return e
 
     def link(self, a, aout, b, bin_):
@@ -559,6 +744,9 @@ def begin_material(name, blend=None, shading=None, two_sided=False, tangent_norm
         MEL.delete_all_material_expressions(mat)
     else:
         mat = create(path, unreal.Material, unreal.MaterialFactoryNew())
+        if not mat:
+            error(f"não consegui criar {path}")
+            return None
     if domain is not None:
         setp(mat, "material_domain", domain)
     setp(mat, "blend_mode", blend if blend is not None else unreal.BlendMode.BLEND_OPAQUE)
@@ -870,7 +1058,7 @@ if (Focus.w > 0.5) {
 }
 float dither = frac(sin(dot(floor(Parameters.SvPosition.xy), float2(12.9898, 78.233))) * 43758.5453);
 MaskOut = (fade * 0.85 > dither) ? 0.0 : t.a;
-BaseColorOut = t.rgb * Color.rgb * VCol.rgb;
+BaseColorOut = t.rgb * Color.rgb * VCol.rgb * float3(CD0, CD1, CD2);   // COLOR do Godot = vértice * instância
 """
 LEAF_WPO = """
 float3 g = float3(WPos.x, WPos.z, WPos.y) / 100.0;   // espaço Godot, metros
@@ -890,7 +1078,7 @@ def m_leaf():
     color = g.vector("Color")
     pix = g.custom(LEAF_PIXEL, [("LeafTex", g.texobj("LeafTex", T("T_leaf")), ""), ("UV", g.uv(), ""), ("VCol", vc, ""),
                                 ("Color", color, ""), ("WPos", g.wpos(), ""), ("CamPos", g.campos(), ""),
-                                ("Focus", g.mpc("Focus"), "")],
+                                ("Focus", g.mpc("Focus"), "")] + [(f"CD{i}", g.custom_data(i), "") for i in range(3)],
                    [("BaseColorOut", OUT_T.CMOT_FLOAT3), ("MaskOut", OUT_T.CMOT_FLOAT1)], "VilaLeaf")
     pix.to_prop("BaseColorOut", MP.MP_BASE_COLOR)
     pix.to_prop("MaskOut", MP.MP_OPACITY_MASK)
@@ -910,7 +1098,8 @@ def m_leaf():
 GRASS_PIXEL = """
 // Nature.grass_material: raiz -> ponta, normais puxadas para cima, some ao longe (visibility_range 70 m).
 float tip = UV.y;
-float3 c = lerp(RootColor.rgb, TipColor.rgb, smoothstep(0.0, 1.0, tip)) * VCol.rgb * 1.3 * Color.rgb;
+float3 c = lerp(RootColor.rgb, TipColor.rgb, smoothstep(0.0, 1.0, tip)) * VCol.rgb * 1.3 * Color.rgb
+         * float3(CD0, CD1, CD2);   // tom/secura do tufo (PerInstanceCustomData do UVilaGrass)
 BaseColorOut = c * (1.0 - Wetness * 0.2);
 RoughOut = lerp(0.95, 0.55, Wetness);
 AOOut = lerp(0.45, 1.0, tip);
@@ -939,7 +1128,8 @@ def m_grass():
     pix = g.custom(GRASS_PIXEL, [("UV", uv, ""), ("VCol", g.vcolor(), ""), ("RootColor", g.vector("RootColor"), ""),
                                  ("TipColor", g.vector("TipColor"), ""), ("Color", g.vector("Color"), ""),
                                  ("Wetness", g.mpc("Wetness"), ""), ("VNrm", g.vnormal(), ""), ("WPos", wp, ""),
-                                 ("CamPos", g.campos(), ""), ("FadeStart", g.scalar("FadeStart"), ""), ("FadeEnd", g.scalar("FadeEnd"), "")],
+                                 ("CamPos", g.campos(), ""), ("FadeStart", g.scalar("FadeStart"), ""), ("FadeEnd", g.scalar("FadeEnd"), "")]
+                   + [(f"CD{i}", g.custom_data(i), "") for i in range(3)],
                    [("BaseColorOut", OUT_T.CMOT_FLOAT3), ("RoughOut", OUT_T.CMOT_FLOAT1), ("AOOut", OUT_T.CMOT_FLOAT1),
                     ("NormalOut", OUT_T.CMOT_FLOAT3), ("MaskOut", OUT_T.CMOT_FLOAT1)], "VilaGrass")
     pix.to_prop("BaseColorOut", MP.MP_BASE_COLOR)
@@ -1029,8 +1219,9 @@ def m_outline():
     setp(sten, "scene_texture_id", unreal.SceneTextureId.PPI_CUSTOM_STENCIL)
     body = """
 // contorno de 'Width' px em volta do que tem CustomStencil == 1 (25 = PPI_CustomStencil)
+// StencilInvSize = saída InvSize do nó SceneTexture (texel do próprio stencil, certo com TSR)
 float2 uv = GetDefaultSceneTextureUV(Parameters, 25);
-float2 px = View.BufferSizeAndInvSize.zw * Width;
+float2 px = StencilInvSize.xy * Width;
 float selfOn = abs(Stencil.r - 1.0) < 0.5 ? 1.0 : 0.0;
 float nb = 0.0;
 float2 dirs[8] = { float2(1, 0), float2(-1, 0), float2(0, 1), float2(0, -1), float2(0.7, 0.7), float2(-0.7, 0.7), float2(0.7, -0.7), float2(-0.7, -0.7) };
@@ -1041,8 +1232,8 @@ for (int i = 0; i < 8; i++) {
 float edge = nb * (1.0 - selfOn);
 ColorOut = lerp(Scene.rgb, OutlineColor.rgb, edge * OutlineColor.a);
 """
-    c = g.custom(body, [("Scene", scene, "Color"), ("Stencil", sten, "Color"), ("Width", g.scalar("Width"), ""),
-                        ("OutlineColor", g.vector("OutlineColor"), "")],
+    c = g.custom(body, [("Scene", scene, "Color"), ("Stencil", sten, "Color"), ("StencilInvSize", sten, "InvSize"),
+                        ("Width", g.scalar("Width"), ""), ("OutlineColor", g.vector("OutlineColor"), "")],
                  [("ColorOut", OUT_T.CMOT_FLOAT3)], "VilaOutline")
     c.to_prop("ColorOut", MP.MP_EMISSIVE_COLOR)
     end_material(g)
@@ -1052,13 +1243,54 @@ MASTERS = [m_surface, m_surface_local, m_color, m_emissive, m_glass, m_carpaint,
            m_leaf, m_grass, m_water, m_windows, m_rain, m_outline]
 
 
+_PARAM_FNS = {"s": "get_scalar_parameter_names", "v": "get_vector_parameter_names", "t": "get_texture_parameter_names"}
+_PARAM_CACHE = {}
+
+
+def param_names(mat, kind):
+    """Nomes de parâmetro de um material (MaterialEditingLibrary.get_*_parameter_names).
+    None se a função não existir na versão."""
+    key = (mat.get_path_name(), kind)
+    if key not in _PARAM_CACHE:
+        try:
+            _PARAM_CACHE[key] = set(str(n) for n in getattr(MEL, _PARAM_FNS[kind])(mat))
+        except Exception as e:
+            warn(f"MaterialEditingLibrary.{_PARAM_FNS[kind]} indisponível ({e}); validação de parâmetros pulada")
+            _PARAM_CACHE[key] = None
+    return _PARAM_CACHE[key]
+
+
+def validate_materials():
+    """Confere os parâmetros de cada mestre (mesmo os pulados) contra MATERIAL_PARAMS e o que o
+    C++ grava (CPP_PARAMS). Faltando = erro; sobrando = aviso."""
+    _PARAM_CACHE.clear()
+    for name, spec in MATERIAL_PARAMS.items():
+        m = load(f"{MAT}/{name}")
+        if not m:
+            error(f"{name} ausente depois da etapa materials")
+            continue
+        for kind in ("s", "v", "t"):
+            have = param_names(m, kind)
+            if have is None:
+                return
+            want = set(spec.get(kind, {})) | set(CPP_PARAMS.get(name, {}).get(kind, []))
+            if want - have:
+                error(f"{name}: faltam os parâmetros {kind}:{sorted(want - have)} (contrato com o C++)")
+            if have - want:
+                warn(f"{name}: parâmetros fora de MATERIAL_PARAMS: {kind}:{sorted(have - want)}")
+
+
 def build_materials():
     log("materiais-mestre...")
+    if not load(f"{MAT}/MPC_Vila"):
+        error("MPC_Vila ausente: os nós de coleção ficam sem coleção (rode a etapa mpc antes)")
     for fn in MASTERS:
         try:
             fn()
         except Exception as e:
-            error(f"{fn.__name__}: {e}")
+            import traceback
+            error(f"{fn.__name__}: {e}\n{traceback.format_exc()}")
+    validate_materials()
 
 
 # ============================================================================ instâncias
@@ -1071,8 +1303,18 @@ def make_mi(path, parent_name, scalars=None, vectors=None, textures=None):
     if not parent:
         error(f"{path}: mestre {parent_name} ausente")
         return None
+    # set_material_instance_*_parameter_value não reclama de nome inexistente: confere aqui
+    for kind, values in (("s", scalars), ("v", vectors), ("t", textures)):
+        have = param_names(parent, kind) if values else None
+        if have is not None:
+            bad = sorted(set(values) - have)
+            if bad:
+                error(f"{path}: {parent_name} não tem os parâmetros {kind}:{bad}")
     if not mi:
         mi = create(path, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+        if not mi:
+            error(f"não consegui criar {path}")
+            return None
     else:
         MEL.clear_all_material_instance_parameters(mi)
     MEL.set_material_instance_parent(mi, parent)
@@ -1160,21 +1402,30 @@ def import_static(glb, final_path, mats):
     if exists(final_path) and not FORCE:
         STATS["pulados"].append(final_path)
         return load(final_path)
-    tmp = f"{TMP}/{split(final_path)[1]}"
+    # pasta temporária única por destino (vazia: tudo o que aparecer nela veio desta importação)
+    tmp = TMP + "/" + final_path[len("/Game/Vila/"):].replace("/", "_")
     clean_tmp(tmp)
-    paths = import_file(glb, tmp, options=interchange_pipeline(skeletal=False))
-    meshes = [p for p in paths if isinstance(EAL.load_asset(p), unreal.StaticMesh)]
+    paths = import_file(glb, tmp, pipeline=interchange_pipeline(skeletal=False), scan=True)
+    loaded = [(p, EAL.load_asset(p)) for p in paths]
+    meshes = [p for p, a in loaded if isinstance(a, unreal.StaticMesh)]
+    if any(isinstance(a, unreal.SkeletalMesh) for _, a in loaded):
+        warn(f"{glb}: veio SkeletalMesh; o pipeline (force_all_mesh_as_type) não foi respeitado")
     if not meshes:
-        error(f"nenhuma StaticMesh em {glb}")
+        error(f"nenhuma StaticMesh em {glb} (importado: {paths})")
         clean_tmp(tmp)
         return None
     if len(meshes) > 1:
-        warn(f"{glb}: {len(meshes)} malhas; usando {meshes[0]}")
-    move(meshes[0], final_path)
+        warn(f"{glb}: {len(meshes)} malhas (combine_static_meshes ignorado?); usando {meshes[0]}")
+    if not move(meshes[0], final_path):
+        clean_tmp(tmp)
+        return None
     sm = load(final_path)
     assign_static(sm, mats, final_path)
     save(sm)
+    # apaga materiais/texturas do glTF que ficaram na pasta temporária (slots não reconhecidos
+    # perdem a referência e ficam com o material padrão; o aviso acima diz quais)
     clean_tmp(tmp)
+    save(sm)
     STATS["criados"].append(final_path)
     return sm
 
@@ -1256,17 +1507,27 @@ def character_material(piece, slot, cache):
 
 
 def assign_skeletal(skm, piece, cache):
+    """Material por slot (Humanoid._material). O UVilaHumanoid escolhe os parâmetros pelo nome do
+    slot (minúsculo, sem mi_/m_, comparação exata): um sufixo como "skin.001" o faria tratar a pele
+    como roupa. Por isso o slot é renomeado para a chave limpa quando ela não se repete."""
     mats = list(skm.get_editor_property("materials"))
-    for i, s in enumerate(mats):
+    keys = []
+    for s in mats:
         names = [s.get_editor_property("material_slot_name"), s.get_editor_property("imported_material_slot_name")]
         mi = s.get_editor_property("material_interface")
         if mi:
             names.append(mi.get_name())
-        slot = next((slot_key(n) for n in names if n and str(n) != "None"), "")
+        keys.append(next((slot_key(n) for n in names if n and str(n) != "None"), ""))
+    for i, s in enumerate(mats):
+        slot = keys[i]
         m = character_material(piece, slot, cache)
         if m:
             s.set_editor_property("material_interface", m)
-            mats[i] = s
+        cur = str(s.get_editor_property("material_slot_name"))
+        if slot and cur != slot and keys.count(slot) == 1:
+            log(f"{skm.get_name()}: slot '{cur}' -> '{slot}'")
+            s.set_editor_property("material_slot_name", slot)
+        mats[i] = s
     try:
         skm.set_editor_property("materials", mats)
     except Exception as e:
@@ -1296,16 +1557,24 @@ def import_character(sex, cache):
     if exists(body_path) and exists(skel_path):
         STATS["pulados"].append(body_path)
     else:
+        # estado parcial (SKEL_Human sem SK_Body): reaproveita o esqueleto, que as peças já usam
+        existing = load(skel_path)
         tmp = f"{TMP}/{sex}_Body"
         clean_tmp(tmp)
-        paths = import_file(os.path.join(src, "Body.glb"), tmp, options=interchange_pipeline(skeletal=True, animations=True))
+        paths = import_file(os.path.join(src, "Body.glb"), tmp, scan=True,
+                            pipeline=interchange_pipeline(skeletal=True, animations=True, skeleton=existing))
         loaded = [(p, EAL.load_asset(p)) for p in paths]
         skm = next((p for p, a in loaded if isinstance(a, unreal.SkeletalMesh)), None)
         skel = next((p for p, a in loaded if isinstance(a, unreal.Skeleton)), None)
-        if not skm or not skel:
+        if not skm or not (skel or existing):
             error(f"{sex}/Body.glb: esqueleto ou malha não importados ({paths})")
+            clean_tmp(tmp)
             return
-        move(skel, skel_path)
+        if skel:
+            if existing:
+                warn(f"{sex}: Body.glb criou outro esqueleto; SKEL_Human foi substituído (rode --force para "
+                     f"reimportar as peças com ele)")
+            move(skel, skel_path)
         move(skm, body_path)
         for p, a in loaded:
             if isinstance(a, unreal.AnimSequence):
@@ -1327,8 +1596,11 @@ def import_character(sex, cache):
             else:
                 error(f"{sex}: animação {an} não importada")
         clean_tmp(tmp)
+        save(sk)
         STATS["criados"].append(body_path)
     skeleton = load(skel_path)
+    if not skeleton:
+        warn(f"{sex}: SKEL_Human ausente; cada peça vai criar o próprio esqueleto")
     # demais peças: mesmo esqueleto, sem animação
     for fn in sorted(os.listdir(src)):
         if not fn.endswith(".glb") or fn == "Body.glb":
@@ -1340,7 +1612,8 @@ def import_character(sex, cache):
             continue
         tmp = f"{TMP}/{sex}_{piece}"
         clean_tmp(tmp)
-        paths = import_file(os.path.join(src, fn), tmp, options=interchange_pipeline(skeletal=True, skeleton=skeleton))
+        paths = import_file(os.path.join(src, fn), tmp, pipeline=interchange_pipeline(skeletal=True, skeleton=skeleton),
+                            scan=True)
         loaded = [(p, EAL.load_asset(p)) for p in paths]
         skm = next((p for p, a in loaded if isinstance(a, unreal.SkeletalMesh)), None)
         if not skm:
@@ -1355,11 +1628,14 @@ def import_character(sex, cache):
                 move(p, f"{base}/Skeletons/SKEL_{piece}")
             elif isinstance(a, unreal.PhysicsAsset):
                 move(p, f"{base}/Skeletons/PHYS_{piece}")
-        move(skm, path)
+        if not move(skm, path):
+            clean_tmp(tmp)
+            continue
         sk = load(path)
         assign_skeletal(sk, piece, cache)
         save(sk)
         clean_tmp(tmp)
+        save(sk)
         STATS["criados"].append(path)
 
 
@@ -1389,6 +1665,7 @@ def find_actor(label, cls):
 
 
 def spawn(cls, label, loc):
+    """Ator com rótulo fixo: reaproveitado (idempotente) ou recriado com --force."""
     sub = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     a = find_actor(label, cls)
     if a and not FORCE:
@@ -1396,78 +1673,162 @@ def spawn(cls, label, loc):
     if a:
         sub.destroy_actor(a)
     a = sub.spawn_actor_from_class(cls, loc, unreal.Rotator(0, 0, 0))
+    if not a:
+        error(f"spawn_actor_from_class({cls.__name__}) falhou")
+        return None, False
     a.set_actor_label(label)
     return a, True
+
+
+def fit_volume(vol, center, half, label):
+    """Escala um volume de pincel para cobrir center ± half. O spawn_actor_from_class passa
+    pela fábrica de atores; para volumes ela costuma ser a UActorFactoryBoxVolume (cubo de
+    200 uu). A escala é calculada a partir dos limites medidos, não do tamanho suposto."""
+    vol.set_actor_location(center, False, False)
+    vol.set_actor_scale3d(unreal.Vector(1, 1, 1))
+    try:
+        _, ext = vol.get_actor_bounds(False)
+    except Exception as e:
+        ext = None
+        warn(f"{label}: get_actor_bounds falhou ({e})")
+    if ext is not None and ext.x > 1 and ext.y > 1 and ext.z > 1:
+        vol.set_actor_scale3d(unreal.Vector(half.x / ext.x, half.y / ext.y, half.z / ext.z))
+        return True
+    # sem geometria de pincel a escala não adianta: o volume não cobre nada
+    error(f"{label}: o volume nasceu sem pincel. No editor: selecione-o, Brush Settings > Brush Shape = Box, "
+          f"e ajuste para {half.x * 2 / 100:.0f} x {half.y * 2 / 100:.0f} x {half.z * 2 / 100:.0f} m "
+          f"centrado em ({center.x / 100:.0f}, {center.y / 100:.0f}, {center.z / 100:.0f}) m")
+    return False
+
+
+def _editor_world():
+    try:
+        return unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
+    except Exception:
+        return unreal.EditorLevelLibrary.get_editor_world()
 
 
 def build_level():
     log("nível...")
     path = "/Game/Vila/Maps/Vila"
     les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+    if not les:
+        error("LevelEditorSubsystem indisponível (linha de comando?): rode --only=level pelo editor")
+        return
     if exists(path):
-        les.load_level(path)
-    elif not les.new_level(path):
-        error("não consegui criar /Game/Vila/Maps/Vila (rode esta etapa pelo editor)")
+        if not les.load_level(path):
+            error(f"não consegui abrir {path}")
+            return
+    else:
+        # new_level(asset_path, is_partitioned_world=False) no 5.1+: nível vazio, salvo no caminho
+        try:
+            ok = les.new_level(path)
+        except Exception as e:
+            ok = False
+            warn(f"new_level: {e}")
+        if not ok:
+            error(f"não consegui criar {path} (rode esta etapa pelo editor: --only=level)")
+            return
+    world = _editor_world()
+    if world and path not in world.get_path_name():
+        error(f"o nível aberto é {world.get_path_name()}, não {path}; nada foi alterado")
         return
     x0, z0, x1, z1 = map_bounds()
-    # NavMeshBoundsVolume: mapa inteiro, altura 0..30 m (Godot [x, z] -> UE (X, Y))
+    # NavMeshBoundsVolume: mapa inteiro, altura 0..30 m (Godot [x, z] -> UE (X, Y)). A navmesh é
+    # gerada em runtime (RuntimeGeneration=Dynamic no DefaultEngine.ini): só os limites importam.
     center = unreal.Vector((x0 + x1) * 50.0, (z0 + z1) * 50.0, 1500.0)
     half = unreal.Vector((x1 - x0) * 50.0, (z1 - z0) * 50.0, 1500.0)
-    nav, created = spawn(unreal.NavMeshBoundsVolume, "VilaNavBounds", center)
-    if created:
-        nav.set_actor_scale3d(unreal.Vector(1, 1, 1))
-        _, ext = nav.get_actor_bounds(False)
-        if ext.x > 1 and ext.y > 1 and ext.z > 1:
-            nav.set_actor_scale3d(unreal.Vector(half.x / ext.x, half.y / ext.y, half.z / ext.z))
+    nav, _ = spawn(unreal.NavMeshBoundsVolume, "VilaNavBounds", center)
+    if nav:
+        fit_volume(nav, center, half, "VilaNavBounds")   # sempre: os limites do JSON podem mudar
+    # PostProcessVolume global com o contorno (bUnbound = "Infinite Extent")
+    ppv, _ = spawn(unreal.PostProcessVolume, "VilaPostProcess", unreal.Vector(0, 0, 0))
+    if ppv:
+        setp(ppv, "unbound", True)
+        setp(ppv, "priority", 0.0, True)
+        setp(ppv, "blend_weight", 1.0, True)
+        outline = load(f"{MAT}/M_Outline")
+        if outline:
+            try:
+                # settings é um struct por valor: copiar, alterar e gravar de volta
+                settings = ppv.get_editor_property("settings")
+                wb = unreal.WeightedBlendable()
+                wb.set_editor_property("weight", 1.0)
+                wb.set_editor_property("object", outline)
+                blend = settings.get_editor_property("weighted_blendables")
+                blend.set_editor_property("array", [wb])
+                settings.set_editor_property("weighted_blendables", blend)
+                ppv.set_editor_property("settings", settings)
+            except Exception as e:
+                error(f"PostProcessVolume: não consegui pôr o M_Outline em weighted_blendables ({e})")
         else:
-            # pincel sem geometria: escala supondo o cubo padrão de 200 uu
-            nav.set_actor_scale3d(unreal.Vector(half.x / 100.0, half.y / 100.0, half.z / 100.0))
-            warn("NavMeshBoundsVolume sem pincel; escala estimada (confira no editor)")
-    # PostProcessVolume global com o contorno
-    ppv, created = spawn(unreal.PostProcessVolume, "VilaPostProcess", unreal.Vector(0, 0, 0))
-    setp(ppv, "unbound", True)
-    setp(ppv, "priority", 0.0, True)
-    outline = load(f"{MAT}/M_Outline")
-    if outline:
-        settings = ppv.get_editor_property("settings")
-        wb = unreal.WeightedBlendable()
-        wb.set_editor_property("weight", 1.0)
-        wb.set_editor_property("object", outline)
-        blend = settings.get_editor_property("weighted_blendables")
-        blend.set_editor_property("array", [wb])
-        settings.set_editor_property("weighted_blendables", blend)
-        ppv.set_editor_property("settings", settings)
-    else:
-        warn("M_Outline ausente: PostProcessVolume sem contorno")
+            warn("M_Outline ausente: PostProcessVolume sem contorno")
     # World Settings: GameMode do projeto (o DefaultEngine.ini já define o global)
     try:
-        sub = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-        ws = next((a for a in sub.get_all_level_actors() if isinstance(a, unreal.WorldSettings)), None)
+        ws = world.get_world_settings() if world else None
+        if ws is None:
+            sub = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+            ws = next((a for a in sub.get_all_level_actors() if isinstance(a, unreal.WorldSettings)), None)
         gm = unreal.load_class(None, "/Script/VilaAurora.VilaGameMode")
         if ws and gm:
             setp(ws, "default_game_mode", gm, True)
+        elif not gm:
+            warn("classe VilaGameMode não encontrada (módulo C++ não compilado?); World Settings sem GameMode")
     except Exception as e:
         warn(f"World Settings não ajustado: {e}")
-    les.save_current_level()
+    if not les.save_current_level():
+        error(f"save_current_level falhou para {path}")
+        return
     STATS["criados"].append(path)
 
 
 # ============================================================================ principal
+def wait_asset_registry():
+    """No editor recém-aberto (e às vezes no commandlet) o registro ainda está varrendo o disco:
+    does_asset_exist daria falso negativo e o script recriaria assets existentes."""
+    try:
+        reg = unreal.AssetRegistryHelpers.get_asset_registry()
+        if reg.is_loading_assets():
+            log("esperando o registro de assets...")
+        reg.wait_for_completion()
+    except Exception as e:
+        try:
+            unreal.AssetRegistryHelpers.get_asset_registry().search_all_assets(True)
+        except Exception:
+            warn(f"não consegui esperar o registro de assets ({e})")
+
+
 def main():
-    log(f"projeto: {PROJECT}  force={FORCE}  etapas={sorted(ONLY) if ONLY else 'todas'}")
-    steps = [("textures", build_textures), ("mpc", build_mpc), ("materials", build_materials),
-             ("surfaces", build_surfaces), ("vehicles", build_vehicles), ("characters", build_characters),
-             ("level", build_level)]
-    for name, fn in steps:
+    log(f"projeto: {PROJECT}  force={FORCE}  etapas={sorted(ONLY) if ONLY else 'todas'}"
+        f"{'  import=AssetImportTask' if IMPORT_TASK_ONLY else ''}")
+    if ONLY:
+        unknown = sorted(ONLY - set(STEPS))
+        if unknown:
+            error(f"etapas desconhecidas em --only: {unknown} (válidas: {', '.join(STEPS)})")
+    if not os.path.isdir(ASSETS):
+        error(f"pasta de entrada não encontrada: {ASSETS} (o projeto precisa estar em <repo>/unreal)")
+    check_contract()
+    wait_asset_registry()
+    steps = {"textures": build_textures, "mpc": build_mpc, "materials": build_materials,
+             "surfaces": build_surfaces, "vehicles": build_vehicles, "characters": build_characters,
+             "level": build_level}
+    for name in STEPS:
         if not step(name):
             continue
         try:
-            fn()
+            steps[name]()
         except Exception as e:
             import traceback
             error(f"etapa {name}: {e}\n{traceback.format_exc()}")
-    clean_tmp()
-    EAL.save_directory("/Game/Vila", only_if_is_dirty=True, recursive=True)
+    try:
+        clean_tmp()
+    except Exception as e:
+        warn(f"não consegui apagar {TMP}: {e}")
+    try:
+        if EAL.does_directory_exist("/Game/Vila"):
+            EAL.save_directory("/Game/Vila", only_if_is_dirty=True, recursive=True)
+    except Exception as e:
+        error(f"save_directory falhou: {e}")
     log("=" * 60)
     log(f"criados/atualizados: {len(STATS['criados'])}   pulados (já existiam): {len(STATS['pulados'])}")
     for w in STATS["avisos"]:

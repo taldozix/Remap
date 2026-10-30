@@ -79,9 +79,16 @@ Opções:
 - `--only=etapa,...` escolhe as etapas. São elas: `textures`, `mpc`, `materials`, `surfaces`,
   `vehicles`, `characters` e `level`. A ordem padrão é essa, e uma etapa depende das
   anteriores.
+- `--import-task` importa os `.glb` só pelo `AssetImportTask`. Sem essa opção, o script usa
+  o `InterchangeManager` com o pipeline do script e só cai no `AssetImportTask` se essa API
+  falhar. Use a opção se o caminho principal se comportar mal na sua versão do motor.
 
 O script é idempotente: sem `--force`, ele pula o que já existe. No fim, imprime um resumo
 com os assets criados, os pulados, os avisos e os erros.
+
+Antes de começar, o script confere se os parâmetros que o C++ grava (`CPP_PARAMS`) estão em
+`MATERIAL_PARAMS`. Depois da etapa `materials`, ele lê os parâmetros de cada mestre no editor
+e compara com essa lista. Um parâmetro faltando conta como erro no resumo.
 
 **Dica:** a etapa `level` usa o `LevelEditorSubsystem`, que funciona melhor com o Editor
 aberto. Se ela falhar na linha de comando, rode só essa etapa pelo Editor:
@@ -114,6 +121,12 @@ Os materiais por slot seguem a mesma regra do Godot:
 
 - O `M_Outline` depende de `r.CustomDepth=3`, que já está no `DefaultEngine.ini`. Ele desenha o
   contorno onde `CustomStencil == 1`.
+- O `M_Windows` começa com `Intensity = 0` e `NightDriven = 0`. O `AVilaBuilding::SetNight`
+  grava `Intensity = noite × 1,4` no MID de cada prédio. Com `NightDriven = 1`, o MPC
+  multiplicaria a noite de novo. Para uma MI estática que acende sozinha pelo MPC, use
+  `NightDriven = 1` e `Intensity = 1,4`.
+- O `M_Grass` e o `M_Leaf` multiplicam a cor pela `PerInstanceCustomData` 0..2, com padrão 1. O
+  `UVilaGrass` e o `UVilaNature` gravam nela o tom de cada tufo e de cada copa.
 - O `M_Surface` reproduz o `Mat.SURFACE_SHADER` com um nó Custom em HLSL:
   - mesma projeção por eixo e mesmo detile;
   - mesmo ruído de macrovariação;
